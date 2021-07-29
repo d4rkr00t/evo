@@ -2,11 +2,14 @@ package typescript
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/fs"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/mattn/go-zglob"
+	"github.com/gobwas/glob"
 )
 
 type TSConfig struct {
@@ -22,12 +25,35 @@ func IsTypeScriptWS(ws_path string) bool {
 func GetFilesFromTSConfig(ws_path string) []string {
 	var tscfg = read_tsconfig(ws_path)
 	var include []string
+	var result []string
 
-	for _, str := range tscfg.Include {
-		include = append(include, filepath.Join(ws_path, str))
+	for _, p := range tscfg.Include {
+		include = append(include, path.Join(ws_path, p))
 	}
-	var matches, _ = zglob.Glob(strings.Join(include, "|"))
-	return matches
+
+	var g = glob.MustCompile("{" + strings.Join(include, ",") + "}")
+	var _ = filepath.Walk(ws_path, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			return err
+		}
+
+		if info.IsDir() && info.Name() == "node_modules" {
+			return filepath.SkipDir
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if g.Match(path) {
+			result = append(result, path)
+		}
+
+		return nil
+	})
+
+	return result
 }
 
 func GetTSConfigPath(ws_path string) string {

@@ -16,6 +16,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	rootCmd.AddCommand(BuildCmd)
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

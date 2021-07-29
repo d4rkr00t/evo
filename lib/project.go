@@ -24,6 +24,18 @@ func NewProject(cwd string) Project {
 	}
 }
 
+func cmp(fl1, fl2 []string) []string {
+	var diff []string
+	fmt.Println(len(fl1) - len(fl2))
+	for i, fp2 := range fl2 {
+		if fp2 != fl1[i] {
+			diff = append(diff, fl1[i]+" -> "+fp2)
+		}
+	}
+
+	return diff
+}
+
 func (p Project) Invalidate(ws_list []string, cc cache.Cache) []string {
 	var updated []string
 	var is_all = len(ws_list) == 0
@@ -38,7 +50,6 @@ func (p Project) Invalidate(ws_list []string, cc cache.Cache) []string {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
 			var hash = ws.Hash()
-			fmt.Println(name, hash)
 			if !cc.Has(hash) {
 				queue <- name
 			} else {

@@ -25,7 +25,10 @@ func (r Runner) GetCwd() string {
 func (r Runner) Build() {
 	fmt.Println("\nBuild:", r.GetCwd())
 	var updated = r.project.Invalidate(make([]string, 0), r.cache)
-	fmt.Println("Updated:", updated)
+	fmt.Println("Updated:", len(updated), "of", len(r.project.Workspaces))
+	if len(updated) > 0 {
+		fmt.Println(updated)
+	}
 
 	var wg sync.WaitGroup
 	for _, ws_name := range updated {
