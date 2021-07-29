@@ -1,14 +1,18 @@
 package cache
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
+
+	"github.com/otiai10/copy"
 )
 
 type Cache struct {
 	path string
 }
+
+type CacheDirIgnores = map[string]bool
 
 func NewCache(project_path string) Cache {
 	var folder = path.Join(project_path, ".cache")
@@ -18,20 +22,18 @@ func NewCache(project_path string) Cache {
 
 func (c Cache) Has(key string) bool {
 	var _, err = os.Lstat(c.get_cache_path(key))
-	return err != nil
+	return err == nil
+}
+
+func (c Cache) CacheDir(key string, dpath string, ignores CacheDirIgnores) {
+	copy.Copy(dpath, c.get_cache_path(key), copy.Options{
+		Skip: func(src string) (bool, error) {
+			var rel_src, _ = filepath.Rel(dpath, src)
+			return ignores[rel_src], nil
+		},
+	})
 }
 
 func (c Cache) get_cache_path(p string) string {
 	return path.Join(c.path, p)
-}
-
-func (c Cache) CacheFile(name string, filep string) {
-	var dat, _ = ioutil.ReadFile(filep)
-	var cpath = c.get_cache_path(name)
-	ioutil.WriteFile(cpath, dat, 0644)
-}
-
-func (c Cache) CacheData(name string, dat []byte) {
-	var cpath = c.get_cache_path(name)
-	ioutil.WriteFile(cpath, dat, 0644)
 }

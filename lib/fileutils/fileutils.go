@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"sync"
 )
 
@@ -22,26 +23,41 @@ func GetFileHash(fpath string) string {
 }
 
 func GetFileListHash(flist []string) string {
+	type Pair struct {
+		fpath string
+		data  []byte
+	}
+
 	var h = sha1.New()
 	var wg sync.WaitGroup
-	var queue = make(chan []byte)
+	var queue = make(chan Pair)
 
 	for _, fpath := range flist {
 		wg.Add(1)
 		go func(fpath string) {
 			var data, _ = ioutil.ReadFile(fpath)
-			queue <- data
+			queue <- Pair{fpath, data}
 		}(fpath)
 	}
 
+	var files []Pair
+
 	go func() {
 		for data := range queue {
-			h.Write(data)
+			files = append(files, data)
 			wg.Done()
 		}
 	}()
 
 	wg.Wait()
+
+	sort.Slice(files[:], func(i, j int) bool {
+		return files[i].fpath > files[j].fpath
+	})
+
+	for _, pair := range files {
+		h.Write(pair.data)
+	}
 
 	return hex.EncodeToString(h.Sum(nil))
 }

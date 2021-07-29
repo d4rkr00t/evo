@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"scu/main/lib/cache"
+	"sync"
 )
 
 type Runner struct {
@@ -22,5 +23,20 @@ func (r Runner) GetCwd() string {
 }
 
 func (r Runner) Build() {
-	fmt.Println("\nBuild: " + r.GetCwd())
+	fmt.Println("\nBuild:", r.GetCwd())
+	var updated = r.project.Invalidate(make([]string, 0), r.cache)
+	fmt.Println("Updated:", updated)
+
+	var wg sync.WaitGroup
+	for _, ws_name := range updated {
+		wg.Add(1)
+		go func(ws_name string) {
+			fmt.Println("Compiling:", ws_name)
+			var ws = r.project.Workspaces[ws_name]
+			ws.Cache(&r.cache)
+			fmt.Println("Done:", ws_name)
+			wg.Done()
+		}(ws_name)
+	}
+	wg.Wait()
 }
