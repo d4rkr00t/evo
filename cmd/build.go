@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
+
+	"scu/main/lib"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
-
-	"scu/main/runner"
 )
 
 var BuildCmd = &cobra.Command{
@@ -16,8 +15,8 @@ var BuildCmd = &cobra.Command{
 	Long:  "Build a project",
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, _ = os.Getwd()
-		var r = runner.NewRunner(cwd)
-		fmt.Println("Build: " + r.GetCwd())
+		var r = lib.NewRunner(cwd)
 		spew.Dump(r)
+		r.Build()
 	},
 }

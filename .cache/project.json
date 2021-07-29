@@ -1,0 +1,131 @@
+{
+  "Cwd": "/Users/ssysoev/Development/scu-go",
+  "Package_json": {
+    "Path": "/Users/ssysoev/Development/scu-go/package.json",
+    "Name": "sculpture-cli",
+    "Version": "",
+    "Workspaces": ["example/dummy/*", "example/opaline/*"],
+    "Dependencies": null
+  },
+  "Workspaces": [
+    {
+      "Name": "pkg-a",
+      "Path": "example/dummy/pkg-a",
+      "Hash": "fb7dea9bbda4ce5955e9da1b6456673dd219049d",
+      "Files": ["package.json"],
+      "Package_json": {
+        "Path": "/Users/ssysoev/Development/scu-go/example/dummy/pkg-a/package.json",
+        "Name": "pkg-a",
+        "Version": "",
+        "Workspaces": null,
+        "Dependencies": null
+      }
+    },
+    {
+      "Name": "pkg-d",
+      "Path": "example/dummy/pkg-d",
+      "Hash": "5a772d332092c71ff446927ff9e887b26901dab9",
+      "Files": ["package.json"],
+      "Package_json": {
+        "Path": "/Users/ssysoev/Development/scu-go/example/dummy/pkg-d/package.json",
+        "Name": "pkg-d",
+        "Version": "",
+        "Workspaces": null,
+        "Dependencies": { "pkg-b": "0.0.0" }
+      }
+    },
+    {
+      "Name": "pkg-b",
+      "Path": "example/dummy/pkg-b",
+      "Hash": "9594f6cf32a832f4599406a05e31704f9d5d895f",
+      "Files": ["package.json"],
+      "Package_json": {
+        "Path": "/Users/ssysoev/Development/scu-go/example/dummy/pkg-b/package.json",
+        "Name": "pkg-b",
+        "Version": "",
+        "Workspaces": null,
+        "Dependencies": { "pkg-a": "0.0.0" }
+      }
+    },
+    {
+      "Name": "@opaline/help-theme-default",
+      "Path": "example/opaline/help-theme-default",
+      "Hash": "c6f088054b61a5d8004b82976cdfcc33369d8383",
+      "Files": ["package.json", "src/index.ts", "tsconfig.json"],
+      "Package_json": {
+        "Path": "/Users/ssysoev/Development/scu-go/example/opaline/help-theme-default/package.json",
+        "Name": "@opaline/help-theme-default",
+        "Version": "0.0.1",
+        "Workspaces": null,
+        "Dependencies": { "@types/node": "^12.6.9", "chalk": "^3.0.0" }
+      }
+    },
+    {
+      "Name": "@opaline/runner",
+      "Path": "example/opaline/runner",
+      "Hash": "7af805ecb154db0d62e66a2e878bf1b2701a69c5",
+      "Files": [
+        "package.json",
+        "src/index.ts",
+        "src/utils/console.ts",
+        "tsconfig.json"
+      ],
+      "Package_json": {
+        "Path": "/Users/ssysoev/Development/scu-go/example/opaline/runner/package.json",
+        "Name": "@opaline/runner",
+        "Version": "0.1.0",
+        "Workspaces": null,
+        "Dependencies": {
+          "@types/node": "^12.6.9",
+          "@types/ora": "^3.2.0",
+          "chalk": "^3.0.0",
+          "ora": "^4.0.3"
+        }
+      }
+    },
+    {
+      "Name": "@opaline/core",
+      "Path": "example/opaline/core",
+      "Hash": "d65388ab39eef63ce20983fa8dd5818c4fdffb78",
+      "Files": [
+        "package.json",
+        "src/handlers/help.ts",
+        "src/index.ts",
+        "src/types.ts",
+        "src/utils/args.ts",
+        "src/utils/error.ts",
+        "src/utils/print.ts",
+        "tsconfig.json"
+      ],
+      "Package_json": {
+        "Path": "/Users/ssysoev/Development/scu-go/example/opaline/core/package.json",
+        "Name": "@opaline/core",
+        "Version": "0.5.0",
+        "Workspaces": null,
+        "Dependencies": {
+          "@babel/parser": "^7.8.4",
+          "@babel/traverse": "^7.8.4",
+          "@opaline/help-theme-default": "^0.0.1",
+          "@opaline/runner": "^0.1.0",
+          "@rollup/plugin-node-resolve": "^7.1.3",
+          "@rollup/plugin-sucrase": "^3.0.0",
+          "@types/babel__traverse": "^7.0.9",
+          "@types/doctrine": "^0.0.3",
+          "@types/minimist": "^1.2.0",
+          "@types/node": "^12.6.9",
+          "chalk": "^3.0.0",
+          "chokidar": "^3.3.1",
+          "comment-parser": "^0.7.4",
+          "doctrine": "^3.0.0",
+          "enquirer": "^2.3.5",
+          "minimist": "^1.2.3",
+          "minimist-options": "^4.0.2",
+          "mkdirp": "^1.0.4",
+          "read-pkg-up": "^7.0.1",
+          "rimraf": "^3.0.2",
+          "rollup": "^2.3.3"
+        }
+      }
+    }
+  ]
+}
