@@ -47,8 +47,7 @@ func (w Workspace) GetStateKey() string {
 	return strings.Replace(w.RelPath+"__"+w.Name, "/", "__", -1)
 }
 
-func (w Workspace) Cache(c *cache.Cache) {
-	var hash = w.Hash()
+func (w Workspace) Cache(c *cache.Cache, hash string) {
 	var ignores = cache.CacheDirIgnores{
 		"node_modules": true,
 	}

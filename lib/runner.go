@@ -38,10 +38,11 @@ func (r Runner) Build() {
 			var ws = r.project.Workspaces[ws_name]
 			if r.cache.Has(ws_hash) {
 				fmt.Println("Cache hit:", ws_name, ws_hash)
-				ws.CacheState(&r.cache, ws_hash)
+				r.cache.RestoreDir(ws_hash, ws.Path)
 			} else {
-				ws.Cache(&r.cache)
+				ws.Cache(&r.cache, ws_hash)
 			}
+			ws.CacheState(&r.cache, ws_hash)
 			fmt.Println("Done:", ws_name)
 			wg.Done()
 		}(ws_name, ws_hash)

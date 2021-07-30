@@ -49,6 +49,10 @@ func (c Cache) CacheDir(key string, dpath string, ignores CacheDirIgnores) {
 	})
 }
 
+func (c Cache) RestoreDir(key string, dpath string) {
+	copy.Copy(c.get_cache_path(key), dpath)
+}
+
 func (c Cache) get_cache_path(p string) string {
 	return path.Join(c.path, p)
 }
