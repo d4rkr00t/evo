@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -23,6 +24,20 @@ func NewCache(project_path string) Cache {
 func (c Cache) Has(key string) bool {
 	var _, err = os.Lstat(c.get_cache_path(key))
 	return err == nil
+}
+
+func (c Cache) CacheData(key string, data string) {
+	var p = c.get_cache_path(key)
+	ioutil.WriteFile(p, []byte(data), 0644)
+}
+
+func (c Cache) ReadData(key string) string {
+	if !c.Has(key) {
+		return ""
+	}
+
+	var dat, _ = ioutil.ReadFile(c.get_cache_path(key))
+	return string(dat)
 }
 
 func (c Cache) CacheDir(key string, dpath string, ignores CacheDirIgnores) {

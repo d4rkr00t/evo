@@ -24,23 +24,11 @@ func NewProject(cwd string) Project {
 	}
 }
 
-func cmp(fl1, fl2 []string) []string {
-	var diff []string
-	fmt.Println(len(fl1) - len(fl2))
-	for i, fp2 := range fl2 {
-		if fp2 != fl1[i] {
-			diff = append(diff, fl1[i]+" -> "+fp2)
-		}
-	}
-
-	return diff
-}
-
-func (p Project) Invalidate(ws_list []string, cc cache.Cache) []string {
-	var updated []string
+func (p Project) Invalidate(ws_list []string, cc cache.Cache) map[string]string {
+	var updated = map[string]string{}
 	var is_all = len(ws_list) == 0
 	var wg sync.WaitGroup
-	var queue = make(chan string)
+	var queue = make(chan []string)
 
 	if is_all {
 		fmt.Println("Invalidating all packages!")
@@ -49,19 +37,20 @@ func (p Project) Invalidate(ws_list []string, cc cache.Cache) []string {
 	for name, ws := range p.Workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
-			var hash = ws.Hash()
-			if !cc.Has(hash) {
-				queue <- name
+			var key = ws.Hash()
+			var state = cc.ReadData(ws.GetStateKey())
+			if key != state {
+				queue <- []string{key, name}
 			} else {
-				queue <- ""
+				queue <- []string{}
 			}
 		}(name, ws)
 	}
 
 	go func() {
-		for name := range queue {
-			if len(name) > 0 {
-				updated = append(updated, name)
+		for dat := range queue {
+			if len(dat) > 0 {
+				updated[dat[0]] = dat[1]
 			}
 			wg.Done()
 		}

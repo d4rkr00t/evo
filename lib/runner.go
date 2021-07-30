@@ -31,15 +31,20 @@ func (r Runner) Build() {
 	}
 
 	var wg sync.WaitGroup
-	for _, ws_name := range updated {
+	for ws_hash, ws_name := range updated {
 		wg.Add(1)
-		go func(ws_name string) {
-			fmt.Println("Compiling:", ws_name)
+		go func(ws_name string, ws_hash string) {
+			fmt.Println("Compiling:", ws_name, ws_hash)
 			var ws = r.project.Workspaces[ws_name]
-			ws.Cache(&r.cache)
+			if r.cache.Has(ws_hash) {
+				fmt.Println("Cache hit:", ws_name, ws_hash)
+				ws.CacheState(&r.cache, ws_hash)
+			} else {
+				ws.Cache(&r.cache)
+			}
 			fmt.Println("Done:", ws_name)
 			wg.Done()
-		}(ws_name)
+		}(ws_name, ws_hash)
 	}
 	wg.Wait()
 }
