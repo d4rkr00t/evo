@@ -52,7 +52,6 @@ func (w Workspace) Cache(c *cache.Cache, hash string) {
 		"node_modules": true,
 	}
 	c.CacheDir(hash, w.Path, ignores)
-	w.CacheState(c, hash)
 }
 
 func (w Workspace) CacheState(c *cache.Cache, hash string) {

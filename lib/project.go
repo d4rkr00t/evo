@@ -8,19 +8,24 @@ import (
 	"sync"
 )
 
+type WorkspacesMap = map[string]Workspace
+
 type Project struct {
 	Cwd          string
 	Package_json PackageJson
-	Workspaces   map[string]Workspace
+	Workspaces   WorkspacesMap
+	DepGraph     DepGraph
 }
 
 func NewProject(cwd string) Project {
 	var package_json = NewPackageJson(cwd + "/package.json")
 	var workspaces = get_workspaces_list(cwd, package_json.Workspaces)
+	var dep_graph = NewDepGraph(&workspaces)
 	return Project{
-		cwd,
-		package_json,
-		workspaces,
+		Cwd:          cwd,
+		Package_json: package_json,
+		Workspaces:   workspaces,
+		DepGraph:     dep_graph,
 	}
 }
 
@@ -40,7 +45,7 @@ func (p Project) Invalidate(ws_list []string, cc cache.Cache) map[string]string 
 			var key = ws.Hash()
 			var state = cc.ReadData(ws.GetStateKey())
 			if key != state {
-				queue <- []string{key, name}
+				queue <- []string{name, key}
 			} else {
 				queue <- []string{}
 			}
@@ -59,6 +64,31 @@ func (p Project) Invalidate(ws_list []string, cc cache.Cache) map[string]string 
 	wg.Wait()
 
 	return updated
+}
+
+func (p Project) GetWs(name string) Workspace {
+	return p.Workspaces[name]
+}
+
+func (p Project) GetAffected(workspaces *map[string]string) map[string]string {
+	var affected = map[string]string{}
+	var wg sync.WaitGroup
+
+	for ws_name := range *workspaces {
+		for _, name := range p.DepGraph.GetDependant(ws_name) {
+			if _, ok := (*workspaces)[name]; !ok {
+				wg.Add(1)
+				go func(name string) {
+					affected[name] = p.GetWs(name).Hash()
+					wg.Done()
+				}(name)
+			}
+		}
+	}
+
+	wg.Wait()
+
+	return affected
 }
 
 func get_workspaces_list(cwd string, workspaces_config []string) map[string]Workspace {
