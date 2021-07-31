@@ -70,11 +70,32 @@ func (p Project) GetWs(name string) Workspace {
 	return p.Workspaces[name]
 }
 
+func (p Project) GetDependant(ws_name string) map[string]string {
+	var affected = map[string]string{}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	for _, name := range p.DepGraph.GetDependant(ws_name) {
+		wg.Add(1)
+		go func(name string) {
+			mu.Lock()
+			affected[name] = p.GetWs(name).Hash()
+			mu.Unlock()
+			wg.Done()
+		}(name)
+	}
+
+	wg.Wait()
+
+	return affected
+}
+
 func (p Project) GetAffected(workspaces *map[string]string) map[string]string {
 	var affected = map[string]string{}
 	var wg sync.WaitGroup
 
-	for ws_name := range *workspaces {
+	for ws_name, ws_hash := range *workspaces {
+		affected[ws_name] = ws_hash
 		for _, name := range p.DepGraph.GetDependant(ws_name) {
 			if _, ok := (*workspaces)[name]; !ok {
 				wg.Add(1)

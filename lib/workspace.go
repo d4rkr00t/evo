@@ -55,7 +55,7 @@ func (w Workspace) Cache(c *cache.Cache, hash string) {
 }
 
 func (w Workspace) CacheState(c *cache.Cache, hash string) {
-	c.CacheData(w.GetStateKey(), hash)
+	// c.CacheData(w.GetStateKey(), hash)
 }
 
 func (w Workspace) get_files() []string {
