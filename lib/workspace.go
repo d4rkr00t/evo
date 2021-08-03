@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"fmt"
 	"path"
 	"path/filepath"
 	"scu/main/lib/cache"
@@ -55,7 +56,7 @@ func (w Workspace) Cache(c *cache.Cache, hash string) {
 }
 
 func (w Workspace) CacheState(c *cache.Cache, hash string) {
-	// c.CacheData(w.GetStateKey(), hash)
+	c.CacheData(w.GetStateKey(), hash)
 }
 
 func (w Workspace) get_files() []string {
@@ -69,4 +70,40 @@ func (w Workspace) get_files() []string {
 	sort.Strings(files)
 
 	return files
+}
+
+func (w Workspace) CreateBuildTask(affected *map[string]string, updated *map[string]string) Task {
+	var task_name = w.Name + ":build"
+	var deps = []string{}
+
+	for dep := range w.Deps {
+		if _, ok := (*affected)[dep]; ok {
+			deps = append(deps, dep+":build")
+		}
+	}
+
+	return NewTask(
+		w.Name,
+		task_name,
+		deps,
+		func(c *cache.Cache) {
+			var ws_hash = (*affected)[w.Name]
+			fmt.Println("Compiling:", w.Name, "->", task_name, "->", ws_hash)
+			var _, was_updated = (*updated)[w.Name]
+
+			if was_updated {
+				if c.Has(ws_hash) {
+					fmt.Println("Cache hit:", w.Name, ws_hash)
+					c.RestoreDir(ws_hash, w.Path)
+				} else {
+					w.Cache(c, ws_hash)
+				}
+			} else {
+				fmt.Println("Force compiling updated deps:", w.Name, ws_hash)
+				w.Cache(c, ws_hash)
+			}
+
+			w.CacheState(c, ws_hash)
+		},
+	)
 }

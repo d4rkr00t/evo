@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"scu/main/lib/cache"
 	"sync"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type Runner struct {
@@ -30,44 +28,13 @@ func (r Runner) Build() {
 	fmt.Println("")
 
 	var updated = r.project.Invalidate(make([]string, 0), r.cache)
-	// var affected = r.project.GetAffected(&updated)
 
 	fmt.Println("\nUpdated:", len(updated), "of", len(r.project.Workspaces), updated)
 
-	// if len(affected) > 0 {
-	// 	fmt.Println("\nAffected:", affected)
-	// }
-
 	var tasks = r.create_tasks(&updated)
 	fmt.Println("Build tasks:")
-	spew.Dump(tasks)
+	// spew.Dump(tasks)
 	r.run_tasks(&tasks)
-
-	// for ws_name, ws_hash := range affected {
-	// 	updated[ws_name] = ws_hash
-	// }
-
-	// var wg sync.WaitGroup
-	// for ws_name, ws_hash := range updated {
-	// 	wg.Add(1)
-	// 	go func(ws_name string, ws_hash string) {
-	// 		fmt.Println("Compiling:", ws_name, ws_hash)
-
-	// 		var ws = r.project.GetWs(ws_name)
-	// 		if r.cache.Has(ws_hash) {
-	// 			fmt.Println("Cache hit:", ws_name, ws_hash)
-	// 			r.cache.RestoreDir(ws_hash, ws.Path)
-	// 		} else {
-	// 			ws.Cache(&r.cache, ws_hash)
-	// 		}
-
-	// 		ws.CacheState(&r.cache, ws_hash)
-	// 		fmt.Println("Done:", ws_name)
-	// 		wg.Done()
-	// 	}(ws_name, ws_hash)
-	// }
-
-	// wg.Wait()
 
 	if len(updated) > 0 {
 		fmt.Println("\n===============")
@@ -80,17 +47,8 @@ func (r Runner) create_tasks(workspaces *map[string]string) map[string]Task {
 	var affected = r.project.GetAffected(workspaces)
 
 	for ws_name := range affected {
-		var task_name = ws_name + ":build"
-		var deps = []string{}
-
-		for dep := range r.project.GetWs(ws_name).Deps {
-			if _, ok := affected[dep]; ok {
-				deps = append(deps, dep)
-			}
-		}
-
-		tasks[task_name] = NewTask(ws_name, task_name, append([]string{}, deps...))
-		tasks[ws_name] = NewTask(ws_name, ws_name, append(append([]string{}, deps...), task_name))
+		var task = r.project.GetWs(ws_name).CreateBuildTask(&affected, workspaces)
+		tasks[task.task_name] = task
 	}
 
 	return tasks
@@ -113,12 +71,11 @@ func (r Runner) run_tasks(tasks *map[string]Task) {
 		}
 	}
 
-	fmt.Println(wg)
-
 	go func() {
 		for task_id := range in_progress_queue {
 			var task = (*tasks)[task_id]
-			fmt.Println("Running task:", task_id, "for", task.ws_name)
+			fmt.Println("\nRunning task:", task_id, "for", task.ws_name)
+			task.Run(&r.cache)
 			mu.Lock()
 
 			task.status = TASK_STATUS_SUCCESS
