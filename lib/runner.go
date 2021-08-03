@@ -2,8 +2,11 @@ package lib
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"scu/main/lib/cache"
 	"sync"
+	"time"
 )
 
 type Runner struct {
@@ -15,6 +18,7 @@ type Runner struct {
 func NewRunner(cwd string) Runner {
 	var cc = cache.NewCache(cwd)
 	var proj = NewProject(cwd)
+	os.Setenv("PATH", proj.GetNodeModulesBinPath()+":"+os.ExpandEnv("$PATH"))
 	return Runner{cwd: cwd, project: proj, cache: cc}
 }
 
@@ -40,6 +44,12 @@ func (r Runner) Build() {
 		fmt.Println("\n===============")
 		fmt.Println("")
 	}
+}
+
+func (r Runner) CreateExec(dir string, name string, params []string) exec.Cmd {
+	var cmd = exec.Command(name, params...)
+	cmd.Dir = dir
+	return *cmd
 }
 
 func (r Runner) create_tasks(workspaces *map[string]string) map[string]Task {
@@ -73,30 +83,36 @@ func (r Runner) run_tasks(tasks *map[string]Task) {
 
 	go func() {
 		for task_id := range in_progress_queue {
-			var task = (*tasks)[task_id]
-			fmt.Println("\nRunning task:", task_id, "for", task.ws_name)
-			task.Run(&r.cache)
-			mu.Lock()
+			go func(task_id string) {
+				var task = (*tasks)[task_id]
+				fmt.Println("\n"+task_id, "-> running")
+				var start = time.Now()
+				task.Run(&r)
+				var duration = time.Since(start)
+				fmt.Println(task_id, "-> duration:", duration)
 
-			task.status = TASK_STATUS_SUCCESS
-			(*tasks)[task_id] = task
+				mu.Lock()
 
-			var next_tasks = find_unblocked_tasks(tasks)
-			fmt.Println("Unblocked tasks:", next_tasks)
-			wg.Add(len(next_tasks))
+				task.status = TASK_STATUS_SUCCESS
+				(*tasks)[task_id] = task
 
-			for _, ntask_id := range next_tasks {
-				var ntask = (*tasks)[ntask_id]
-				ntask.status = TASK_STATUS_RUNNING
-				(*tasks)[ntask_id] = ntask
+				var next_tasks = find_unblocked_tasks(tasks)
+				fmt.Println(task_id, "-> unblocked tasks:", next_tasks)
+				wg.Add(len(next_tasks))
 
-				go func(id string) {
-					in_progress_queue <- id
-				}(ntask_id)
-			}
+				for _, ntask_id := range next_tasks {
+					var ntask = (*tasks)[ntask_id]
+					ntask.status = TASK_STATUS_RUNNING
+					(*tasks)[ntask_id] = ntask
 
-			wg.Done()
-			mu.Unlock()
+					go func(id string) {
+						in_progress_queue <- id
+					}(ntask_id)
+				}
+
+				wg.Done()
+				mu.Unlock()
+			}(task_id)
 		}
 	}()
 

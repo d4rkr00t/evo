@@ -112,6 +112,10 @@ func (p Project) GetAffected(workspaces *map[string]string) map[string]string {
 	return affected
 }
 
+func (p Project) GetNodeModulesBinPath() string {
+	return path.Join(p.Cwd, "node_modules", ".bin")
+}
+
 func get_workspaces_list(cwd string, workspaces_config []string) map[string]Workspace {
 	var workspaces = make(map[string]Workspace)
 	var wg sync.WaitGroup

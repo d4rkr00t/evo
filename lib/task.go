@@ -1,9 +1,5 @@
 package lib
 
-import (
-	"scu/main/lib/cache"
-)
-
 type Task struct {
 	ws_name   string
 	task_name string
@@ -12,7 +8,7 @@ type Task struct {
 	Run       task_run
 }
 
-type task_run = func(c *cache.Cache)
+type task_run = func(r *Runner)
 
 const (
 	TASK_STATUS_PENDING = iota

@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bytes"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -86,24 +87,38 @@ func (w Workspace) CreateBuildTask(affected *map[string]string, updated *map[str
 		w.Name,
 		task_name,
 		deps,
-		func(c *cache.Cache) {
+		func(r *Runner) {
 			var ws_hash = (*affected)[w.Name]
-			fmt.Println("Compiling:", w.Name, "->", task_name, "->", ws_hash)
+			fmt.Println(task_name, "-> compiling")
 			var _, was_updated = (*updated)[w.Name]
 
-			if was_updated {
-				if c.Has(ws_hash) {
-					fmt.Println("Cache hit:", w.Name, ws_hash)
-					c.RestoreDir(ws_hash, w.Path)
-				} else {
-					w.Cache(c, ws_hash)
+			var run = func() {
+				var cmd = r.CreateExec(w.Path, "tsc", []string{"-p", "tsconfig.json"})
+				var out bytes.Buffer
+				var e bytes.Buffer
+				cmd.Stdout = &out
+				cmd.Stderr = &e
+				err := cmd.Run()
+				if err != nil {
+					fmt.Println(task_name, "-> error", e.String())
 				}
-			} else {
-				fmt.Println("Force compiling updated deps:", w.Name, ws_hash)
-				w.Cache(c, ws_hash)
 			}
 
-			w.CacheState(c, ws_hash)
+			if was_updated {
+				if r.cache.Has(ws_hash) {
+					fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
+					r.cache.RestoreDir(ws_hash, w.Path)
+				} else {
+					run()
+					w.Cache(&r.cache, ws_hash)
+				}
+			} else {
+				fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
+				run()
+				w.Cache(&r.cache, ws_hash)
+			}
+
+			w.CacheState(&r.cache, ws_hash)
 		},
 	)
 }
