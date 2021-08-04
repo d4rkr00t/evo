@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bytes"
-	"fmt"
 	"path"
 	"path/filepath"
 	"scu/main/lib/cache"
@@ -89,7 +88,7 @@ func (w Workspace) CreateBuildTask(affected *map[string]string, updated *map[str
 		deps,
 		func(r *Runner) {
 			var ws_hash = (*affected)[w.Name]
-			fmt.Println(task_name, "-> compiling")
+			// fmt.Println(task_name, "-> compiling")
 			var _, was_updated = (*updated)[w.Name]
 
 			var run = func() {
@@ -98,22 +97,22 @@ func (w Workspace) CreateBuildTask(affected *map[string]string, updated *map[str
 				var e bytes.Buffer
 				cmd.Stdout = &out
 				cmd.Stderr = &e
-				err := cmd.Run()
-				if err != nil {
-					fmt.Println(task_name, "-> error", e.String())
-				}
+				cmd.Run()
+				// if err != nil {
+				// 	fmt.Println(task_name, "-> error", e.String())
+				// }
 			}
 
 			if was_updated {
 				if r.cache.Has(ws_hash) {
-					fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
+					// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
 					r.cache.RestoreDir(ws_hash, w.Path)
 				} else {
 					run()
 					w.Cache(&r.cache, ws_hash)
 				}
 			} else {
-				fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
+				// fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
 				run()
 				w.Cache(&r.cache, ws_hash)
 			}

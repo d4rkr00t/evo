@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"runtime"
 	"scu/main/lib/cache"
 	"sync"
 )
@@ -93,14 +94,21 @@ func (p Project) GetDependant(ws_name string) map[string]string {
 func (p Project) GetAffected(workspaces *map[string]string) map[string]string {
 	var affected = map[string]string{}
 	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var guard = make(chan struct{}, runtime.NumCPU())
 
 	for ws_name, ws_hash := range *workspaces {
 		affected[ws_name] = ws_hash
 		for _, name := range p.DepGraph.GetDependant(ws_name) {
 			if _, ok := (*workspaces)[name]; !ok {
 				wg.Add(1)
+				guard <- struct{}{}
 				go func(name string) {
-					affected[name] = p.GetWs(name).Hash()
+					var hash = p.GetWs(name).Hash()
+					mu.Lock()
+					affected[name] = hash
+					<-guard
+					mu.Unlock()
 					wg.Done()
 				}(name)
 			}
