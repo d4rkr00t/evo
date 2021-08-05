@@ -2,12 +2,13 @@ package lib
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"runtime"
 	"scu/main/lib/cache"
-	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -38,13 +39,16 @@ func (r Runner) Build() {
 	var updated = r.project.Invalidate(make([]string, 0), r.cache)
 
 	fmt.Println("\nUpdated:", len(updated), "of", len(r.project.Workspaces))
+	fmt.Println("")
 
-	fmt.Println("Creating build tasks")
-	var tasks = r.create_tasks(&updated)
-	fmt.Println("Building...")
-	if len(tasks) > 0 {
-		// spew.Dump(tasks)
-		r.run_tasks(&tasks)
+	if len(updated) > 0 {
+		fmt.Println("Creating build tasks")
+		var tasks = r.create_tasks(&updated)
+		fmt.Println("Building...")
+		if len(tasks) > 0 {
+			// spew.Dump(tasks)
+			r.run_tasks(&tasks)
+		}
 	}
 
 	if len(updated) > 0 {
@@ -63,6 +67,7 @@ func (r Runner) create_tasks(workspaces *map[string]string) map[string]Task {
 	var tasks = map[string]Task{}
 	fmt.Println("Calculating affected packages...")
 	var affected = r.project.GetAffected(workspaces)
+	fmt.Println("Total affected ->", len(affected))
 
 	fmt.Println("Creating tasks for affected packages...")
 	for ws_name := range affected {
@@ -74,94 +79,94 @@ func (r Runner) create_tasks(workspaces *map[string]string) map[string]Task {
 }
 
 func (r Runner) run_tasks(tasks *map[string]Task) {
-	var in_progress_queue = make(chan string)
 	var wg sync.WaitGroup
-	var mu sync.Mutex
-	var guard = make(chan struct{}, runtime.NumCPU())
-
+	var mu sync.RWMutex
+	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.5, float64(len(*tasks))))
+	var queue_size = num_goroutines * 2
+	var pqueue = make(chan string, queue_size)
+	var dqueue = make(chan string)
 	var s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
-	s.Start()
+	var count_done = 0
+	var in_progress int64
+	var total = len(*tasks)
 
-	for task_id, task := range *tasks {
-		if len(task.Deps) == 0 {
-			wg.Add(1)
-			guard <- struct{}{}
-			task.status = TASK_STATUS_RUNNING
-			(*tasks)[task_id] = task
-			go func(id string) {
-				in_progress_queue <- id
-			}(task_id)
-		}
-	}
+	fmt.Println("Num goroutins ->", num_goroutines, "| queue size ->", queue_size, "| num cpus ->", runtime.NumCPU())
 
-	s.Suffix = build_spinner_text(tasks)
+	wg.Add(num_goroutines)
 
-	go func() {
-		for task_id := range in_progress_queue {
-			go func(task_id string) {
+	fmt.Println("Creating go routines...")
+
+	for i := 0; i < num_goroutines; i++ {
+		go func() {
+			defer wg.Done()
+			for task_id := range pqueue {
+				mu.RLock()
 				var task = (*tasks)[task_id]
-				// fmt.Println("\n"+task_id, "-> running")
+				mu.RUnlock()
+
+				atomic.AddInt64(&in_progress, 1)
+				s.Suffix = build_spinner_text(total, count_done, len(pqueue), int(in_progress))
+
 				// var start = time.Now()
 				task.Run(&r)
+
+				atomic.AddInt64(&in_progress, -1)
 				// var duration = time.Since(start)
 				// fmt.Println(task_id, "-> duration:", duration)
 
-				mu.Lock()
+				dqueue <- task_id
+			}
+		}()
+	}
 
-				task.status = TASK_STATUS_SUCCESS
-				(*tasks)[task_id] = task
+	fmt.Println("Starting done routine...")
+	go func() {
+		for task_id := range dqueue {
+			count_done += 1
+			fmt.Println("Finished task ->", task_id)
 
-				var next_tasks = find_unblocked_tasks(tasks)
-				// fmt.Println(task_id, "-> unblocked tasks:", next_tasks)
-				wg.Add(len(next_tasks))
-				<-guard
+			mu.Lock()
+			var task = (*tasks)[task_id]
+			task.status = TASK_STATUS_SUCCESS
+			(*tasks)[task_id] = task
 
-				for _, ntask_id := range next_tasks {
-					var ntask = (*tasks)[ntask_id]
-					guard <- struct{}{}
-					if ntask.status != TASK_STATUS_PENDING {
-						<-guard
-						continue
-					}
-					ntask.status = TASK_STATUS_RUNNING
-					(*tasks)[ntask_id] = ntask
+			var next_tasks = find_unblocked_tasks(tasks)
 
-					go func(id string) {
-						in_progress_queue <- id
-					}(ntask_id)
-				}
+			for _, ntask_id := range next_tasks {
+				var ntask = (*tasks)[ntask_id]
+				ntask.status = TASK_STATUS_RUNNING
+				(*tasks)[ntask_id] = ntask
+				go func(tid string) {
+					pqueue <- tid
+					fmt.Println("Adding task ->", tid)
+				}(ntask_id)
+			}
+			mu.Unlock()
 
-				s.Suffix = build_spinner_text(tasks)
-
-				wg.Done()
-				mu.Unlock()
-			}(task_id)
+			if count_done == len(*tasks) {
+				close(pqueue)
+			}
 		}
 	}()
 
+	fmt.Println("Adding initial tasks...")
+	for task_id, task := range *tasks {
+		if len(task.Deps) == 0 {
+			task.status = TASK_STATUS_RUNNING
+			(*tasks)[task_id] = task
+			pqueue <- task_id
+		}
+	}
+
+	s.Suffix = build_spinner_text(total, count_done, len(pqueue), int(in_progress))
+
+	s.Start()
 	wg.Wait()
 	s.Stop()
 }
 
-func build_spinner_text(tasks *map[string]Task) string {
-	var spinner_text = []string{}
-	var count_done = 0
-	var count_running = 0
-	for _, t := range *tasks {
-		if t.status == TASK_STATUS_RUNNING {
-			spinner_text = append(spinner_text, t.task_name)
-			count_running += 1
-		} else if t.status == TASK_STATUS_SUCCESS {
-			count_done += 1
-		}
-	}
-	var postfix = ""
-	if count_running > 3 {
-		postfix = "..."
-		spinner_text = spinner_text[:3]
-	}
-
-	return " [waiting:" + fmt.Sprint((len(*tasks) - (count_done + count_running))) + " | running:" + fmt.Sprint(count_running) + "] " + strings.Join(spinner_text, " | ") + postfix
+func build_spinner_text(total int, done int, queued int, in_progress int) string {
+	return " [" + "total:" + fmt.Sprint(total) + " | waiting:" + fmt.Sprint(total-done-in_progress) + " | done:" + fmt.Sprint(done) + " | queued:" + fmt.Sprint(queued) + " | running:" + fmt.Sprint(in_progress) + "] "
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

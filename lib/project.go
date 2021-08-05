@@ -98,7 +98,9 @@ func (p Project) GetAffected(workspaces *map[string]string) map[string]string {
 	var guard = make(chan struct{}, runtime.NumCPU())
 
 	for ws_name, ws_hash := range *workspaces {
+		mu.Lock()
 		affected[ws_name] = ws_hash
+		mu.Unlock()
 		for _, name := range p.DepGraph.GetDependant(ws_name) {
 			if _, ok := (*workspaces)[name]; !ok {
 				wg.Add(1)
