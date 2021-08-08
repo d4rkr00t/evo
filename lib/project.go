@@ -19,7 +19,7 @@ type Project struct {
 }
 
 func NewProject(cwd string) Project {
-	var package_json = NewPackageJson(cwd + "/package.json")
+	var package_json = NewPackageJson(path.Join(cwd, "package.json"))
 	var workspaces = get_workspaces_list(cwd, package_json.Workspaces)
 	var dep_graph = NewDepGraph(&workspaces)
 	return Project{

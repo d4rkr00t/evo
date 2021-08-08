@@ -81,7 +81,7 @@ func (r Runner) create_tasks(workspaces *map[string]string) map[string]Task {
 func (r Runner) run_tasks(tasks *map[string]Task) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
-	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.5, float64(len(*tasks))))
+	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
 	var queue_size = num_goroutines * 2
 	var pqueue = make(chan string, queue_size)
 	var dqueue = make(chan string)
