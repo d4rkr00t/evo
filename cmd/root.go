@@ -15,9 +15,9 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	BuildCmd.PersistentFlags().String("cwd", "", "Override CWD")
+	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
 
-	rootCmd.AddCommand(BuildCmd)
+	rootCmd.AddCommand(RunCmd)
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 
 	if err := rootCmd.Execute(); err != nil {

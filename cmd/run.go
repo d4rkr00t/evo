@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"path"
 	"scu/main/lib"
@@ -10,10 +10,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var BuildCmd = &cobra.Command{
-	Use:   "build",
-	Short: "Build a project",
-	Long:  "Build a project",
+var RunCmd = &cobra.Command{
+	Use:   "run <command>",
+	Short: "Run a project's commmand",
+	Long:  "Run a project's command",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("command name is required")
+		}
+		return nil
+
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwd_err = cmd.Flags().GetString("cwd")
 		var os_cwd, _ = os.Getwd()
@@ -23,13 +30,11 @@ var BuildCmd = &cobra.Command{
 			cwd = path.Join(os_cwd, cwd)
 		}
 
-		fmt.Println(cwd)
-
 		var r = lib.NewRunner(cwd)
 		var verbose, _ = cmd.Flags().GetBool("verbose")
 		if verbose {
 			spew.Dump(r)
 		}
-		r.Build()
+		r.Run(args[0])
 	},
 }

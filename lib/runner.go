@@ -31,8 +31,8 @@ func (r Runner) GetCwd() string {
 	return r.cwd
 }
 
-func (r Runner) Build() {
-	fmt.Println("\nBuild:", r.GetCwd())
+func (r Runner) Run(cmd string) {
+	fmt.Println("\n"+cmd+" ->", r.GetCwd())
 	fmt.Println("\n===============")
 	fmt.Println("")
 
