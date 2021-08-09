@@ -39,7 +39,7 @@ func (r Runner) Run(cmd string) {
 	fmt.Println("\n===============")
 	fmt.Println("")
 
-	var updated = r.project.Invalidate(make([]string, 0), r.cache)
+	var updated = r.project.Invalidate(make([]string, 0), cmd, &r.cache)
 
 	fmt.Println("\nUpdated:", len(updated), "of", len(r.project.Workspaces))
 	fmt.Println("")
@@ -105,7 +105,6 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[stri
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(r *Runner) {
 			var ws_hash = affected[ws.Name]
 			// fmt.Println(task_name, "-> compiling")
-			var _, was_updated = (*workspaces)[ws.Name]
 
 			var run = func() {
 				var args = strings.Split(rule.Cmd, " ")
@@ -122,21 +121,21 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[stri
 				// }
 			}
 
-			if was_updated {
-				if r.cache.Has(ws_hash) {
-					// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
-					r.cache.RestoreDir(ws_hash, ws.Path)
-				} else {
-					run()
-					ws.Cache(&r.cache, ws_hash)
+			var cache_key = cmd + ":" + ws_hash
+
+			if r.cache.Has(cache_key) {
+				// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
+				if rule.CacheOutput {
+					r.cache.RestoreDir(cache_key, ws.Path)
 				}
 			} else {
-				// fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
 				run()
-				ws.Cache(&r.cache, ws_hash)
+				if rule.CacheOutput {
+					ws.Cache(&r.cache, cache_key)
+				}
 			}
 
-			ws.CacheState(&r.cache, ws_hash)
+			ws.CacheState(&r.cache, cmd, ws_hash)
 		}, false)
 
 		// spew.Dump(ws_name, rule, deps)

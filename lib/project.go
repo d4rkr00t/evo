@@ -20,7 +20,7 @@ type Project struct {
 
 func NewProject(cwd string) Project {
 	var package_json = NewPackageJson(path.Join(cwd, "package.json"))
-	var workspaces = get_workspaces_list(cwd, package_json.GetConfig().Workspaces)
+	var workspaces = get_workspaces_list(cwd, &package_json.Scu)
 	var dep_graph = NewDepGraph(&workspaces)
 
 	return Project{
@@ -31,7 +31,7 @@ func NewProject(cwd string) Project {
 	}
 }
 
-func (p Project) Invalidate(ws_list []string, cc cache.Cache) map[string]string {
+func (p Project) Invalidate(ws_list []string, cmd string, cc *cache.Cache) map[string]string {
 	var updated = map[string]string{}
 	var is_all = len(ws_list) == 0
 	var wg sync.WaitGroup
@@ -44,10 +44,9 @@ func (p Project) Invalidate(ws_list []string, cc cache.Cache) map[string]string 
 	for name, ws := range p.Workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
-			var key = ws.Hash()
-			var state = cc.ReadData(ws.GetStateKey())
-			if key != state {
-				queue <- []string{name, key}
+			var updated, ws_hash = ws.Invalidate(cmd, cc)
+			if updated {
+				queue <- []string{name, ws_hash}
 			} else {
 				queue <- []string{}
 			}
@@ -131,18 +130,19 @@ func (p Project) GetRule(name string, ws_path string) Rule {
 	return p.Package_json.Scu.GetRule(name, ws_path)
 }
 
-func get_workspaces_list(cwd string, workspaces_config []string) map[string]Workspace {
+func get_workspaces_list(cwd string, conf *Config) map[string]Workspace {
 	var workspaces = make(map[string]Workspace)
 	var wg sync.WaitGroup
 	var queue = make(chan Workspace)
 
-	for _, wc := range workspaces_config {
+	for _, wc := range conf.Workspaces {
 		var ws_glob = path.Join(cwd, wc, "package.json")
 		var matches, _ = filepath.Glob(ws_glob)
 		for _, ws_path := range matches {
 			wg.Add(1)
 			go func(ws_path string) {
-				queue <- NewWorkspace(cwd, path.Dir(ws_path))
+				var includes, excludes = conf.GetInputs(path.Dir(ws_path))
+				queue <- NewWorkspace(cwd, path.Dir(ws_path), includes, excludes)
 			}(ws_path)
 		}
 	}

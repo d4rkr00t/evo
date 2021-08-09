@@ -1,5 +1,10 @@
 - [x] Replace `build` with `run`
-- [ ] Add configuration
-  - [ ] Namespace config
+- [x] Add configuration
+  - [x] Namespace config
+- [x] Move more caching logic to a task
+  - [x] Cache tasks with a task name prefix
 - [ ] Add dependency install and linking
 - [ ] Add logging and progress
+- [ ] Rebuild affected by a rule change
+- [ ] Per rule inputs config (?)
+- [ ] Proper dependency tracking for deciding when ws is updated

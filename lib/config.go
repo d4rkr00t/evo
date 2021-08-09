@@ -1,27 +1,58 @@
 package lib
 
-import "github.com/bmatcuk/doublestar/v4"
+import (
+	"github.com/bmatcuk/doublestar/v4"
+)
+
+type ConfigOverride struct {
+	Rules  map[string]Rule
+	Inputs ConfigInputs
+}
+
+type ConfigInputs struct {
+	Includes []string
+	Excludes []string
+}
 
 type Config struct {
 	Workspaces []string
-	Rules      map[string]map[string]Rule
+	Rules      map[string]Rule
+	Inputs     ConfigInputs
+	Overrides  map[string]ConfigOverride
 }
 
 type Rule struct {
-	Cmd  string
-	Deps []string
+	Cmd         string
+	Deps        []string
+	CacheOutput bool
 }
 
 func (c Config) GetRule(name string, ws_path string) Rule {
-	for r_name, rule := range c.Rules {
-		if r_name == "default" {
-			continue
-		}
-
-		if val, _ := doublestar.Match(r_name, ws_path); val {
-			return rule[name]
+	for group_name, group := range c.Overrides {
+		if val, _ := doublestar.Match(group_name, ws_path); val {
+			if val, ok := group.Rules[name]; ok {
+				return val
+			}
 		}
 	}
 
-	return c.Rules["default"][name]
+	return c.Rules[name]
+}
+
+func (c Config) GetInputs(ws_path string) ([]string, []string) {
+	var includes = c.Inputs.Includes
+	var excludes = c.Inputs.Excludes
+
+	for group_name, group := range c.Overrides {
+		if val, _ := doublestar.Match(group_name, ws_path); val {
+			if len(group.Inputs.Includes) > 0 {
+				includes = group.Inputs.Includes
+			}
+			if len(group.Inputs.Excludes) > 0 {
+				excludes = group.Inputs.Excludes
+			}
+		}
+	}
+
+	return includes, excludes
 }
