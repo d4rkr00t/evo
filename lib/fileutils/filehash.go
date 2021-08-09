@@ -5,11 +5,10 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
-	"path"
 )
 
 func GetFileHash(fpath string) string {
-	var f, _ = os.Open(path.Join(fpath, "package.json"))
+	var f, _ = os.Open(fpath)
 	defer f.Close()
 
 	var h = sha1.New()

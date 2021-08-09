@@ -4,7 +4,16 @@
 - [x] Move more caching logic to a task
   - [x] Cache tasks with a task name prefix
 - [ ] Add dependency install and linking
+  - [x] Cache project state
+  - [x] Install packages
+  - [x] Check if node_modules folder exists
+  - [ ] Improve project state cache by storing a list of WS
+  - [ ] Link packages
 - [ ] Add logging and progress
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Proper dependency tracking for deciding when ws is updated
+- [ ] Validations
+  - [ ] Validate external dependencies
+  - [ ] Validate dep cycles
+- [ ] REFACTOR: Generic create a task from a rule

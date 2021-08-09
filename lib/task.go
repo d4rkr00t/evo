@@ -28,3 +28,7 @@ func NewTask(ws_name string, task_name string, deps []string, run task_run, forc
 		Force:     force,
 	}
 }
+
+// func NewTaskFromRule(scope string, rule_name string, rule *Rule) Task {
+// 	var task_name = scope + ":" + rule_name
+// }

@@ -1,11 +1,9 @@
 package lib
 
 import (
-	"bytes"
 	"fmt"
 	"math"
 	"os"
-	"os/exec"
 	"runtime"
 	"scu/main/lib/cache"
 	"strings"
@@ -39,7 +37,12 @@ func (r Runner) Run(cmd string) {
 	fmt.Println("\n===============")
 	fmt.Println("")
 
-	var updated = r.project.Invalidate(make([]string, 0), cmd, &r.cache)
+	if r.project.Invalidate(&r.cache) {
+		fmt.Println("INSTALL")
+		r.project.InstallDeps(&r)
+	}
+
+	var updated = r.project.InvalidateWorkspaces(make([]string, 0), cmd, &r.cache)
 
 	fmt.Println("\nUpdated:", len(updated), "of", len(r.project.Workspaces))
 	fmt.Println("")
@@ -54,16 +57,12 @@ func (r Runner) Run(cmd string) {
 		}
 	}
 
+	r.project.CacheState(&r.cache)
+
 	if len(updated) > 0 {
 		fmt.Println("\n\n===============")
 		fmt.Println("")
 	}
-}
-
-func (r Runner) CreateExec(dir string, name string, params []string) exec.Cmd {
-	var cmd = exec.Command(name, params...)
-	cmd.Dir = dir
-	return *cmd
 }
 
 func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[string]Task {
@@ -110,15 +109,9 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[stri
 				var args = strings.Split(rule.Cmd, " ")
 				var cmd_name = args[0]
 				var cmd_args = args[1:]
-				var cmd = r.CreateExec(ws.Path, cmd_name, cmd_args)
-				var out bytes.Buffer
-				var e bytes.Buffer
-				cmd.Stdout = &out
-				cmd.Stderr = &e
+
+				var cmd = NewCmd(task_name, ws.Path, cmd_name, cmd_args)
 				cmd.Run()
-				// if err != nil {
-				// fmt.Println(task_name, "-> error", e.String())
-				// }
 			}
 
 			var cache_key = cmd + ":" + ws_hash

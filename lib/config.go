@@ -21,12 +21,6 @@ type Config struct {
 	Overrides  map[string]ConfigOverride
 }
 
-type Rule struct {
-	Cmd         string
-	Deps        []string
-	CacheOutput bool
-}
-
 func (c Config) GetRule(name string, ws_path string) Rule {
 	for group_name, group := range c.Overrides {
 		if val, _ := doublestar.Match(group_name, ws_path); val {

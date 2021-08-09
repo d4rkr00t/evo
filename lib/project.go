@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"scu/main/lib/cache"
+	"scu/main/lib/fileutils"
 	"sync"
 )
 
@@ -31,7 +32,12 @@ func NewProject(cwd string) Project {
 	}
 }
 
-func (p Project) Invalidate(ws_list []string, cmd string, cc *cache.Cache) map[string]string {
+func (p Project) Invalidate(cc *cache.Cache) bool {
+	var hash = p.GetHash()
+	return cc.ReadData(p.GetStateKey()) != hash || !fileutils.Exist(path.Join(p.Cwd, "node_modules"))
+}
+
+func (p Project) InvalidateWorkspaces(ws_list []string, cmd string, cc *cache.Cache) map[string]string {
 	var updated = map[string]string{}
 	var is_all = len(ws_list) == 0
 	var wg sync.WaitGroup
@@ -128,6 +134,23 @@ func (p Project) GetNodeModulesBinPath() string {
 
 func (p Project) GetRule(name string, ws_path string) Rule {
 	return p.Package_json.Scu.GetRule(name, ws_path)
+}
+
+func (p Project) GetHash() string {
+	return fileutils.GetFileHash(p.Package_json.Path)
+}
+
+func (p Project) GetStateKey() string {
+	return "@project"
+}
+
+func (p Project) CacheState(c *cache.Cache) {
+	c.CacheData(p.GetStateKey(), p.GetHash())
+}
+
+func (p Project) InstallDeps(r *Runner) {
+	var cmd = NewCmd("pnpm install", p.Cwd, "pnpm", []string{"install"})
+	cmd.Run()
 }
 
 func get_workspaces_list(cwd string, conf *Config) map[string]Workspace {
