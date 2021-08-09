@@ -9,7 +9,7 @@ type PackageJson struct {
 	Path         string
 	Name         string
 	Version      string
-	Workspaces   []string
+	Scu          Config
 	Dependencies map[string]string
 }
 
@@ -19,4 +19,8 @@ func NewPackageJson(path string) PackageJson {
 	json.Unmarshal(dat, &p)
 	p.Path = path
 	return p
+}
+
+func (p PackageJson) GetConfig() Config {
+	return p.Scu
 }

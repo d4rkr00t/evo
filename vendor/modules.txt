@@ -1,3 +1,6 @@
+# github.com/bmatcuk/doublestar/v4 v4.0.2
+## explicit
+github.com/bmatcuk/doublestar/v4
 # github.com/briandowns/spinner v1.16.0
 ## explicit
 github.com/briandowns/spinner
@@ -6,16 +9,6 @@ github.com/briandowns/spinner
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/gobwas/glob v0.2.3
-## explicit
-github.com/gobwas/glob
-github.com/gobwas/glob/compiler
-github.com/gobwas/glob/match
-github.com/gobwas/glob/syntax
-github.com/gobwas/glob/syntax/ast
-github.com/gobwas/glob/syntax/lexer
-github.com/gobwas/glob/util/runes
-github.com/gobwas/glob/util/strings
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/mattn/go-colorable v0.1.2

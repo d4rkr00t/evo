@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"bytes"
 	"path"
 	"path/filepath"
 	"scu/main/lib/cache"
@@ -72,52 +71,52 @@ func (w Workspace) get_files() []string {
 	return files
 }
 
-func (w Workspace) CreateBuildTask(affected *map[string]string, updated *map[string]string) Task {
-	var task_name = w.Name + ":build"
-	var deps = []string{}
+// func (w Workspace) CreateBuildTask(affected *map[string]string, updated *map[string]string) Task {
+// 	var task_name = w.Name + ":build"
+// 	var deps = []string{}
 
-	for dep := range w.Deps {
-		if _, ok := (*affected)[dep]; ok {
-			deps = append(deps, dep+":build")
-		}
-	}
+// 	for dep := range w.Deps {
+// 		if _, ok := (*affected)[dep]; ok {
+// 			deps = append(deps, dep+":build")
+// 		}
+// 	}
 
-	return NewTask(
-		w.Name,
-		task_name,
-		deps,
-		func(r *Runner) {
-			var ws_hash = (*affected)[w.Name]
-			// fmt.Println(task_name, "-> compiling")
-			var _, was_updated = (*updated)[w.Name]
+// 	return NewTask(
+// 		w.Name,
+// 		task_name,
+// 		deps,
+// 		func(r *Runner) {
+// 			var ws_hash = (*affected)[w.Name]
+// 			// fmt.Println(task_name, "-> compiling")
+// 			var _, was_updated = (*updated)[w.Name]
 
-			var run = func() {
-				var cmd = r.CreateExec(w.Path, "tsc", []string{"-p", "tsconfig.json"})
-				var out bytes.Buffer
-				var e bytes.Buffer
-				cmd.Stdout = &out
-				cmd.Stderr = &e
-				cmd.Run()
-				// if err != nil {
-				// 	fmt.Println(task_name, "-> error", e.String())
-				// }
-			}
+// 			var run = func() {
+// 				var cmd = r.CreateExec(w.Path, "tsc", []string{"-p", "tsconfig.json"})
+// 				var out bytes.Buffer
+// 				var e bytes.Buffer
+// 				cmd.Stdout = &out
+// 				cmd.Stderr = &e
+// 				cmd.Run()
+// 				// if err != nil {
+// 				// 	fmt.Println(task_name, "-> error", e.String())
+// 				// }
+// 			}
 
-			if was_updated {
-				if r.cache.Has(ws_hash) {
-					// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
-					r.cache.RestoreDir(ws_hash, w.Path)
-				} else {
-					run()
-					w.Cache(&r.cache, ws_hash)
-				}
-			} else {
-				// fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
-				run()
-				w.Cache(&r.cache, ws_hash)
-			}
+// 			if was_updated {
+// 				if r.cache.Has(ws_hash) {
+// 					// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
+// 					r.cache.RestoreDir(ws_hash, w.Path)
+// 				} else {
+// 					run()
+// 					w.Cache(&r.cache, ws_hash)
+// 				}
+// 			} else {
+// 				// fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
+// 				run()
+// 				w.Cache(&r.cache, ws_hash)
+// 			}
 
-			w.CacheState(&r.cache, ws_hash)
-		},
-	)
-}
+// 			w.CacheState(&r.cache, ws_hash)
+// 		},
+// 	)
+// }

@@ -1,17 +1,20 @@
 package lib
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"os"
 	"os/exec"
 	"runtime"
 	"scu/main/lib/cache"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/briandowns/spinner"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type Runner struct {
@@ -43,10 +46,10 @@ func (r Runner) Run(cmd string) {
 
 	if len(updated) > 0 {
 		fmt.Println("Creating build tasks")
-		var tasks = r.create_tasks(&updated)
+		var tasks = r.create_tasks(cmd, &updated)
 		fmt.Println("Building...")
 		if len(tasks) > 0 {
-			// spew.Dump(tasks)
+			spew.Dump(tasks)
 			r.run_tasks(&tasks)
 		}
 	}
@@ -63,16 +66,84 @@ func (r Runner) CreateExec(dir string, name string, params []string) exec.Cmd {
 	return *cmd
 }
 
-func (r Runner) create_tasks(workspaces *map[string]string) map[string]Task {
+func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[string]Task {
 	var tasks = map[string]Task{}
 	fmt.Println("Calculating affected packages...")
 	var affected = r.project.GetAffected(workspaces)
 	fmt.Println("Total affected ->", len(affected))
-
 	fmt.Println("Creating tasks for affected packages...")
-	for ws_name := range affected {
-		var task = r.project.GetWs(ws_name).CreateBuildTask(&affected, workspaces)
-		tasks[task.task_name] = task
+
+	var __create_tasks func(cmd string, ws_name string)
+	__create_tasks = func(cmd string, ws_name string) {
+		var task_name = ws_name + ":" + cmd
+
+		if _, ok := tasks[task_name]; ok {
+			return
+		}
+
+		var ws = r.project.GetWs(ws_name)
+		var rule = r.project.GetRule(cmd, ws.Path)
+		var deps = []string{}
+
+		spew.Dump(ws_name, rule)
+
+		for _, dep := range rule.Deps {
+			if dep[0] == '@' {
+				dep = dep[1:]
+				for dep_name := range ws.Deps {
+					if _, ok := affected[dep_name]; ok {
+						deps = append(deps, dep_name+":"+dep)
+						__create_tasks(dep, dep_name)
+					}
+				}
+			} else {
+				deps = append(deps, ws_name+":"+dep)
+				__create_tasks(dep, ws_name)
+			}
+		}
+
+		tasks[task_name] = NewTask(ws_name, task_name, deps, func(r *Runner) {
+			var ws_hash = affected[ws.Name]
+			// fmt.Println(task_name, "-> compiling")
+			var _, was_updated = (*workspaces)[ws.Name]
+
+			var run = func() {
+				var args = strings.Split(rule.Cmd, " ")
+				var cmd_name = args[0]
+				var cmd_args = args[1:]
+				var cmd = r.CreateExec(ws.Path, cmd_name, cmd_args)
+				var out bytes.Buffer
+				var e bytes.Buffer
+				cmd.Stdout = &out
+				cmd.Stderr = &e
+				cmd.Run()
+				// if err != nil {
+				// fmt.Println(task_name, "-> error", e.String())
+				// }
+			}
+
+			if was_updated {
+				if r.cache.Has(ws_hash) {
+					// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
+					r.cache.RestoreDir(ws_hash, ws.Path)
+				} else {
+					run()
+					ws.Cache(&r.cache, ws_hash)
+				}
+			} else {
+				// fmt.Println(task_name, "-> force compiling updated deps:", w.Name, ws_hash)
+				run()
+				ws.Cache(&r.cache, ws_hash)
+			}
+
+			ws.CacheState(&r.cache, ws_hash)
+		}, false)
+
+		// spew.Dump(ws_name, rule, deps)
+	}
+
+	for ws := range affected {
+		__create_tasks(cmd, ws)
 	}
 
 	return tasks

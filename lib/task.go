@@ -6,6 +6,7 @@ type Task struct {
 	status    int
 	Deps      []string
 	Run       task_run
+	Force     bool
 }
 
 type task_run = func(r *Runner)
@@ -17,12 +18,13 @@ const (
 	TASK_STATUS_FAILURE = iota
 )
 
-func NewTask(ws_name string, task_name string, deps []string, run task_run) Task {
+func NewTask(ws_name string, task_name string, deps []string, run task_run, force bool) Task {
 	return Task{
 		ws_name:   ws_name,
 		task_name: task_name,
 		status:    TASK_STATUS_PENDING,
 		Deps:      deps,
 		Run:       run,
+		Force:     force,
 	}
 }

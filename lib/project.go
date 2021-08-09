@@ -20,8 +20,9 @@ type Project struct {
 
 func NewProject(cwd string) Project {
 	var package_json = NewPackageJson(path.Join(cwd, "package.json"))
-	var workspaces = get_workspaces_list(cwd, package_json.Workspaces)
+	var workspaces = get_workspaces_list(cwd, package_json.GetConfig().Workspaces)
 	var dep_graph = NewDepGraph(&workspaces)
+
 	return Project{
 		Cwd:          cwd,
 		Package_json: package_json,
@@ -124,6 +125,10 @@ func (p Project) GetAffected(workspaces *map[string]string) map[string]string {
 
 func (p Project) GetNodeModulesBinPath() string {
 	return path.Join(p.Cwd, "node_modules", ".bin")
+}
+
+func (p Project) GetRule(name string, ws_path string) Rule {
+	return p.Package_json.Scu.GetRule(name, ws_path)
 }
 
 func get_workspaces_list(cwd string, workspaces_config []string) map[string]Workspace {

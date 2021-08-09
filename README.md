@@ -1,4 +1,5 @@
-[x] Replace `build` with `run`
-[ ] Add configuration
-[ ] Add dependency install and linking
-[ ] Add logging and progress
+- [x] Replace `build` with `run`
+- [ ] Add configuration
+  - [ ] Namespace config
+- [ ] Add dependency install and linking
+- [ ] Add logging and progress

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gobwas/glob"
+	"github.com/bmatcuk/doublestar/v4"
 )
 
 type TSConfig struct {
@@ -31,10 +31,10 @@ func GetFilesFromTSConfig(ws_path string) []string {
 		include = append(include, path.Join(ws_path, p))
 	}
 
-	var g = glob.MustCompile("{" + strings.Join(include, ",") + "}")
-	var _ = filepath.Walk(ws_path, func(path string, info fs.FileInfo, err error) error {
+	var pattern = "{" + strings.Join(include, ",") + "}"
+	var _ = filepath.Walk(ws_path, func(p string, info fs.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", p, err)
 			return err
 		}
 
@@ -46,8 +46,8 @@ func GetFilesFromTSConfig(ws_path string) []string {
 			return nil
 		}
 
-		if g.Match(path) {
-			result = append(result, path)
+		if val, _ := doublestar.Match(pattern, p); val {
+			result = append(result, p)
 		}
 
 		return nil
