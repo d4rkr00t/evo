@@ -7,8 +7,8 @@
   - [x] Cache project state
   - [x] Install packages
   - [x] Check if node_modules folder exists
+  - [x] Link packages
   - [ ] Improve project state cache by storing a list of WS
-  - [ ] Link packages
 - [ ] Add logging and progress
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
@@ -17,3 +17,6 @@
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
 - [ ] REFACTOR: Generic create a task from a rule
+- [ ] Error handling
+  - [ ] Task execution
+- [ ] Improve WS caching

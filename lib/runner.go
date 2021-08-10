@@ -28,12 +28,8 @@ func NewRunner(cwd string) Runner {
 	return Runner{cwd: cwd, project: proj, cache: cc}
 }
 
-func (r Runner) GetCwd() string {
-	return r.cwd
-}
-
 func (r Runner) Run(cmd string) {
-	fmt.Println("\n"+cmd+" ->", r.GetCwd())
+	fmt.Println("\n"+cmd+" ->", r.project.Cwd)
 	fmt.Println("\n===============")
 	fmt.Println("")
 
@@ -46,6 +42,10 @@ func (r Runner) Run(cmd string) {
 
 	fmt.Println("\nUpdated:", len(updated), "of", len(r.project.Workspaces))
 	fmt.Println("")
+
+	fmt.Println("Linking workspaces...")
+	fmt.Println("")
+	LinkWorkspaces(&updated, &r.project)
 
 	if len(updated) > 0 {
 		fmt.Println("Creating build tasks")
