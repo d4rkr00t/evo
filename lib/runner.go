@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -28,6 +29,7 @@ func NewRunner(cwd string, verbose bool) Runner {
 }
 
 func (r Runner) Run(cmd string) {
+	var start_time = time.Now()
 	r.logger.Log()
 	r.logger.LogWithBadge("cwd", r.project.Cwd)
 	r.logger.LogWithBadge("scu", fmt.Sprintf("Target → %s", color.CyanString(cmd)))
@@ -78,6 +80,8 @@ func (r Runner) Run(cmd string) {
 		}
 
 		building_lg.End()
+		r.logger.Log()
+		r.logger.Log(fmt.Sprintf("%s Total time %s\n", color.CyanString("╺"), color.GreenString(time.Since(start_time).String())))
 	} else {
 		prerunchecks_lg.Log("Everything is up-to-date.")
 		prerunchecks_lg.End()
@@ -134,7 +138,7 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected
 			var cache_key = cmd + ":" + ws_hash
 
 			if r.cache.Has(cache_key) {
-				lg.SuccessWithBadge(task_name, "cache hit:", ws_name, ws_hash)
+				lg.SuccessWithBadge(task_name, "cache hit:", ws_hash)
 				if rule.CacheOutput {
 					r.cache.RestoreDir(cache_key, ws.Path)
 				}

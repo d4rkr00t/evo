@@ -41,12 +41,12 @@ type LoggerGroup struct {
 
 func (lg *LoggerGroup) Start(msg ...string) {
 	lg.start = time.Now()
-	fmt.Printf("\n%s %s\n", color.HiBlackString(strings.ToLower("┌")), strings.Join(msg, " "))
+	fmt.Printf("\n%s %s\n", color.HiBlackString("┌"), strings.Join(msg, " "))
 	lg.Log()
 }
 
 func (lg LoggerGroup) Log(msg ...string) {
-	fmt.Printf("%s %s\n", color.HiBlackString(strings.ToLower("│")), strings.Join(msg, " "))
+	fmt.Printf("%s %s\n", color.HiBlackString("│"), strings.Join(msg, " "))
 }
 
 func (lg LoggerGroup) LogVerbose(msg ...string) {
@@ -56,19 +56,19 @@ func (lg LoggerGroup) LogVerbose(msg ...string) {
 }
 
 func (lg LoggerGroup) Warn(msg ...string) {
-	fmt.Printf("%s %s\n", color.HiBlackString(strings.ToLower("│")), color.CyanString(strings.Join(msg, " ")))
+	fmt.Printf("%s %s\n", color.HiBlackString("│"), color.CyanString(strings.Join(msg, " ")))
 }
 
 func (lg LoggerGroup) LogWithBadge(badge string, msg ...string) {
-	fmt.Printf("%s %s: %s\n", color.HiBlackString(strings.ToLower("│")), color.CyanString(badge), strings.Join(msg, " "))
+	fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.CyanString(badge), strings.Join(msg, " "))
 }
 
 func (lg LoggerGroup) SuccessWithBadge(badge string, msg ...string) {
-	fmt.Printf("%s %s: %s\n", color.HiBlackString(strings.ToLower("│")), color.GreenString(badge), strings.Join(msg, " "))
+	fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.GreenString(badge), strings.Join(msg, " "))
 }
 
 func (lg LoggerGroup) InfoWithBadge(badge string, msg ...string) {
-	fmt.Printf("%s %s: %s\n", color.HiBlackString(strings.ToLower("│")), color.BlueString(badge), strings.Join(msg, " "))
+	fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.BlueString(badge), strings.Join(msg, " "))
 }
 
 func (lg LoggerGroup) LogWithBadgeVerbose(badge string, msg ...string) {
