@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bufio"
-	"fmt"
 	"os/exec"
 )
 
@@ -11,11 +10,12 @@ type Cmd struct {
 	dir    string
 	cmd    string
 	params []string
+	stdout func(msg string)
 }
 
-func NewCmd(name string, dir string, cmd string, params []string) Cmd {
+func NewCmd(name string, dir string, cmd string, params []string, stdout func(msg string)) Cmd {
 	return Cmd{
-		name, dir, cmd, params,
+		name, dir, cmd, params, stdout,
 	}
 }
 
@@ -32,7 +32,7 @@ func (c Cmd) Run() error {
 	for scanner.Scan() {
 		var m = scanner.Text()
 		if len(m) > 0 {
-			fmt.Println("["+c.name+"] → ", m)
+			c.stdout(m)
 		}
 	}
 	var err = cmd.Wait()

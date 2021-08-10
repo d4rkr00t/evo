@@ -9,68 +9,85 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 
-	"github.com/briandowns/spinner"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/fatih/color"
 )
 
 type Runner struct {
 	cwd     string
 	project Project
 	cache   cache.Cache
+	logger  Logger
 }
 
-func NewRunner(cwd string) Runner {
+func NewRunner(cwd string, verbose bool) Runner {
 	var cc = cache.NewCache(cwd)
 	var proj = NewProject(cwd)
 	os.Setenv("PATH", proj.GetNodeModulesBinPath()+":"+os.ExpandEnv("$PATH"))
-	return Runner{cwd: cwd, project: proj, cache: cc}
+	return Runner{cwd: cwd, project: proj, cache: cc, logger: NewLogger(verbose)}
 }
 
 func (r Runner) Run(cmd string) {
-	fmt.Println("\n"+cmd+" ->", r.project.Cwd)
-	fmt.Println("\n===============")
-	fmt.Println("")
+	r.logger.Log()
+	r.logger.LogWithBadge("cwd", r.project.Cwd)
+	r.logger.LogWithBadge("scu", fmt.Sprintf("Target → %s", color.CyanString(cmd)))
 
+	var prerunchecks_lg = r.logger.CreateGroup()
+	prerunchecks_lg.Start("Checking project...")
 	if r.project.Invalidate(&r.cache) {
-		fmt.Println("INSTALL")
-		r.project.InstallDeps(&r)
+		prerunchecks_lg.LogWithBadge("Installing dependencies...")
+		r.project.InstallDeps(&r, &prerunchecks_lg)
 	}
 
+	prerunchecks_lg.LogVerbose("Invalidating workspaces...")
 	var updated = r.project.InvalidateWorkspaces(make([]string, 0), cmd, &r.cache)
 
-	fmt.Println("\nUpdated:", len(updated), "of", len(r.project.Workspaces))
-	fmt.Println("")
-
-	fmt.Println("Linking workspaces...")
-	fmt.Println("")
-	LinkWorkspaces(&updated, &r.project)
-
 	if len(updated) > 0 {
-		fmt.Println("Creating build tasks")
-		var tasks = r.create_tasks(cmd, &updated)
-		fmt.Println("Building...")
+		prerunchecks_lg.LogWithBadge(
+			"updated",
+			color.CyanString(fmt.Sprint((len(updated)))),
+			"of",
+			color.CyanString(fmt.Sprint((len(r.project.Workspaces)))),
+			"workspaces",
+		)
+		prerunchecks_lg.LogVerbose("Calculating affected workspaces...")
+		var affected = r.project.GetAffected(&updated)
+		prerunchecks_lg.LogWithBadge(
+			"affected",
+			color.CyanString(fmt.Sprint((len(affected)))),
+			"of",
+			color.CyanString(fmt.Sprint((len(r.project.Workspaces)))),
+			"workspaces",
+		)
+
+		prerunchecks_lg.LogVerbose("Linking workspaces...")
+
+		LinkWorkspaces(&updated, &r.project)
+		prerunchecks_lg.End()
+
+		var building_lg = r.logger.CreateGroup()
+		building_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(cmd)))
+		building_lg.LogVerbose("Creating tasks...")
+
+		var tasks = r.create_tasks(cmd, &updated, &affected, &building_lg)
+
 		if len(tasks) > 0 {
-			spew.Dump(tasks)
-			r.run_tasks(&tasks)
+			building_lg.LogVerbose("Executing tasks...")
+			// spew.Dump(tasks)
+			r.run_tasks(&tasks, &building_lg)
 		}
+
+		building_lg.End()
+	} else {
+		prerunchecks_lg.Log("Everything is up-to-date.")
+		prerunchecks_lg.End()
 	}
 
 	r.project.CacheState(&r.cache)
-
-	if len(updated) > 0 {
-		fmt.Println("\n\n===============")
-		fmt.Println("")
-	}
 }
 
-func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[string]Task {
+func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected *map[string]string, lg *LoggerGroup) map[string]Task {
 	var tasks = map[string]Task{}
-	fmt.Println("Calculating affected packages...")
-	var affected = r.project.GetAffected(workspaces)
-	fmt.Println("Total affected ->", len(affected))
-	fmt.Println("Creating tasks for affected packages...")
 
 	var __create_tasks func(cmd string, ws_name string)
 	__create_tasks = func(cmd string, ws_name string) {
@@ -84,13 +101,11 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[stri
 		var rule = r.project.GetRule(cmd, ws.Path)
 		var deps = []string{}
 
-		spew.Dump(ws_name, rule)
-
 		for _, dep := range rule.Deps {
 			if dep[0] == '@' {
 				dep = dep[1:]
 				for dep_name := range ws.Deps {
-					if _, ok := affected[dep_name]; ok {
+					if _, ok := (*affected)[dep_name]; ok {
 						deps = append(deps, dep_name+":"+dep)
 						__create_tasks(dep, dep_name)
 					}
@@ -102,22 +117,24 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[stri
 		}
 
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(r *Runner) {
-			var ws_hash = affected[ws.Name]
-			// fmt.Println(task_name, "-> compiling")
+			var ws_hash = (*affected)[ws.Name]
+			lg.InfoWithBadge(task_name, "starting...")
 
 			var run = func() {
 				var args = strings.Split(rule.Cmd, " ")
 				var cmd_name = args[0]
 				var cmd_args = args[1:]
 
-				var cmd = NewCmd(task_name, ws.Path, cmd_name, cmd_args)
+				var cmd = NewCmd(task_name, ws.Path, cmd_name, cmd_args, func(msg string) {
+					lg.InfoWithBadge(task_name, msg)
+				})
 				cmd.Run()
 			}
 
 			var cache_key = cmd + ":" + ws_hash
 
 			if r.cache.Has(cache_key) {
-				// fmt.Println(task_name, "-> cache hit:", w.Name, ws_hash)
+				lg.SuccessWithBadge(task_name, "cache hit:", ws_name, ws_hash)
 				if rule.CacheOutput {
 					r.cache.RestoreDir(cache_key, ws.Path)
 				}
@@ -134,30 +151,34 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string) map[stri
 		// spew.Dump(ws_name, rule, deps)
 	}
 
-	for ws := range affected {
+	for ws := range *affected {
 		__create_tasks(cmd, ws)
 	}
 
 	return tasks
 }
 
-func (r Runner) run_tasks(tasks *map[string]Task) {
+func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
 	var queue_size = num_goroutines * 2
 	var pqueue = make(chan string, queue_size)
 	var dqueue = make(chan string)
-	var s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	var count_done = 0
 	var in_progress int64
-	var total = len(*tasks)
 
-	fmt.Println("Num goroutins ->", num_goroutines, "| queue size ->", queue_size, "| num cpus ->", runtime.NumCPU())
+	lg.LogWithBadge("threads", fmt.Sprint(num_goroutines))
+	lg.LogWithBadge("tasks", fmt.Sprint(len(*tasks)))
+	lg.LogVerbose("queue size ->", fmt.Sprint(queue_size), "| num cpus ->", fmt.Sprint(runtime.NumCPU()))
+	lg.Log()
 
 	wg.Add(num_goroutines)
 
-	fmt.Println("Creating go routines...")
+	lg.Log("Running tasks...")
+	lg.Log()
+
+	lg.LogVerbose("Creating go routines...")
 
 	for i := 0; i < num_goroutines; i++ {
 		go func() {
@@ -168,25 +189,19 @@ func (r Runner) run_tasks(tasks *map[string]Task) {
 				mu.RUnlock()
 
 				atomic.AddInt64(&in_progress, 1)
-				s.Suffix = build_spinner_text(total, count_done, len(pqueue), int(in_progress))
-
-				// var start = time.Now()
 				task.Run(&r)
-
 				atomic.AddInt64(&in_progress, -1)
-				// var duration = time.Since(start)
-				// fmt.Println(task_id, "-> duration:", duration)
 
 				dqueue <- task_id
 			}
 		}()
 	}
 
-	fmt.Println("Starting done routine...")
+	lg.LogVerbose("Starting done routine...")
 	go func() {
 		for task_id := range dqueue {
 			count_done += 1
-			fmt.Println("Finished task ->", task_id)
+			lg.SuccessWithBadge(task_id, "done")
 
 			mu.Lock()
 			var task = (*tasks)[task_id]
@@ -201,7 +216,7 @@ func (r Runner) run_tasks(tasks *map[string]Task) {
 				(*tasks)[ntask_id] = ntask
 				go func(tid string) {
 					pqueue <- tid
-					fmt.Println("Adding task ->", tid)
+					lg.LogWithBadgeVerbose(tid, "added to the queue")
 				}(ntask_id)
 			}
 			mu.Unlock()
@@ -212,7 +227,6 @@ func (r Runner) run_tasks(tasks *map[string]Task) {
 		}
 	}()
 
-	fmt.Println("Adding initial tasks...")
 	for task_id, task := range *tasks {
 		if len(task.Deps) == 0 {
 			task.status = TASK_STATUS_RUNNING
@@ -221,15 +235,7 @@ func (r Runner) run_tasks(tasks *map[string]Task) {
 		}
 	}
 
-	s.Suffix = build_spinner_text(total, count_done, len(pqueue), int(in_progress))
-
-	s.Start()
 	wg.Wait()
-	s.Stop()
-}
-
-func build_spinner_text(total int, done int, queued int, in_progress int) string {
-	return " [" + "total:" + fmt.Sprint(total) + " | waiting:" + fmt.Sprint(total-done-in_progress) + " | done:" + fmt.Sprint(done) + " | queued:" + fmt.Sprint(queued) + " | running:" + fmt.Sprint(in_progress) + "] "
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

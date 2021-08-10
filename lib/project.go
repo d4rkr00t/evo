@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"fmt"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -39,13 +38,8 @@ func (p Project) Invalidate(cc *cache.Cache) bool {
 
 func (p Project) InvalidateWorkspaces(ws_list []string, cmd string, cc *cache.Cache) map[string]string {
 	var updated = map[string]string{}
-	var is_all = len(ws_list) == 0
 	var wg sync.WaitGroup
 	var queue = make(chan []string)
-
-	if is_all {
-		fmt.Println("Invalidating all packages!")
-	}
 
 	for name, ws := range p.Workspaces {
 		wg.Add(1)
@@ -148,8 +142,10 @@ func (p Project) CacheState(c *cache.Cache) {
 	c.CacheData(p.GetStateKey(), p.GetHash())
 }
 
-func (p Project) InstallDeps(r *Runner) {
-	var cmd = NewCmd("pnpm install", p.Cwd, "pnpm", []string{"install"})
+func (p Project) InstallDeps(r *Runner, lg *LoggerGroup) {
+	var cmd = NewCmd("pnpm install", p.Cwd, "pnpm", []string{"install"}, func(msg string) {
+		lg.LogWithBadge("pnpm", msg)
+	})
 	cmd.Run()
 }
 

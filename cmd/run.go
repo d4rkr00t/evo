@@ -30,8 +30,8 @@ var RunCmd = &cobra.Command{
 			cwd = path.Join(os_cwd, cwd)
 		}
 
-		var r = lib.NewRunner(cwd)
 		var verbose, _ = cmd.Flags().GetBool("verbose")
+		var r = lib.NewRunner(cwd, verbose)
 		if verbose {
 			spew.Dump(r)
 		}
