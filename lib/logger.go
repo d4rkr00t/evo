@@ -26,6 +26,12 @@ func (l Logger) Log(msg ...string) {
 	fmt.Println(strings.Join(msg, ""))
 }
 
+func (l Logger) LogVerbose(msg ...string) {
+	if l.verbose {
+		l.Log(msg...)
+	}
+}
+
 func (l Logger) CreateGroup() LoggerGroup {
 	return LoggerGroup{logger: &l}
 }

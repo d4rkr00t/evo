@@ -7,6 +7,7 @@ import (
 	"scu/main/lib/fileutils"
 	"sort"
 	"strings"
+	"sync"
 )
 
 type Workspace struct {
@@ -17,6 +18,8 @@ type Workspace struct {
 	Includes []string
 	Excludes []string
 }
+
+type WorkspacesMap = map[string]Workspace
 
 func NewWorkspace(project_path string, ws_path string, includes []string, excludes []string) Workspace {
 	var package_json_path = path.Join(ws_path, "package.json")
@@ -65,4 +68,64 @@ func (w Workspace) get_files() []string {
 	var files []string = fileutils.GlobFiles(w.Path, &w.Includes, &w.Excludes)
 	sort.Strings(files)
 	return files
+}
+
+func GetWorkspaces(cwd string, conf *Config) WorkspacesMap {
+	var workspaces = make(map[string]Workspace)
+	var wg sync.WaitGroup
+	var queue = make(chan Workspace)
+
+	for _, wc := range conf.Workspaces {
+		var ws_glob = path.Join(cwd, wc, "package.json")
+		var matches, _ = filepath.Glob(ws_glob)
+		for _, ws_path := range matches {
+			wg.Add(1)
+			go func(ws_path string) {
+				var includes, excludes = conf.GetInputs(path.Dir(ws_path))
+				queue <- NewWorkspace(cwd, path.Dir(ws_path), includes, excludes)
+			}(ws_path)
+		}
+	}
+
+	go func() {
+		for ws := range queue {
+			workspaces[ws.Name] = ws
+			wg.Done()
+		}
+	}()
+
+	wg.Wait()
+
+	return workspaces
+}
+
+func InvalidateWorkspaces(workspaces *WorkspacesMap, target string, cc *cache.Cache) map[string]string {
+	var updated = map[string]string{}
+	var wg sync.WaitGroup
+	var queue = make(chan []string)
+
+	for name, ws := range *workspaces {
+		wg.Add(1)
+		go func(name string, ws Workspace) {
+			var updated, ws_hash = ws.Invalidate(target, cc)
+			if updated {
+				queue <- []string{name, ws_hash}
+			} else {
+				queue <- []string{}
+			}
+		}(name, ws)
+	}
+
+	go func() {
+		for dat := range queue {
+			if len(dat) > 0 {
+				updated[dat[0]] = dat[1]
+			}
+			wg.Done()
+		}
+	}()
+
+	wg.Wait()
+
+	return updated
 }

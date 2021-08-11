@@ -5,7 +5,6 @@ import (
 	"math"
 	"os"
 	"runtime"
-	"scu/main/lib/cache"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -13,91 +12,99 @@ import (
 	"github.com/fatih/color"
 )
 
-type Runner struct {
-	cwd     string
-	project Project
-	cache   cache.Cache
-	logger  Logger
-	stats   Stats
-}
+func Run(ctx Context) {
+	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
 
-func NewRunner(cwd string, verbose bool) Runner {
-	var cc = cache.NewCache(cwd)
-	var proj = NewProject(cwd)
-	os.Setenv("PATH", proj.GetNodeModulesBinPath()+":"+os.ExpandEnv("$PATH"))
-	return Runner{
-		cwd:     cwd,
-		project: proj,
-		cache:   cc,
-		logger:  NewLogger(verbose),
-		stats:   NewStats(),
-	}
-}
+	ctx.logger.Log()
+	ctx.logger.LogWithBadge("cwd", ctx.cwd)
+	ctx.logger.LogWithBadge("scu", fmt.Sprintf("Target → %s", color.CyanString(ctx.target)))
 
-func (r Runner) Run(cmd string) {
-	r.logger.Log()
-	r.logger.LogWithBadge("cwd", r.project.Cwd)
-	r.logger.LogWithBadge("scu", fmt.Sprintf("Target → %s", color.CyanString(cmd)))
+	if ctx.root_pkg_json.Invalidate(&ctx.cache) || !IsNodeModulesExist(ctx.root) {
+		ctx.stats.StartMeasure("install", MEASURE_KIND_STAGE)
+		var install_lg = ctx.logger.CreateGroup()
+		install_lg.Start("Installing dependencies...")
 
-	r.stats.StartMeasure("prerun", MEASURE_KIND_STAGE)
-	var prerun_lg = r.logger.CreateGroup()
-	prerun_lg.Start("Checking project...")
-	if r.project.Invalidate(&r.cache) {
-		prerun_lg.LogWithBadge("Installing dependencies...")
-		r.project.InstallDeps(&r, &prerun_lg)
+		InstallNodeDeps(ctx.root, &install_lg)
+		ctx.root_pkg_json.CacheState(&ctx.cache)
+
+		install_lg.End(ctx.stats.StopMeasure("install"))
 	}
 
-	prerun_lg.LogVerbose("Invalidating workspaces...")
-	var updated = r.project.InvalidateWorkspaces(make([]string, 0), cmd, &r.cache)
+	ctx.stats.StartMeasure("invalidate", MEASURE_KIND_STAGE)
+	var invalidate_lg = ctx.logger.CreateGroup()
+	invalidate_lg.Start("Invalidating workspaces...")
 
-	if len(updated) > 0 {
-		prerun_lg.LogWithBadge(
+	var workspaces = GetWorkspaces(ctx.root, &ctx.config)
+	var dep_graph = NewDepGraph(&workspaces)
+	var updated_ws = InvalidateWorkspaces(&workspaces, ctx.target, &ctx.cache)
+
+	if len(updated_ws) > 0 {
+		invalidate_lg.LogWithBadge(
 			"updated",
-			color.CyanString(fmt.Sprint((len(updated)))),
+			color.CyanString(fmt.Sprint((len(updated_ws)))),
 			"of",
-			color.CyanString(fmt.Sprint((len(r.project.Workspaces)))),
+			color.CyanString(fmt.Sprint((len(workspaces)))),
 			"workspaces",
 		)
-		prerun_lg.LogVerbose("Calculating affected workspaces...")
-		var affected = r.project.GetAffected(&updated)
-		prerun_lg.LogWithBadge(
+
+		invalidate_lg.LogVerbose("Calculating affected workspaces...")
+		var affected_ws = dep_graph.GetAffected(&workspaces, &updated_ws)
+		invalidate_lg.LogWithBadge(
 			"affected",
-			color.CyanString(fmt.Sprint((len(affected)))),
+			color.CyanString(fmt.Sprint((len(affected_ws)))),
 			"of",
-			color.CyanString(fmt.Sprint((len(r.project.Workspaces)))),
+			color.CyanString(fmt.Sprint((len(workspaces)))),
 			"workspaces",
 		)
+		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 
-		prerun_lg.LogVerbose("Linking workspaces...")
+		ctx.stats.StartMeasure("linking", MEASURE_KIND_STAGE)
+		var linking_lg = ctx.logger.CreateGroup()
+		linking_lg.Start("Linking workspaces...")
 
-		LinkWorkspaces(&updated, &r.project)
-		prerun_lg.End(r.stats.StopMeasure("prerun"))
+		LinkWorkspaces(ctx.root, &workspaces, &updated_ws)
 
-		r.stats.StartMeasure("run", MEASURE_KIND_STAGE)
-		var run_lg = r.logger.CreateGroup()
-		run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(cmd)))
+		linking_lg.End(ctx.stats.StopMeasure("linking"))
+
+		ctx.stats.StartMeasure("run", MEASURE_KIND_STAGE)
+		var run_lg = ctx.logger.CreateGroup()
+
+		run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(ctx.target)))
 		run_lg.LogVerbose("Creating tasks...")
 
-		var tasks = r.create_tasks(cmd, &updated, &affected, &run_lg)
+		var tasks = create_tasks(
+			ctx.target,
+			&workspaces,
+			&updated_ws,
+			&affected_ws,
+			&ctx.config,
+			&run_lg,
+		)
 
 		if len(tasks) > 0 {
 			run_lg.LogVerbose("Executing tasks...")
 			// spew.Dump(tasks)
-			r.run_tasks(&tasks, &run_lg, &r.stats)
+			run_tasks(&ctx, &tasks, &run_lg)
 		}
 
-		run_lg.End(r.stats.StopMeasure("run"))
-		r.logger.Log()
-		r.logger.Log(fmt.Sprintf("%s Total time %s\n", color.CyanString("╺"), color.GreenString(r.stats.total.String())))
+		run_lg.End(ctx.stats.StopMeasure("run"))
 	} else {
-		prerun_lg.Log("Everything is up-to-date.")
-		prerun_lg.End(r.stats.StopMeasure("prerun"))
+		invalidate_lg.Log("Everything is up-to-date.")
+		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 	}
 
-	r.project.CacheState(&r.cache)
+	ctx.logger.Log()
+	ctx.logger.LogWithBadge("Total time", color.GreenString(ctx.stats.total.String()))
 }
 
-func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected *map[string]string, lg *LoggerGroup) map[string]Task {
+func create_tasks(
+	cmd string,
+	workspaces *WorkspacesMap,
+	updated_ws *map[string]string,
+	affected_ws *map[string]string,
+	config *Config,
+	lg *LoggerGroup,
+) map[string]Task {
 	var tasks = map[string]Task{}
 
 	var __create_tasks func(cmd string, ws_name string)
@@ -108,15 +115,15 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected
 			return
 		}
 
-		var ws = r.project.GetWs(ws_name)
-		var rule = r.project.GetRule(cmd, ws.Path)
+		var ws = (*workspaces)[ws_name]
+		var rule = config.GetRule(cmd, ws.Path)
 		var deps = []string{}
 
 		for _, dep := range rule.Deps {
 			if dep[0] == '@' {
 				dep = dep[1:]
 				for dep_name := range ws.Deps {
-					if _, ok := (*affected)[dep_name]; ok {
+					if _, ok := (*affected_ws)[dep_name]; ok {
 						deps = append(deps, dep_name+":"+dep)
 						__create_tasks(dep, dep_name)
 					}
@@ -127,8 +134,8 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected
 			}
 		}
 
-		tasks[task_name] = NewTask(ws_name, task_name, deps, func(r *Runner) {
-			var ws_hash = (*affected)[ws.Name]
+		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context) {
+			var ws_hash = (*affected_ws)[ws.Name]
 			lg.InfoWithBadge(task_name, "starting...")
 
 			var run = func() {
@@ -144,32 +151,32 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected
 
 			var cache_key = cmd + ":" + ws_hash
 
-			if r.cache.Has(cache_key) {
+			if ctx.cache.Has(cache_key) {
 				lg.SuccessWithBadge(task_name, "cache hit:", ws_hash)
 				if rule.CacheOutput {
-					r.cache.RestoreDir(cache_key, ws.Path)
+					ctx.cache.RestoreDir(cache_key, ws.Path)
 				}
 			} else {
 				run()
 				if rule.CacheOutput {
-					ws.Cache(&r.cache, cache_key)
+					ws.Cache(&ctx.cache, cache_key)
 				}
 			}
 
-			ws.CacheState(&r.cache, cmd, ws_hash)
+			ws.CacheState(&ctx.cache, cmd, ws_hash)
 		}, false)
 
 		// spew.Dump(ws_name, rule, deps)
 	}
 
-	for ws := range *affected {
+	for ws := range *affected_ws {
 		__create_tasks(cmd, ws)
 	}
 
 	return tasks
 }
 
-func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup, stats *Stats) {
+func run_tasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
@@ -200,9 +207,9 @@ func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup, stats *Stats)
 				mu.RUnlock()
 
 				atomic.AddInt64(&in_progress, 1)
-				r.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
-				task.Run(&r)
-				r.stats.StopMeasure(task_id)
+				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
+				task.Run(ctx)
+				ctx.stats.StopMeasure(task_id)
 				atomic.AddInt64(&in_progress, -1)
 
 				dqueue <- task_id
@@ -214,7 +221,7 @@ func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup, stats *Stats)
 	go func() {
 		for task_id := range dqueue {
 			count_done += 1
-			lg.SuccessWithBadge(task_id, "done in "+stats.GetMeasure(task_id).duration.String())
+			lg.SuccessWithBadge(task_id, "done in "+ctx.stats.GetMeasure(task_id).duration.String())
 
 			mu.Lock()
 			var task = (*tasks)[task_id]

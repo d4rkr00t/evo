@@ -2,7 +2,10 @@ package lib
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"scu/main/lib/cache"
+	"scu/main/lib/fileutils"
 )
 
 type PackageJson struct {
@@ -23,4 +26,21 @@ func NewPackageJson(path string) PackageJson {
 
 func (p PackageJson) GetConfig() Config {
 	return p.Scu
+}
+
+func (p PackageJson) Invalidate(cc *cache.Cache) bool {
+	var hash = p.GetHash()
+	return cc.ReadData(p.GetStateKey()) != hash
+}
+
+func (p PackageJson) GetStateKey() string {
+	return fmt.Sprintf("%s-packagejson", p.Name)
+}
+
+func (p PackageJson) GetHash() string {
+	return fileutils.GetFileHash(p.Path)
+}
+
+func (p PackageJson) CacheState(c *cache.Cache) {
+	c.CacheData(p.GetStateKey(), p.GetHash())
 }

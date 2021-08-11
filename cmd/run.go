@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"scu/main/lib"
+	"scu/main/lib/cache"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
@@ -31,10 +32,23 @@ var RunCmd = &cobra.Command{
 		}
 
 		var verbose, _ = cmd.Flags().GetBool("verbose")
-		var r = lib.NewRunner(cwd, verbose)
+
+		var pkg_json = lib.NewPackageJson(path.Join(cwd, "package.json"))
+		var ctx = lib.NewContext(
+			cwd,
+			cwd,
+			args[0],
+			pkg_json,
+			cache.NewCache(cwd),
+			lib.NewLogger(verbose),
+			lib.NewStats(),
+			pkg_json.GetConfig(),
+		)
+
 		if verbose {
-			spew.Dump(r)
+			spew.Dump(ctx)
 		}
-		r.Run(args[0])
+
+		lib.Run(ctx)
 	},
 }

@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-func LinkWorkspaces(workspaces *map[string]string, project *Project) {
-	for ws_name := range *workspaces {
-		var ws = project.GetWs(ws_name)
-		var node_modules = path.Join(ws.Path, "node_modules")
+func LinkWorkspaces(root string, workspaces *WorkspacesMap, updated *map[string]string) {
+	for ws_name := range *updated {
+		var ws = (*workspaces)[ws_name]
+		var node_modules = GetNodeModulesPath(ws.Path)
 
 		os.RemoveAll(node_modules)
 
 		for dep := range ws.Deps {
-			if dep_ws, ok := project.Workspaces[dep]; ok {
+			if dep_ws, ok := (*workspaces)[dep]; ok {
 				link_local_ws(&ws, &dep_ws)
 			} else {
-				link_external(project.Cwd, &ws, dep)
+				link_external(root, &ws, dep)
 			}
 		}
 	}

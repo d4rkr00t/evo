@@ -12,6 +12,10 @@
   - [ ] Link dev dependencies
 - [x] Build stats
 - [ ] REFACTOR: Get rid of runner and project in favour of context
+  - [x] Remove runner struct
+  - [x] Remove project struct
+  - [ ] Split Run function into stages
+  - [ ] Create task runner
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Proper dependency tracking for deciding when ws is updated

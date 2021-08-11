@@ -1,5 +1,10 @@
 package lib
 
+import (
+	"runtime"
+	"sync"
+)
+
 type deps = map[string][]string
 
 type DepGraph struct {
@@ -34,6 +39,37 @@ func (dg DepGraph) GetDependant(ws_name string) []string {
 		result = append(result, key)
 	}
 	return result
+}
+
+func (dg DepGraph) GetAffected(workspaces *WorkspacesMap, updated *map[string]string) map[string]string {
+	var affected = map[string]string{}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var guard = make(chan struct{}, runtime.NumCPU())
+
+	for ws_name, ws_hash := range *updated {
+		mu.Lock()
+		affected[ws_name] = ws_hash
+		mu.Unlock()
+		for _, name := range dg.GetDependant(ws_name) {
+			if _, ok := (*updated)[name]; !ok {
+				wg.Add(1)
+				guard <- struct{}{}
+				go func(name string) {
+					var hash = (*workspaces)[name].Hash()
+					mu.Lock()
+					affected[name] = hash
+					<-guard
+					mu.Unlock()
+					wg.Done()
+				}(name)
+			}
+		}
+	}
+
+	wg.Wait()
+
+	return affected
 }
 
 func build_direct(workspaces *WorkspacesMap) deps {

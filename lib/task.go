@@ -9,7 +9,7 @@ type Task struct {
 	Force     bool
 }
 
-type task_run = func(r *Runner)
+type task_run = func(ctx *Context)
 
 const (
 	TASK_STATUS_PENDING = iota
