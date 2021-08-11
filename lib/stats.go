@@ -19,14 +19,12 @@ type StatsMeasure struct {
 type Stats struct {
 	finished []*StatsMeasure
 	measures map[string]StatsMeasure
-	total    time.Duration
 }
 
 func NewStats() Stats {
 	return Stats{
 		finished: []*StatsMeasure{},
 		measures: map[string]StatsMeasure{},
-		total:    0,
 	}
 }
 
@@ -43,10 +41,6 @@ func (s *Stats) StopMeasure(name string) time.Duration {
 		m.duration = time.Since(m.start)
 		s.measures[name] = m
 		s.finished = append(s.finished, &m)
-
-		if m.kind == MEASURE_KIND_STAGE {
-			s.total += m.duration
-		}
 
 		return m.duration
 	}

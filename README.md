@@ -16,6 +16,7 @@
   - [x] Remove project struct
   - [ ] Split Run function into stages
   - [ ] Create task runner
+  - [ ] Workspaces List (?)
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Proper dependency tracking for deciding when ws is updated

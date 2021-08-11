@@ -13,6 +13,8 @@ import (
 )
 
 func Run(ctx Context) {
+	ctx.stats.StartMeasure("total", MEASURE_KIND_STAGE)
+
 	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
 
 	ctx.logger.Log()
@@ -94,7 +96,7 @@ func Run(ctx Context) {
 	}
 
 	ctx.logger.Log()
-	ctx.logger.LogWithBadge("Total time", color.GreenString(ctx.stats.total.String()))
+	ctx.logger.LogWithBadge("Total time", color.GreenString(ctx.stats.StopMeasure("total").String()))
 }
 
 func create_tasks(
