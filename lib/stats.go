@@ -1,0 +1,59 @@
+package lib
+
+import (
+	"time"
+)
+
+const (
+	MEASURE_KIND_STAGE = iota
+	MEASURE_KIND_TASK  = iota
+)
+
+type StatsMeasure struct {
+	name     string
+	start    time.Time
+	duration time.Duration
+	kind     int
+}
+
+type Stats struct {
+	finished []*StatsMeasure
+	measures map[string]StatsMeasure
+	total    time.Duration
+}
+
+func NewStats() Stats {
+	return Stats{
+		finished: []*StatsMeasure{},
+		measures: map[string]StatsMeasure{},
+		total:    0,
+	}
+}
+
+func (s *Stats) StartMeasure(name string, kind int) {
+	s.measures[name] = StatsMeasure{
+		name:  name,
+		kind:  kind,
+		start: time.Now(),
+	}
+}
+
+func (s *Stats) StopMeasure(name string) time.Duration {
+	if m, ok := s.measures[name]; ok {
+		m.duration = time.Since(m.start)
+		s.measures[name] = m
+		s.finished = append(s.finished, &m)
+
+		if m.kind == MEASURE_KIND_STAGE {
+			s.total += m.duration
+		}
+
+		return m.duration
+	}
+
+	return 0
+}
+
+func (s Stats) GetMeasure(name string) StatsMeasure {
+	return s.measures[name]
+}

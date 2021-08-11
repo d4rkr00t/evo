@@ -10,7 +10,8 @@
   - [x] Check if node_modules folder exists
   - [x] Link packages
   - [ ] Link dev dependencies
-- [ ] Improve project state cache by storing a list of WS
+- [x] Build stats
+- [ ] REFACTOR: Get rid of runner and project in favour of context
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Proper dependency tracking for deciding when ws is updated
@@ -19,10 +20,19 @@
   - [ ] Validate dep cycles
 - [ ] Error handling
   - [ ] Task execution
+  - [ ] Task dependencies
 - [ ] Improve WS caching
 - [ ] Unify caching
   - [ ] WS output vs WS state
 - [ ] REFACTOR: Generic create a task from a rule
 - [ ] REFACTOR: Runner
 - [ ] TESTS!!!
-- [ ] Build stats
+- [ ] Watch mode
+- [ ] Different info
+  - [ ] Show path to a cache output – `scu show-cache 058a068`
+  - [ ] Show what's included in hash for a workspace – `scu show-hash pkg-a` or `scy show-hash pkg-a target`
+  - [ ] Show dependencies of a workspace – `scu show-deps pkg-a`
+- [ ] Scoped runs – `scu run build pkg-a`
+- [ ] REFACTOR: Refactor logger to interfaces
+- [ ] REFACTOR: Refactor cache to interfaces
+- [ ] Rebuild examples with a real world use cases

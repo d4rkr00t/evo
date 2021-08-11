@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/fatih/color"
 )
@@ -19,42 +18,49 @@ type Runner struct {
 	project Project
 	cache   cache.Cache
 	logger  Logger
+	stats   Stats
 }
 
 func NewRunner(cwd string, verbose bool) Runner {
 	var cc = cache.NewCache(cwd)
 	var proj = NewProject(cwd)
 	os.Setenv("PATH", proj.GetNodeModulesBinPath()+":"+os.ExpandEnv("$PATH"))
-	return Runner{cwd: cwd, project: proj, cache: cc, logger: NewLogger(verbose)}
+	return Runner{
+		cwd:     cwd,
+		project: proj,
+		cache:   cc,
+		logger:  NewLogger(verbose),
+		stats:   NewStats(),
+	}
 }
 
 func (r Runner) Run(cmd string) {
-	var start_time = time.Now()
 	r.logger.Log()
 	r.logger.LogWithBadge("cwd", r.project.Cwd)
 	r.logger.LogWithBadge("scu", fmt.Sprintf("Target → %s", color.CyanString(cmd)))
 
-	var prerunchecks_lg = r.logger.CreateGroup()
-	prerunchecks_lg.Start("Checking project...")
+	r.stats.StartMeasure("prerun", MEASURE_KIND_STAGE)
+	var prerun_lg = r.logger.CreateGroup()
+	prerun_lg.Start("Checking project...")
 	if r.project.Invalidate(&r.cache) {
-		prerunchecks_lg.LogWithBadge("Installing dependencies...")
-		r.project.InstallDeps(&r, &prerunchecks_lg)
+		prerun_lg.LogWithBadge("Installing dependencies...")
+		r.project.InstallDeps(&r, &prerun_lg)
 	}
 
-	prerunchecks_lg.LogVerbose("Invalidating workspaces...")
+	prerun_lg.LogVerbose("Invalidating workspaces...")
 	var updated = r.project.InvalidateWorkspaces(make([]string, 0), cmd, &r.cache)
 
 	if len(updated) > 0 {
-		prerunchecks_lg.LogWithBadge(
+		prerun_lg.LogWithBadge(
 			"updated",
 			color.CyanString(fmt.Sprint((len(updated)))),
 			"of",
 			color.CyanString(fmt.Sprint((len(r.project.Workspaces)))),
 			"workspaces",
 		)
-		prerunchecks_lg.LogVerbose("Calculating affected workspaces...")
+		prerun_lg.LogVerbose("Calculating affected workspaces...")
 		var affected = r.project.GetAffected(&updated)
-		prerunchecks_lg.LogWithBadge(
+		prerun_lg.LogWithBadge(
 			"affected",
 			color.CyanString(fmt.Sprint((len(affected)))),
 			"of",
@@ -62,29 +68,30 @@ func (r Runner) Run(cmd string) {
 			"workspaces",
 		)
 
-		prerunchecks_lg.LogVerbose("Linking workspaces...")
+		prerun_lg.LogVerbose("Linking workspaces...")
 
 		LinkWorkspaces(&updated, &r.project)
-		prerunchecks_lg.End()
+		prerun_lg.End(r.stats.StopMeasure("prerun"))
 
-		var building_lg = r.logger.CreateGroup()
-		building_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(cmd)))
-		building_lg.LogVerbose("Creating tasks...")
+		r.stats.StartMeasure("run", MEASURE_KIND_STAGE)
+		var run_lg = r.logger.CreateGroup()
+		run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(cmd)))
+		run_lg.LogVerbose("Creating tasks...")
 
-		var tasks = r.create_tasks(cmd, &updated, &affected, &building_lg)
+		var tasks = r.create_tasks(cmd, &updated, &affected, &run_lg)
 
 		if len(tasks) > 0 {
-			building_lg.LogVerbose("Executing tasks...")
+			run_lg.LogVerbose("Executing tasks...")
 			// spew.Dump(tasks)
-			r.run_tasks(&tasks, &building_lg)
+			r.run_tasks(&tasks, &run_lg, &r.stats)
 		}
 
-		building_lg.End()
+		run_lg.End(r.stats.StopMeasure("run"))
 		r.logger.Log()
-		r.logger.Log(fmt.Sprintf("%s Total time %s\n", color.CyanString("╺"), color.GreenString(time.Since(start_time).String())))
+		r.logger.Log(fmt.Sprintf("%s Total time %s\n", color.CyanString("╺"), color.GreenString(r.stats.total.String())))
 	} else {
-		prerunchecks_lg.Log("Everything is up-to-date.")
-		prerunchecks_lg.End()
+		prerun_lg.Log("Everything is up-to-date.")
+		prerun_lg.End(r.stats.StopMeasure("prerun"))
 	}
 
 	r.project.CacheState(&r.cache)
@@ -162,7 +169,7 @@ func (r Runner) create_tasks(cmd string, workspaces *map[string]string, affected
 	return tasks
 }
 
-func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup) {
+func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup, stats *Stats) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
@@ -193,7 +200,9 @@ func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup) {
 				mu.RUnlock()
 
 				atomic.AddInt64(&in_progress, 1)
+				r.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
 				task.Run(&r)
+				r.stats.StopMeasure(task_id)
 				atomic.AddInt64(&in_progress, -1)
 
 				dqueue <- task_id
@@ -205,7 +214,7 @@ func (r Runner) run_tasks(tasks *map[string]Task, lg *LoggerGroup) {
 	go func() {
 		for task_id := range dqueue {
 			count_done += 1
-			lg.SuccessWithBadge(task_id, "done")
+			lg.SuccessWithBadge(task_id, "done in "+stats.GetMeasure(task_id).duration.String())
 
 			mu.Lock()
 			var task = (*tasks)[task_id]
