@@ -14,13 +14,38 @@ import (
 
 func Run(ctx Context) {
 	ctx.stats.StartMeasure("total", MEASURE_KIND_STAGE)
+	defer print_total_time(&ctx)
 
 	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
 
 	ctx.logger.Log()
-	ctx.logger.LogWithBadge("cwd", ctx.cwd)
-	ctx.logger.LogWithBadge("scu", fmt.Sprintf("Target → %s", color.CyanString(ctx.target)))
+	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
+	ctx.logger.LogWithBadge("target", color.CyanString(ctx.target))
 
+	should_continue, _ := install_dependencies_step(&ctx)
+	if !should_continue {
+		return
+	}
+
+	should_continue, workspaces, _, updated_ws, affected_ws := invalidate_workspaces_step(&ctx)
+	if !should_continue {
+		return
+	}
+
+	should_continue, _ = linking_step(&ctx, &workspaces, &updated_ws)
+	if !should_continue {
+		return
+	}
+
+	run_step(&ctx, &workspaces, &updated_ws, &affected_ws)
+}
+
+func print_total_time(ctx *Context) {
+	ctx.logger.Log()
+	ctx.logger.LogWithBadge("Total time", color.GreenString(ctx.stats.StopMeasure("total").String()))
+}
+
+func install_dependencies_step(ctx *Context) (bool, error) {
 	if ctx.root_pkg_json.Invalidate(&ctx.cache) || !IsNodeModulesExist(ctx.root) {
 		ctx.stats.StartMeasure("install", MEASURE_KIND_STAGE)
 		var install_lg = ctx.logger.CreateGroup()
@@ -32,6 +57,10 @@ func Run(ctx Context) {
 		install_lg.End(ctx.stats.StopMeasure("install"))
 	}
 
+	return true, nil
+}
+
+func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, DepGraph, map[string]string, map[string]string) {
 	ctx.stats.StartMeasure("invalidate", MEASURE_KIND_STAGE)
 	var invalidate_lg = ctx.logger.CreateGroup()
 	invalidate_lg.Start("Invalidating workspaces...")
@@ -60,43 +89,46 @@ func Run(ctx Context) {
 		)
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 
-		ctx.stats.StartMeasure("linking", MEASURE_KIND_STAGE)
-		var linking_lg = ctx.logger.CreateGroup()
-		linking_lg.Start("Linking workspaces...")
-
-		LinkWorkspaces(ctx.root, &workspaces, &updated_ws)
-
-		linking_lg.End(ctx.stats.StopMeasure("linking"))
-
-		ctx.stats.StartMeasure("run", MEASURE_KIND_STAGE)
-		var run_lg = ctx.logger.CreateGroup()
-
-		run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(ctx.target)))
-		run_lg.LogVerbose("Creating tasks...")
-
-		var tasks = create_tasks(
-			ctx.target,
-			&workspaces,
-			&updated_ws,
-			&affected_ws,
-			&ctx.config,
-			&run_lg,
-		)
-
-		if len(tasks) > 0 {
-			run_lg.LogVerbose("Executing tasks...")
-			// spew.Dump(tasks)
-			run_tasks(&ctx, &tasks, &run_lg)
-		}
-
-		run_lg.End(ctx.stats.StopMeasure("run"))
-	} else {
-		invalidate_lg.Log("Everything is up-to-date.")
-		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
+		return true, workspaces, dep_graph, updated_ws, affected_ws
 	}
 
-	ctx.logger.Log()
-	ctx.logger.LogWithBadge("Total time", color.GreenString(ctx.stats.StopMeasure("total").String()))
+	invalidate_lg.Log("Everything is up-to-date.")
+	invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
+	return false, workspaces, dep_graph, updated_ws, map[string]string{}
+}
+
+func linking_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]string) (bool, error) {
+	ctx.stats.StartMeasure("linking", MEASURE_KIND_STAGE)
+	var linking_lg = ctx.logger.CreateGroup()
+	linking_lg.Start("Linking workspaces...")
+	LinkWorkspaces(ctx.root, workspaces, updated_ws)
+	linking_lg.End(ctx.stats.StopMeasure("linking"))
+	return true, nil
+}
+
+func run_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]string, affected_ws *map[string]string) (bool, error) {
+	ctx.stats.StartMeasure("run", MEASURE_KIND_STAGE)
+	var run_lg = ctx.logger.CreateGroup()
+
+	run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(ctx.target)))
+	run_lg.LogVerbose("Creating tasks...")
+
+	var tasks = create_tasks(
+		ctx.target,
+		workspaces,
+		updated_ws,
+		affected_ws,
+		&ctx.config,
+		&run_lg,
+	)
+
+	if len(tasks) > 0 {
+		run_lg.LogVerbose("Executing tasks...")
+		run_tasks(ctx, &tasks, &run_lg)
+	}
+
+	run_lg.End(ctx.stats.StopMeasure("run"))
+	return false, nil
 }
 
 func create_tasks(

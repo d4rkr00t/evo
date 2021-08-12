@@ -11,10 +11,10 @@
   - [x] Link packages
   - [ ] Link dev dependencies
 - [x] Build stats
-- [ ] REFACTOR: Get rid of runner and project in favour of context
+- [ ] REFACTOR: Get rid of runner and project in favor of context
   - [x] Remove runner struct
   - [x] Remove project struct
-  - [ ] Split Run function into stages
+  - [x] Split Run function into stages
   - [ ] Create task runner
   - [ ] Workspaces List (?)
 - [ ] Rebuild affected by a rule change
