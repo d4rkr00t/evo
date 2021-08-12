@@ -76,6 +76,7 @@ func CreateTasksFromWorkspaces(
 			}
 
 			t.CacheState(&ctx.cache, ws_hash)
+			ws.CacheState(&ctx.cache, ws_hash)
 		}, false)
 	}
 

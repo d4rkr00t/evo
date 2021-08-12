@@ -1,6 +1,9 @@
 package lib
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
+	"io"
 	"path"
 	"path/filepath"
 	"scu/main/lib/cache"
@@ -37,7 +40,11 @@ func NewWorkspace(project_path string, ws_path string, includes []string, exclud
 
 func (w Workspace) Hash() string {
 	var files = w.get_files()
-	return fileutils.GetFileListHash(files)
+	var fileshash = fileutils.GetFileListHash(files)
+	var depshash = w.get_deps_hash()
+	var h = sha1.New()
+	io.WriteString(h, depshash+fileshash)
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func (w Workspace) Cache(c *cache.Cache, cache_key string) {
@@ -47,10 +54,39 @@ func (w Workspace) Cache(c *cache.Cache, cache_key string) {
 	c.CacheDir(cache_key, w.Path, ignores)
 }
 
+func (w Workspace) GetStateKey() string {
+	return ClearTaskName(w.Name)
+}
+
+func (w Workspace) CacheState(c *cache.Cache, ws_hash string) {
+	c.CacheData(w.GetStateKey(), ws_hash)
+}
+
+func (w Workspace) GetCacheState(c *cache.Cache) string {
+	return c.ReadData(w.GetStateKey())
+}
+
 func (w Workspace) get_files() []string {
 	var files []string = fileutils.GlobFiles(w.Path, &w.Includes, &w.Excludes)
 	sort.Strings(files)
 	return files
+}
+
+func (w Workspace) get_deps_hash() string {
+	var h = sha1.New()
+	var deps_list = []string{}
+
+	for dep_name, dep_version := range w.Deps {
+		deps_list = append(deps_list, dep_name+":"+dep_version)
+	}
+
+	sort.Strings(deps_list)
+
+	for _, dep := range deps_list {
+		io.WriteString(h, dep)
+	}
+
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func GetWorkspaces(cwd string, conf *Config) WorkspacesMap {

@@ -18,11 +18,15 @@
   - [ ] Link dev dependencies
   - [ ] Link binaries
 - [ ] Proper dependency tracking for deciding when ws is updated
+  - [x] Cache WS state
+  - [ ] Use ws states to build dependencies cache
+  - [ ] Use ws_files_hash + dependencies_hash as a ws_hash
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Validations
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
+  - [ ] Duplicate WS
 - [ ] Error handling
   - [ ] Task execution
   - [ ] Task dependencies

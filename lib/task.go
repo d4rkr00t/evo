@@ -39,7 +39,7 @@ func (t Task) GetCacheKey(ws_hash string) string {
 }
 
 func (t Task) Invalidate(cc *cache.Cache, ws_hash string) bool {
-	return cc.ReadData(t.GetStateKey()) != ws_hash
+	return t.GetCacheState(cc) != ws_hash
 }
 
 func (t Task) GetStateKey() string {
@@ -48,6 +48,10 @@ func (t Task) GetStateKey() string {
 
 func (t Task) CacheState(c *cache.Cache, ws_hash string) {
 	c.CacheData(t.GetStateKey(), ws_hash)
+}
+
+func (t Task) GetCacheState(c *cache.Cache) string {
+	return c.ReadData(t.GetStateKey())
 }
 
 func ClearTaskName(name string) string {
