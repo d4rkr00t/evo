@@ -4,6 +4,12 @@
 - [x] Move more caching logic to a task
   - [x] Cache tasks with a task name prefix
 - [x] Add logging and progress
+- [x] Build stats
+- [x] REFACTOR: Get rid of runner and project in favor of context
+  - [x] Remove runner struct
+  - [x] Remove project struct
+  - [x] Split Run function into stages
+  - [x] Create task runner
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -11,16 +17,9 @@
   - [x] Link packages
   - [ ] Link dev dependencies
   - [ ] Link binaries
-- [x] Build stats
-- [ ] REFACTOR: Get rid of runner and project in favor of context
-  - [x] Remove runner struct
-  - [x] Remove project struct
-  - [x] Split Run function into stages
-  - [x] Create task runner
-  - [ ] Workspaces List (?)
+- [ ] Proper dependency tracking for deciding when ws is updated
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
-- [ ] Proper dependency tracking for deciding when ws is updated
 - [ ] Validations
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles

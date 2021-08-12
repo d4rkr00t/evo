@@ -7,7 +7,6 @@ import (
 	"scu/main/lib"
 	"scu/main/lib/cache"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
 )
 
@@ -44,10 +43,6 @@ var RunCmd = &cobra.Command{
 			lib.NewStats(),
 			pkg_json.GetConfig(),
 		)
-
-		if verbose {
-			spew.Dump(ctx)
-		}
 
 		lib.Run(ctx)
 	},

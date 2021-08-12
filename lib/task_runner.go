@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/fatih/color"
 )
 
 func CreateTasksFromWorkspaces(
@@ -21,7 +23,7 @@ func CreateTasksFromWorkspaces(
 
 	var __create_tasks func(cmd string, ws_name string)
 	__create_tasks = func(cmd string, ws_name string) {
-		var task_name = ws_name + ":" + cmd
+		var task_name = GetTaskName(cmd, ws_name)
 
 		if _, ok := tasks[task_name]; ok {
 			return
@@ -46,7 +48,7 @@ func CreateTasksFromWorkspaces(
 			}
 		}
 
-		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context) {
+		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) {
 			var ws_hash = (*affected_ws)[ws.Name]
 			lg.InfoWithBadge(task_name, "starting...")
 
@@ -61,24 +63,20 @@ func CreateTasksFromWorkspaces(
 				cmd.Run()
 			}
 
-			var cache_key = cmd + ":" + ws_hash
-
-			if ctx.cache.Has(cache_key) {
-				lg.SuccessWithBadge(task_name, "cache hit:", ws_hash)
+			if !t.Invalidate(&ctx.cache, ws_hash) {
+				lg.SuccessWithBadge(task_name, "cache hit:", color.HiBlackString(ws_hash))
 				if rule.CacheOutput {
-					ctx.cache.RestoreDir(cache_key, ws.Path)
+					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
 				run()
 				if rule.CacheOutput {
-					ws.Cache(&ctx.cache, cache_key)
+					ws.Cache(&ctx.cache, t.GetCacheKey(ws_hash))
 				}
 			}
 
-			ws.CacheState(&ctx.cache, cmd, ws_hash)
+			t.CacheState(&ctx.cache, ws_hash)
 		}, false)
-
-		// spew.Dump(ws_name, rule, deps)
 	}
 
 	for ws := range *affected_ws {
@@ -97,6 +95,8 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	var dqueue = make(chan string)
 	var count_done = 0
 	var in_progress int64
+
+	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 
 	lg.LogWithBadge("threads", fmt.Sprint(num_goroutines))
 	lg.LogWithBadge("tasks", fmt.Sprint(len(*tasks)))
@@ -119,9 +119,16 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 				mu.RUnlock()
 
 				atomic.AddInt64(&in_progress, 1)
+				mu.Lock()
 				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
-				task.Run(ctx)
+				mu.Unlock()
+
+				task.Run(ctx, &task)
+
+				// TODO: Fix this lock later
+				mu.Lock()
 				ctx.stats.StopMeasure(task_id)
+				mu.Unlock()
 				atomic.AddInt64(&in_progress, -1)
 
 				dqueue <- task_id
@@ -133,9 +140,9 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	go func() {
 		for task_id := range dqueue {
 			count_done += 1
-			lg.SuccessWithBadge(task_id, "done in "+ctx.stats.GetMeasure(task_id).duration.String())
 
 			mu.Lock()
+			lg.SuccessWithBadge(task_id, "done in "+ctx.stats.GetMeasure(task_id).duration.String())
 			var task = (*tasks)[task_id]
 			task.status = TASK_STATUS_SUCCESS
 			(*tasks)[task_id] = task
@@ -168,6 +175,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	}
 
 	wg.Wait()
+	ctx.stats.StopMeasure("runtasks")
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

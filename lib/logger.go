@@ -19,11 +19,17 @@ func NewLogger(verbose bool) Logger {
 }
 
 func (l Logger) LogWithBadge(badge string, msg ...string) {
-	fmt.Printf("%s %s: %s\n", color.CyanString("╺"), color.HiBlackString(strings.ToLower(badge)), strings.Join(msg, ""))
+	fmt.Printf("%s %s: %s\n", color.CyanString("╺"), color.HiBlackString(strings.ToLower(badge)), strings.Join(msg, " "))
+}
+
+func (l Logger) LogWithBadgeVerbose(badge string, msg ...string) {
+	if l.verbose {
+		l.LogWithBadge(badge, msg...)
+	}
 }
 
 func (l Logger) Log(msg ...string) {
-	fmt.Println(strings.Join(msg, ""))
+	fmt.Println(strings.Join(msg, " "))
 }
 
 func (l Logger) LogVerbose(msg ...string) {

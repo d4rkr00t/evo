@@ -6,7 +6,6 @@ import (
 	"scu/main/lib/cache"
 	"scu/main/lib/fileutils"
 	"sort"
-	"strings"
 	"sync"
 )
 
@@ -36,32 +35,16 @@ func NewWorkspace(project_path string, ws_path string, includes []string, exclud
 	}
 }
 
-func (w Workspace) Invalidate(cmd string, cc *cache.Cache) (bool, string) {
-	var ws_hash = w.Hash()
-	if cc.ReadData(w.GetStateKey(cmd)) == ws_hash {
-		return false, ws_hash
-	}
-	return true, ws_hash
-}
-
 func (w Workspace) Hash() string {
 	var files = w.get_files()
 	return fileutils.GetFileListHash(files)
 }
 
-func (w Workspace) GetStateKey(cmd string) string {
-	return cmd + ":" + strings.Replace(w.RelPath+"__"+w.Name, "/", "__", -1)
-}
-
-func (w Workspace) Cache(c *cache.Cache, hash string) {
+func (w Workspace) Cache(c *cache.Cache, cache_key string) {
 	var ignores = cache.CacheDirIgnores{
 		"node_modules": true,
 	}
-	c.CacheDir(hash, w.Path, ignores)
-}
-
-func (w Workspace) CacheState(c *cache.Cache, cmd string, hash string) {
-	c.CacheData(w.GetStateKey(cmd), hash)
+	c.CacheDir(cache_key, w.Path, ignores)
 }
 
 func (w Workspace) get_files() []string {
@@ -107,11 +90,12 @@ func InvalidateWorkspaces(workspaces *WorkspacesMap, target string, cc *cache.Ca
 	for name, ws := range *workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
-			var updated, ws_hash = ws.Invalidate(target, cc)
-			if updated {
-				queue <- []string{name, ws_hash}
-			} else {
+			var ws_hash = ws.Hash()
+			var state_key = ClearTaskName(GetTaskName(target, ws.Name))
+			if cc.ReadData(state_key) == ws_hash {
 				queue <- []string{}
+			} else {
+				queue <- []string{name, ws_hash}
 			}
 		}(name, ws)
 	}

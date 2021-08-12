@@ -51,3 +51,15 @@ func (s *Stats) StopMeasure(name string) time.Duration {
 func (s Stats) GetMeasure(name string) StatsMeasure {
 	return s.measures[name]
 }
+
+func (s Stats) GetTasksSumDuration() time.Duration {
+	var res time.Duration = 0
+
+	for _, m := range s.measures {
+		if m.kind == MEASURE_KIND_TASK {
+			res += m.duration
+		}
+	}
+
+	return res
+}
