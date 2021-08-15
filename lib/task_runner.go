@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"runtime"
@@ -48,10 +49,18 @@ func CreateTasksFromWorkspaces(
 			}
 		}
 
-		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) {
+		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) error {
 			var ws = (*workspaces)[ws.Name]
 			var ws_hash = ws.Hash(workspaces)
 			lg.InfoWithBadge(task_name, "running →", color.HiBlackString(rule.Cmd))
+
+			for _, dep := range t.Deps {
+				if tasks[dep].status == TASK_STATUS_FAILURE {
+					var msg = fmt.Sprintf("cannot continue, dependent upon task \"%s\" failed", color.CyanString(tasks[dep].task_name))
+					lg.ErrorWithBadge(task_name, "error →", msg)
+					return errors.New(msg)
+				}
+			}
 
 			var run = func() error {
 				var args = strings.Split(rule.Cmd, " ")
@@ -73,7 +82,7 @@ func CreateTasksFromWorkspaces(
 				var err = run()
 				if err != nil {
 					lg.ErrorWithBadge(task_name, "error →", err.Error())
-					return
+					return err
 				}
 
 				if t.CacheOutput {
@@ -85,6 +94,8 @@ func CreateTasksFromWorkspaces(
 
 			ws.CacheState(&ctx.cache, ws_hash)
 			t.CacheState(&ctx.cache, ws_hash)
+
+			return nil
 		}, rule.CacheOutput)
 	}
 
@@ -95,13 +106,18 @@ func CreateTasksFromWorkspaces(
 	return tasks
 }
 
+type TaskResult struct {
+	task_id string
+	err     error
+}
+
 func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
 	var queue_size = num_goroutines * 2
 	var pqueue = make(chan string, queue_size)
-	var dqueue = make(chan string)
+	var dqueue = make(chan TaskResult)
 	var count_done = 0
 	var in_progress int64
 
@@ -132,7 +148,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
 				mu.Unlock()
 
-				task.Run(ctx, &task)
+				var err = task.Run(ctx, &task)
 
 				// TODO: Fix this lock later
 				mu.Lock()
@@ -140,20 +156,27 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 				mu.Unlock()
 				atomic.AddInt64(&in_progress, -1)
 
-				dqueue <- task_id
+				dqueue <- TaskResult{task_id, err}
 			}
 		}()
 	}
 
 	lg.LogVerbose("Starting done routine...")
 	go func() {
-		for task_id := range dqueue {
+		for task_result := range dqueue {
 			count_done += 1
 
+			var task_id = task_result.task_id
+			var err = task_result.err
+
 			mu.Lock()
-			lg.SuccessWithBadge(task_id, "done in "+color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
 			var task = (*tasks)[task_id]
-			task.status = TASK_STATUS_SUCCESS
+			if err == nil {
+				lg.SuccessWithBadge(task_id, "done in "+color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
+				task.status = TASK_STATUS_SUCCESS
+			} else {
+				task.status = TASK_STATUS_FAILURE
+			}
 			(*tasks)[task_id] = task
 
 			var next_tasks = find_unblocked_tasks(tasks)
