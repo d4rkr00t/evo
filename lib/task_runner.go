@@ -49,7 +49,10 @@ func CreateTasksFromWorkspaces(
 		}
 
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) {
-			var ws_hash = (*affected_ws)[ws.Name]
+			// var ws_hash = (*affected_ws)[ws.Name]
+			// TODO: may need to recalculate the hash
+			var ws = (*workspaces)[ws.Name]
+			var ws_hash = ws.Hash(workspaces)
 			lg.InfoWithBadge(task_name, "starting...")
 
 			var run = func() {
@@ -58,26 +61,28 @@ func CreateTasksFromWorkspaces(
 				var cmd_args = args[1:]
 
 				var cmd = NewCmd(task_name, ws.Path, cmd_name, cmd_args, func(msg string) {
-					lg.InfoWithBadge(task_name, msg)
+					lg.InfoWithBadge(task_name, "→ "+msg)
 				})
 				cmd.Run()
 			}
 
 			if !t.Invalidate(&ctx.cache, ws_hash) {
 				lg.SuccessWithBadge(task_name, "cache hit:", color.HiBlackString(ws_hash))
-				if rule.CacheOutput {
+				if t.CacheOutput {
 					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
 				run()
-				if rule.CacheOutput {
-					ws.Cache(&ctx.cache, t.GetCacheKey(ws_hash))
+				if t.CacheOutput {
+					ws_hash = ws.Hash(workspaces)
 				}
+
+				t.Cache(&ctx.cache, &ws, ws_hash)
 			}
 
-			t.CacheState(&ctx.cache, ws_hash)
 			ws.CacheState(&ctx.cache, ws_hash)
-		}, false)
+			t.CacheState(&ctx.cache, ws_hash)
+		}, rule.CacheOutput)
 	}
 
 	for ws := range *affected_ws {
@@ -143,7 +148,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 			count_done += 1
 
 			mu.Lock()
-			lg.SuccessWithBadge(task_id, "done in "+ctx.stats.GetMeasure(task_id).duration.String())
+			lg.SuccessWithBadge(task_id, "done in "+color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
 			var task = (*tasks)[task_id]
 			task.status = TASK_STATUS_SUCCESS
 			(*tasks)[task_id] = task

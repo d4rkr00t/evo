@@ -19,11 +19,12 @@ type Workspace struct {
 	Deps     map[string]string
 	Includes []string
 	Excludes []string
+	cache    *cache.Cache
 }
 
 type WorkspacesMap = map[string]Workspace
 
-func NewWorkspace(project_path string, ws_path string, includes []string, excludes []string) Workspace {
+func NewWorkspace(project_path string, ws_path string, includes []string, excludes []string, cc *cache.Cache) Workspace {
 	var package_json_path = path.Join(ws_path, "package.json")
 	var package_json = NewPackageJson(package_json_path)
 	var rel_path, _ = filepath.Rel(project_path, ws_path)
@@ -35,23 +36,17 @@ func NewWorkspace(project_path string, ws_path string, includes []string, exclud
 		Deps:     package_json.Dependencies,
 		Includes: includes,
 		Excludes: excludes,
+		cache:    cc,
 	}
 }
 
-func (w Workspace) Hash() string {
+func (w Workspace) Hash(workspaces *WorkspacesMap) string {
 	var files = w.get_files()
 	var fileshash = fileutils.GetFileListHash(files)
-	var depshash = w.get_deps_hash()
+	var depshash = w.get_deps_hash(workspaces)
 	var h = sha1.New()
 	io.WriteString(h, depshash+fileshash)
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-func (w Workspace) Cache(c *cache.Cache, cache_key string) {
-	var ignores = cache.CacheDirIgnores{
-		"node_modules": true,
-	}
-	c.CacheDir(cache_key, w.Path, ignores)
 }
 
 func (w Workspace) GetStateKey() string {
@@ -72,12 +67,16 @@ func (w Workspace) get_files() []string {
 	return files
 }
 
-func (w Workspace) get_deps_hash() string {
+func (w Workspace) get_deps_hash(workspaces *WorkspacesMap) string {
 	var h = sha1.New()
 	var deps_list = []string{}
 
 	for dep_name, dep_version := range w.Deps {
-		deps_list = append(deps_list, dep_name+":"+dep_version)
+		if dep_ws, ok := (*workspaces)[dep_name]; ok {
+			deps_list = append(deps_list, dep_name+":"+dep_ws.GetCacheState(w.cache))
+		} else {
+			deps_list = append(deps_list, dep_name+":"+dep_version)
+		}
 	}
 
 	sort.Strings(deps_list)
@@ -89,7 +88,7 @@ func (w Workspace) get_deps_hash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func GetWorkspaces(cwd string, conf *Config) WorkspacesMap {
+func GetWorkspaces(cwd string, conf *Config, cc *cache.Cache) WorkspacesMap {
 	var workspaces = make(map[string]Workspace)
 	var wg sync.WaitGroup
 	var queue = make(chan Workspace)
@@ -101,7 +100,7 @@ func GetWorkspaces(cwd string, conf *Config) WorkspacesMap {
 			wg.Add(1)
 			go func(ws_path string) {
 				var includes, excludes = conf.GetInputs(path.Dir(ws_path))
-				queue <- NewWorkspace(cwd, path.Dir(ws_path), includes, excludes)
+				queue <- NewWorkspace(cwd, path.Dir(ws_path), includes, excludes, cc)
 			}(ws_path)
 		}
 	}
@@ -126,7 +125,7 @@ func InvalidateWorkspaces(workspaces *WorkspacesMap, target string, cc *cache.Ca
 	for name, ws := range *workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
-			var ws_hash = ws.Hash()
+			var ws_hash = ws.Hash(workspaces)
 			var state_key = ClearTaskName(GetTaskName(target, ws.Name))
 			if cc.ReadData(state_key) == ws_hash {
 				queue <- []string{}

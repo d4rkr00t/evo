@@ -56,7 +56,7 @@ func (dg DepGraph) GetAffected(workspaces *WorkspacesMap, updated *map[string]st
 				wg.Add(1)
 				guard <- struct{}{}
 				go func(name string) {
-					var hash = (*workspaces)[name].Hash()
+					var hash = (*workspaces)[name].Hash(workspaces)
 					mu.Lock()
 					affected[name] = hash
 					<-guard

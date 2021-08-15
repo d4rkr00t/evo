@@ -74,7 +74,7 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, DepGraph, ma
 	var invalidate_lg = ctx.logger.CreateGroup()
 	invalidate_lg.Start("Invalidating workspaces...")
 
-	var workspaces = GetWorkspaces(ctx.root, &ctx.config)
+	var workspaces = GetWorkspaces(ctx.root, &ctx.config, &ctx.cache)
 	var dep_graph = NewDepGraph(&workspaces)
 	var updated_ws = InvalidateWorkspaces(&workspaces, ctx.target, &ctx.cache)
 
@@ -87,6 +87,7 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, DepGraph, ma
 			"workspaces",
 		)
 
+		invalidate_lg.LogVerbose("")
 		invalidate_lg.LogVerbose("Calculating affected workspaces...")
 		var affected_ws = dep_graph.GetAffected(&workspaces, &updated_ws)
 		invalidate_lg.LogWithBadge(

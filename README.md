@@ -10,6 +10,10 @@
   - [x] Remove project struct
   - [x] Split Run function into stages
   - [x] Create task runner
+- [x] Proper dependency tracking for deciding when ws is updated
+  - [x] Cache WS state
+  - [x] Use ws_files_hash + dependencies_hash as a ws_hash
+  - [x] Use ws states to build dependencies cache
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -17,10 +21,6 @@
   - [x] Link packages
   - [ ] Link dev dependencies
   - [ ] Link binaries
-- [ ] Proper dependency tracking for deciding when ws is updated
-  - [x] Cache WS state
-  - [x] Use ws_files_hash + dependencies_hash as a ws_hash
-  - [ ] Use ws states to build dependencies cache
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Validations
@@ -46,3 +46,7 @@
 - [ ] REFACTOR: Refactor cache to interfaces
 - [ ] Rebuild examples with a real world use cases
 - [ ] Throw an error when not in a SCU project
+- [ ] Pretty print duration
+- [ ] Watch file changes during task run
+  - [ ] Update cache only when a file changes
+  - [ ] Derive outputs automatically (?)
