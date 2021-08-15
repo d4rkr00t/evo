@@ -1,0 +1,8 @@
+{
+  "name": "pkg-c-ts",
+  "description": "1",
+  "dependencies": {
+    "@pkg/a-ts": "0.0.0",
+    "pkg-b-ts": "0.0.0"
+  }
+}

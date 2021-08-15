@@ -1,0 +1,16 @@
+{
+  "name": "@opaline/runner",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "description": "2",
+  "keywords": [],
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^12.6.9",
+    "chalk": "^3.0.0",
+    "ora": "^5.4.1"
+  }
+}

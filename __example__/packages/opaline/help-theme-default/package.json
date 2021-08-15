@@ -1,0 +1,15 @@
+{
+  "name": "@opaline/help-theme-default",
+  "version": "0.0.1",
+  "main": "./dist/index.js",
+  "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^12.6.9",
+    "chalk": "^3.0.0"
+  }
+}

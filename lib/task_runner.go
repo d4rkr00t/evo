@@ -56,7 +56,7 @@ func CreateTasksFromWorkspaces(
 
 			for _, dep := range t.Deps {
 				if tasks[dep].status == TASK_STATUS_FAILURE {
-					var msg = fmt.Sprintf("cannot continue, dependent upon task \"%s\" failed", color.CyanString(tasks[dep].task_name))
+					var msg = fmt.Sprintf("cannot continue, dependency \"%s\" has failed", color.CyanString(tasks[dep].task_name))
 					lg.ErrorWithBadge(task_name, "error →", msg)
 					return errors.New(msg)
 				}
@@ -162,6 +162,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	}
 
 	lg.LogVerbose("Starting done routine...")
+	lg.LogVerbose()
 	go func() {
 		for task_result := range dqueue {
 			count_done += 1

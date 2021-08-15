@@ -1,0 +1,7 @@
+{
+  "name": "pkg-d-ts",
+  "description": "hello-1",
+  "dependencies": {
+    "@pkg/a-ts": "0.0.0"
+  }
+}

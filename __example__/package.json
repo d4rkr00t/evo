@@ -1,0 +1,113 @@
+{
+  "name": "sculpture-cli",
+  "private": true,
+  "description": "Example SCU Project.11",
+  "scu": {
+    "workspaces": [
+      "packages/dummy/*",
+      "packages/opaline/*",
+      "packages/ts/*"
+    ],
+    "inputs": {
+      "includes": [
+        "**/tsconfig.json",
+        "**/*.ts"
+      ],
+      "excludes": [
+        "**/node_modules"
+      ]
+    },
+    "rules": {
+      "build": {
+        "cmd": "tsc -p ./",
+        "cacheOutput": true,
+        "deps": [
+          "@build",
+          "test"
+        ]
+      },
+      "test": {
+        "cmd": "echo 'TEST'",
+        "deps": [
+          "@build"
+        ]
+      }
+    },
+    "overrides": {
+      "**/opaline/core": {
+        "rules": {
+          "test": {
+            "cmd": "ava --config ./ava.config.cjs",
+            "deps": [
+              "@build"
+            ]
+          }
+        }
+      },
+      "**/ts/pkg-b-ts": {
+        "rules": {
+          "build": {
+            "cmd": "tsc -p ./",
+            "deps": [
+              "@build",
+              "test",
+              "lint"
+            ],
+            "cacheOutput": true
+          },
+          "lint": {
+            "cmd": "echo 'LINT'",
+            "deps": [
+              "@test"
+            ]
+          }
+        }
+      },
+      "**/dummy/*": {
+        "rules": {
+          "build": {
+            "cmd": "echo $CWD",
+            "deps": [
+              "@build"
+            ],
+            "cacheOutput": true
+          }
+        }
+      }
+    }
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "scripts": {
+    "build": "go build main.go && cp ./main ~/.bin-temp/scu",
+    "dev": "watchexec -w ./ -e go npm run build"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.8.4",
+    "@babel/traverse": "^7.8.4",
+    "@opaline/help-theme-default": "^0.0.1",
+    "@opaline/runner": "^0.1.0",
+    "@rollup/plugin-node-resolve": "^7.1.3",
+    "@rollup/plugin-sucrase": "^3.0.0",
+    "@types/babel__traverse": "^7.0.9",
+    "@types/doctrine": "^0.0.3",
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^12.6.9",
+    "ava": "^3.15.0",
+    "chalk": "^3.0.0",
+    "chokidar": "^3.3.1",
+    "comment-parser": "^0.7.4",
+    "doctrine": "^3.0.0",
+    "enquirer": "^2.3.5",
+    "minimist": "^1.2.3",
+    "minimist-options": "^4.0.2",
+    "mkdirp": "^1.0.4",
+    "ora": "^5.4.1",
+    "read-pkg-up": "^7.0.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.3.3",
+    "ts-node": "^10.2.0",
+    "typescript": "^4.3.5"
+  }
+}
