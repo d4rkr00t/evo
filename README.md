@@ -19,8 +19,8 @@
   - [ ] Link binaries
 - [ ] Proper dependency tracking for deciding when ws is updated
   - [x] Cache WS state
+  - [x] Use ws_files_hash + dependencies_hash as a ws_hash
   - [ ] Use ws states to build dependencies cache
-  - [ ] Use ws_files_hash + dependencies_hash as a ws_hash
 - [ ] Rebuild affected by a rule change
 - [ ] Per rule inputs config (?)
 - [ ] Validations
@@ -45,3 +45,4 @@
 - [ ] REFACTOR: Refactor logger to interfaces
 - [ ] REFACTOR: Refactor cache to interfaces
 - [ ] Rebuild examples with a real world use cases
+- [ ] Throw an error when not in a SCU project
