@@ -14,11 +14,13 @@
   - [x] Cache WS state
   - [x] Use ws_files_hash + dependencies_hash as a ws_hash
   - [x] Use ws states to build dependencies cache
-- [ ] Rebuild examples with a real world use cases
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated ws
   - [ ] Store all affected ws
+- [ ] Add reusable commands definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
+- [ ] Run multiple commands e.g. `cmd: ["tsc", "echo"]`
+- [ ] Rebuild examples with a real world use cases
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -42,6 +44,7 @@
   - [ ] Show path to a cache output – `scu show-cache 058a068`
   - [ ] Show what's included in hash for a workspace – `scu show-hash pkg-a` or `scy show-hash pkg-a target`
   - [ ] Show dependencies of a workspace – `scu show-deps pkg-a`
+  - [ ] Show rule with all overrides – `scu show-rule build pkg-a`
 - [ ] Scoped runs – `scu run build pkg-a`
 - [ ] REFACTOR: Refactor logger to interfaces
 - [ ] REFACTOR: Refactor cache to interfaces
