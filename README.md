@@ -14,6 +14,11 @@
   - [x] Cache WS state
   - [x] Use ws_files_hash + dependencies_hash as a ws_hash
   - [x] Use ws states to build dependencies cache
+- [ ] Rebuild examples with a real world use cases
+- [ ] Workspaces struct
+  - [ ] Store all WS
+  - [ ] Store all updated ws
+  - [ ] Store all affected ws
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -21,20 +26,16 @@
   - [x] Link packages
   - [ ] Link dev dependencies
   - [ ] Link binaries
-- [ ] Rebuild affected by a rule change
-- [ ] Per rule inputs config (?)
 - [ ] Validations
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
   - [ ] Duplicate WS
+- [ ] Rebuild affected by a rule change
+- [ ] Per rule inputs config (?)
 - [ ] Error handling
   - [ ] Task execution
   - [ ] Task dependencies
-- [ ] Improve WS caching
-- [ ] Unify caching
-  - [ ] WS output vs WS state
 - [ ] REFACTOR: Generic create a task from a rule
-- [ ] REFACTOR: Runner
 - [ ] TESTS!!!
 - [ ] Watch mode
 - [ ] Different info
@@ -44,9 +45,13 @@
 - [ ] Scoped runs – `scu run build pkg-a`
 - [ ] REFACTOR: Refactor logger to interfaces
 - [ ] REFACTOR: Refactor cache to interfaces
-- [ ] Rebuild examples with a real world use cases
 - [ ] Throw an error when not in a SCU project
 - [ ] Pretty print duration
 - [ ] Watch file changes during task run
   - [ ] Update cache only when a file changes
   - [ ] Derive outputs automatically (?)
+- [ ] More commands
+  - [ ] `scu add dep@ver` to add a dependency
+  - [ ] `scu remove dep` to remove a dependency
+  - [ ] `scu clear cache`
+  - [ ] `scu clear output` – clears all outputs from packages

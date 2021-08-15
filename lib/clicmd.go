@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bufio"
+	"io"
 	"os/exec"
 )
 
@@ -24,10 +25,12 @@ func (c Cmd) Run() error {
 	cmd.Dir = c.dir
 
 	var stdout, _ = cmd.StdoutPipe()
+	var stderr, _ = cmd.StderrPipe()
 
 	cmd.Start()
 
-	var scanner = bufio.NewScanner(stdout)
+	var combined = io.MultiReader(stdout, stderr)
+	var scanner = bufio.NewScanner(combined)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		var m = scanner.Text()

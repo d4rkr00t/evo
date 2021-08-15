@@ -12,6 +12,7 @@ func Run(ctx Context) {
 	defer print_total_time(&ctx)
 
 	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
+	os.Setenv("ROOT", ctx.root)
 
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)

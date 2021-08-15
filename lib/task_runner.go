@@ -49,13 +49,11 @@ func CreateTasksFromWorkspaces(
 		}
 
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) {
-			// var ws_hash = (*affected_ws)[ws.Name]
-			// TODO: may need to recalculate the hash
 			var ws = (*workspaces)[ws.Name]
 			var ws_hash = ws.Hash(workspaces)
-			lg.InfoWithBadge(task_name, "starting...")
+			lg.InfoWithBadge(task_name, "running →", color.HiBlackString(rule.Cmd))
 
-			var run = func() {
+			var run = func() error {
 				var args = strings.Split(rule.Cmd, " ")
 				var cmd_name = args[0]
 				var cmd_args = args[1:]
@@ -63,7 +61,7 @@ func CreateTasksFromWorkspaces(
 				var cmd = NewCmd(task_name, ws.Path, cmd_name, cmd_args, func(msg string) {
 					lg.InfoWithBadge(task_name, "→ "+msg)
 				})
-				cmd.Run()
+				return cmd.Run()
 			}
 
 			if !t.Invalidate(&ctx.cache, ws_hash) {
@@ -72,7 +70,12 @@ func CreateTasksFromWorkspaces(
 					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
-				run()
+				var err = run()
+				if err != nil {
+					lg.ErrorWithBadge(task_name, "error →", err.Error())
+					return
+				}
+
 				if t.CacheOutput {
 					ws_hash = ws.Hash(workspaces)
 				}

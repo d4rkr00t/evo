@@ -81,6 +81,10 @@ func (lg LoggerGroup) InfoWithBadge(badge string, msg ...string) {
 	fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.BlueString(badge), strings.Join(msg, " "))
 }
 
+func (lg LoggerGroup) ErrorWithBadge(badge string, msg ...string) {
+	fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.RedString(badge), strings.Join(msg, " "))
+}
+
 func (lg LoggerGroup) LogWithBadgeVerbose(badge string, msg ...string) {
 	if lg.logger.verbose {
 		lg.LogWithBadge(badge, msg...)
