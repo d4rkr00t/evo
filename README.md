@@ -14,13 +14,14 @@
   - [x] Cache WS state
   - [x] Use ws_files_hash + dependencies_hash as a ws_hash
   - [x] Use ws states to build dependencies cache
+- [x] Rebuild affected by a rule change
+  - [x] Use a hash of all rules that apply to a WS
+  - [x] Move preprocessed rules to WS
+- [ ] Add reusable command definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated ws
   - [ ] Store all affected ws
-- [ ] Add reusable commands definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
-- [ ] Run multiple commands e.g. `cmd: ["tsc", "echo"]`
-- [ ] Rebuild examples with a real world use cases
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -32,17 +33,14 @@
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
   - [ ] Duplicate WS
-- [ ] Rebuild affected by a rule change
-- [ ] Per rule inputs config (?)
 - [ ] Error handling
-  - [ ] Task execution
-  - [ ] Task dependencies
+  - [x] Task execution
+  - [x] Task dependencies
+  - [ ] File System
+- [ ] Store STDOUT + STDERR of a command and replay output
 - [ ] REFACTOR: Generic create a task from a rule
-- [ ] TESTS!!!
-- [ ] Watch mode
 - [ ] Different info
-  - [ ] Show path to a cache output – `scu show-cache 058a068`
-  - [ ] Show what's included in hash for a workspace – `scu show-hash pkg-a` or `scy show-hash pkg-a target`
+  - [ ] Show what's included in hash for a workspace – `scu show-hash pkg-a` or `scu show-hash pkg-a target`
   - [ ] Show dependencies of a workspace – `scu show-deps pkg-a`
   - [ ] Show rule with all overrides – `scu show-rule build pkg-a`
 - [ ] Scoped runs – `scu run build pkg-a`
@@ -51,10 +49,22 @@
 - [ ] Throw an error when not in a SCU project
 - [ ] Pretty print duration
 - [ ] Watch file changes during task run
-  - [ ] Update cache only when a file changes
-  - [ ] Derive outputs automatically (?)
+  - [ ] Update FileSystem cache only when a file changes
+- [ ] FileSystem module
+  - [ ] In memory cache of file checksums, update only when update time of a file changed
+    - [ ] Preserve cache on disk
+  - [ ] Add / remove files from cache
 - [ ] More commands
   - [ ] `scu add dep@ver` to add a dependency
   - [ ] `scu remove dep` to remove a dependency
   - [ ] `scu clear cache`
   - [ ] `scu clear output` – clears all outputs from packages
+- [ ] Generators
+  - [ ] Generate a project from pnpm/yarn workspace and npm scripts
+- [ ] TESTS!!!
+- [ ] Watch mode
+- [ ] Rebuild examples with a real world use cases
+- [ ] Remote cache
+- [ ] Per rule inputs config (?)
+- [ ] Run multiple commands e.g. `cmd: ["tsc", "echo"]` (?)
+- [ ] Rename to "evo" from "evoke"

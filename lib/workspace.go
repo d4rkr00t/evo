@@ -19,12 +19,13 @@ type Workspace struct {
 	Deps     map[string]string
 	Includes []string
 	Excludes []string
+	Rules    map[string]Rule
 	cache    *cache.Cache
 }
 
 type WorkspacesMap = map[string]Workspace
 
-func NewWorkspace(project_path string, ws_path string, includes []string, excludes []string, cc *cache.Cache) Workspace {
+func NewWorkspace(project_path string, ws_path string, includes []string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
 	var package_json_path = path.Join(ws_path, "package.json")
 	var package_json = NewPackageJson(package_json_path)
 	var rel_path, _ = filepath.Rel(project_path, ws_path)
@@ -36,16 +37,22 @@ func NewWorkspace(project_path string, ws_path string, includes []string, exclud
 		Deps:     package_json.Dependencies,
 		Includes: includes,
 		Excludes: excludes,
+		Rules:    rules,
 		cache:    cc,
 	}
+}
+
+func (w Workspace) GetRule(name string) Rule {
+	return w.Rules[name]
 }
 
 func (w Workspace) Hash(workspaces *WorkspacesMap) string {
 	var files = w.get_files()
 	var fileshash = fileutils.GetFileListHash(files)
 	var depshash = w.get_deps_hash(workspaces)
+	var ruleshash = w.get_rules_hash()
 	var h = sha1.New()
-	io.WriteString(h, depshash+fileshash)
+	io.WriteString(h, depshash+":"+fileshash+":"+ruleshash)
 	return hex.EncodeToString(h.Sum(nil))
 }
 
@@ -57,8 +64,8 @@ func (w Workspace) CacheState(c *cache.Cache, ws_hash string) {
 	c.CacheData(w.GetStateKey(), ws_hash)
 }
 
-func (w Workspace) GetCacheState(c *cache.Cache) string {
-	return c.ReadData(w.GetStateKey())
+func (w Workspace) GetCacheState() string {
+	return w.cache.ReadData(w.GetStateKey())
 }
 
 func (w Workspace) get_files() []string {
@@ -73,7 +80,7 @@ func (w Workspace) get_deps_hash(workspaces *WorkspacesMap) string {
 
 	for dep_name, dep_version := range w.Deps {
 		if dep_ws, ok := (*workspaces)[dep_name]; ok {
-			deps_list = append(deps_list, dep_name+":"+dep_ws.GetCacheState(w.cache))
+			deps_list = append(deps_list, dep_name+":"+dep_ws.GetCacheState())
 		} else {
 			deps_list = append(deps_list, dep_name+":"+dep_version)
 		}
@@ -83,6 +90,23 @@ func (w Workspace) get_deps_hash(workspaces *WorkspacesMap) string {
 
 	for _, dep := range deps_list {
 		io.WriteString(h, dep)
+	}
+
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (w Workspace) get_rules_hash() string {
+	var h = sha1.New()
+	var rules_list = []string{}
+
+	for rule_name, _ := range w.Rules {
+		rules_list = append(rules_list, rule_name)
+	}
+
+	sort.Strings(rules_list)
+
+	for _, rule_name := range rules_list {
+		io.WriteString(h, w.Rules[rule_name].String())
 	}
 
 	return hex.EncodeToString(h.Sum(nil))
@@ -99,9 +123,10 @@ func GetWorkspaces(cwd string, conf *Config, cc *cache.Cache) WorkspacesMap {
 		for _, ws_path := range matches {
 			wg.Add(1)
 			go func(ws_path string) {
-				var includes, excludes = conf.GetInputs(path.Dir(ws_path))
-				queue <- NewWorkspace(cwd, path.Dir(ws_path), includes, excludes, cc)
-			}(ws_path)
+				var includes, excludes = conf.GetInputs(ws_path)
+				var rules = conf.GetAllRulesForWS(ws_path)
+				queue <- NewWorkspace(cwd, ws_path, includes, excludes, cc, rules)
+			}(path.Dir(ws_path))
 		}
 	}
 

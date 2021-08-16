@@ -21,16 +21,24 @@ type Config struct {
 	Overrides  map[string]ConfigOverride
 }
 
-func (c Config) GetRule(name string, ws_path string) Rule {
+func (c Config) GetAllRulesForWS(ws_path string) map[string]Rule {
+	var rules = map[string]Rule{}
+
+	// Adding default rules
+	for name, rule := range c.Rules {
+		rules[name] = rule
+	}
+
+	// Adding rule overrides
 	for group_name, group := range c.Overrides {
 		if val, _ := doublestar.Match(group_name, ws_path); val {
-			if val, ok := group.Rules[name]; ok {
-				return val
+			for name, rule := range group.Rules {
+				rules[name] = rule
 			}
 		}
 	}
 
-	return c.Rules[name]
+	return rules
 }
 
 func (c Config) GetInputs(ws_path string) ([]string, []string) {

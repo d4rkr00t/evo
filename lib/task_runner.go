@@ -31,7 +31,7 @@ func CreateTasksFromWorkspaces(
 		}
 
 		var ws = (*workspaces)[ws_name]
-		var rule = config.GetRule(cmd, ws.Path)
+		var rule = ws.GetRule(cmd)
 		var deps = []string{}
 
 		for _, dep := range rule.Deps {
@@ -52,7 +52,6 @@ func CreateTasksFromWorkspaces(
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) error {
 			var ws = (*workspaces)[ws.Name]
 			var ws_hash = ws.Hash(workspaces)
-			lg.InfoWithBadge(task_name, "running →", color.HiBlackString(rule.Cmd))
 
 			for _, dep := range t.Deps {
 				if tasks[dep].status == TASK_STATUS_FAILURE {
@@ -79,6 +78,7 @@ func CreateTasksFromWorkspaces(
 					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
+				lg.InfoWithBadge(task_name, "running →", color.HiBlackString(rule.Cmd))
 				var err = run()
 				if err != nil {
 					lg.ErrorWithBadge(task_name, "error →", err.Error())

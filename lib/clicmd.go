@@ -3,6 +3,7 @@ package lib
 import (
 	"bufio"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -21,7 +22,12 @@ func NewCmd(name string, dir string, cmd string, params []string, stdout func(ms
 }
 
 func (c Cmd) Run() error {
-	var cmd = exec.Command(c.cmd, c.params...)
+	var params = []string{}
+
+	for _, param := range c.params {
+		params = append(params, os.ExpandEnv(param))
+	}
+	var cmd = exec.Command(c.cmd, params...)
 	cmd.Dir = c.dir
 
 	var stdout, _ = cmd.StdoutPipe()

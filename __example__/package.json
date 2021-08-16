@@ -19,7 +19,7 @@
     },
     "rules": {
       "build": {
-        "cmd": "tsc -p ./",
+        "cmd": "tsc -p ./tsconfig.json",
         "cacheOutput": true,
         "deps": [
           "@build",
@@ -64,9 +64,17 @@
         }
       },
       "**/dummy/*": {
+        "inputs": {
+          "includes": [
+            "**/*.js"
+          ],
+          "excludes": [
+            "**/node_modules"
+          ]
+        },
         "rules": {
           "build": {
-            "cmd": "echo $CWD",
+            "cmd": "echo $ROOT",
             "deps": [
               "@build"
             ],
