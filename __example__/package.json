@@ -1,8 +1,8 @@
 {
-  "name": "sculpture-cli",
+  "name": "evo-monorepo-example",
   "private": true,
-  "description": "Example SCU Project.11",
-  "scu": {
+  "description": "Example EVO Project",
+  "evo": {
     "workspaces": [
       "packages/dummy/*",
       "packages/opaline/*",

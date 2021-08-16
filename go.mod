@@ -1,4 +1,4 @@
-module scu/main
+module evo/main
 
 go 1.16
 

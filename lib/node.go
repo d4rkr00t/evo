@@ -1,8 +1,8 @@
 package lib
 
 import (
+	"evo/main/lib/fileutils"
 	"path"
-	"scu/main/lib/fileutils"
 )
 
 func IsNodeModulesExist(p string) bool {

@@ -8,7 +8,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:               "scu",
+	Use:               "evo",
 	Short:             "Build orchestration tool.",
 	Long:              `A fresh take on monorepo tooling.`,
 	CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},

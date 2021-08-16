@@ -2,17 +2,17 @@ package lib
 
 import (
 	"encoding/json"
+	"evo/main/lib/cache"
+	"evo/main/lib/fileutils"
 	"fmt"
 	"io/ioutil"
-	"scu/main/lib/cache"
-	"scu/main/lib/fileutils"
 )
 
 type PackageJson struct {
 	Path         string
 	Name         string
 	Version      string
-	Scu          Config
+	Evo          Config
 	Dependencies map[string]string
 }
 
@@ -25,7 +25,7 @@ func NewPackageJson(path string) PackageJson {
 }
 
 func (p PackageJson) GetConfig() Config {
-	return p.Scu
+	return p.Evo
 }
 
 func (p PackageJson) Invalidate(cc *cache.Cache) bool {

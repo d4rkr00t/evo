@@ -40,13 +40,13 @@
   - [ ] File System
 - [ ] REFACTOR: Generic create a task from a rule
 - [ ] Different info
-  - [ ] Show what's included in hash for a workspace – `scu show-hash pkg-a` or `scu show-hash pkg-a target`
-  - [ ] Show dependencies of a workspace – `scu show-deps pkg-a`
-  - [ ] Show rule with all overrides – `scu show-rule build pkg-a`
-- [ ] Scoped runs – `scu run build pkg-a`
+  - [ ] Show what's included in hash for a workspace – `evo show-hash pkg-a` or `evo show-hash pkg-a target`
+  - [ ] Show dependencies of a workspace – `evo show-deps pkg-a`
+  - [ ] Show rule with all overrides – `evo show-rule build pkg-a`
+- [ ] Scoped runs – `evo run build pkg-a`
 - [ ] REFACTOR: Refactor logger to interfaces
 - [ ] REFACTOR: Refactor cache to interfaces
-- [ ] Throw an error when not in a SCU project
+- [ ] Throw an error when not in a EVO project
 - [ ] Pretty print duration
 - [ ] Watch file changes during task run
   - [ ] Update FileSystem cache only when a file changes
@@ -55,10 +55,10 @@
     - [ ] Preserve cache on disk
   - [ ] Add / remove files from cache
 - [ ] More commands
-  - [ ] `scu add dep@ver` to add a dependency
-  - [ ] `scu remove dep` to remove a dependency
-  - [ ] `scu clear cache`
-  - [ ] `scu clear output` – clears all outputs from packages
+  - [ ] `evo add dep@ver` to add a dependency
+  - [ ] `evo remove dep` to remove a dependency
+  - [ ] `evo clear cache`
+  - [ ] `evo clear output` – clears all outputs from packages
 - [ ] Generators
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] TESTS!!!

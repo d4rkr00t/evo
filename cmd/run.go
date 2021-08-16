@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"errors"
+	"evo/main/lib"
+	"evo/main/lib/cache"
 	"os"
 	"path"
-	"scu/main/lib"
-	"scu/main/lib/cache"
 
 	"github.com/spf13/cobra"
 )

@@ -1,2 +1,2 @@
-echo "Devloop for SCU..."
-watchexec -w ./ -e go "go build main.go && cp ./main ~/.bin-temp/scu"
+echo "Devloop for EVO..."
+watchexec -w ./ -e go "go build main.go && cp ./main ~/.bin-temp/evo"

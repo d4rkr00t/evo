@@ -1,6 +1,6 @@
 package lib
 
-import "scu/main/lib/cache"
+import "evo/main/lib/cache"
 
 type Context struct {
 	root          string

@@ -3,11 +3,11 @@ package lib
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"evo/main/lib/cache"
+	"evo/main/lib/fileutils"
 	"io"
 	"path"
 	"path/filepath"
-	"scu/main/lib/cache"
-	"scu/main/lib/fileutils"
 	"sort"
 	"sync"
 )

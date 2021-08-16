@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"scu/main/lib/cache"
+	"evo/main/lib/cache"
 	"strings"
 )
 
