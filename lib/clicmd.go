@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 type Cmd struct {
@@ -21,7 +22,7 @@ func NewCmd(name string, dir string, cmd string, params []string, stdout func(ms
 	}
 }
 
-func (c Cmd) Run() error {
+func (c Cmd) Run() (string, error) {
 	var params = []string{}
 
 	for _, param := range c.params {
@@ -37,14 +38,16 @@ func (c Cmd) Run() error {
 
 	var combined = io.MultiReader(stdout, stderr)
 	var scanner = bufio.NewScanner(combined)
+	var out = []string{}
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		var m = scanner.Text()
 		if len(m) > 0 {
+			out = append(out, m)
 			c.stdout(m)
 		}
 	}
 	var err = cmd.Wait()
 
-	return err
+	return strings.Join(out, "\n"), err
 }

@@ -18,7 +18,7 @@
   - [x] Use a hash of all rules that apply to a WS
   - [x] Move preprocessed rules to WS
 - [x] Add reusable command definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
-- [ ] Store STDOUT + STDERR of a command and replay output
+- [x] Store STDOUT + STDERR of a command and replay output
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated ws

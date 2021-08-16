@@ -61,8 +61,16 @@ func (t Task) CacheState(c *cache.Cache, ws_hash string) {
 	c.CacheData(t.GetStateKey(), ws_hash)
 }
 
+func (t Task) CacheLog(c *cache.Cache, ws_hash string, log string) {
+	c.CacheData(t.GetCacheKey(ws_hash)+":log", log)
+}
+
 func (t Task) GetCacheState(c *cache.Cache) string {
 	return c.ReadData(t.GetStateKey())
+}
+
+func (t Task) GetLogCache(c *cache.Cache, ws_hash string) string {
+	return c.ReadData(t.GetCacheKey(ws_hash) + ":log")
 }
 
 func ClearTaskName(name string) string {

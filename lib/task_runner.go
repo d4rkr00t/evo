@@ -61,7 +61,7 @@ func CreateTasksFromWorkspaces(
 				}
 			}
 
-			var run = func() error {
+			var run = func() (string, error) {
 				var args = strings.Split(rule.Cmd, " ")
 				var cmd_name = args[0]
 				var cmd_args = args[1:]
@@ -74,12 +74,19 @@ func CreateTasksFromWorkspaces(
 
 			if !t.Invalidate(&ctx.cache, ws_hash) {
 				lg.SuccessWithBadge(task_name, "cache hit:", color.HiBlackString(ws_hash))
+				var out = t.GetLogCache(&ctx.cache, ws_hash)
+				if len(out) > 0 {
+					lg.InfoWithBadge(task_name, "→ replaying output...")
+					for _, line := range strings.Split(out, "\n") {
+						lg.InfoWithBadge(task_name, "→ "+line)
+					}
+				}
 				if t.CacheOutput {
 					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
 				lg.InfoWithBadge(task_name, "running →", color.HiBlackString(rule.Cmd))
-				var err = run()
+				var out, err = run()
 				if err != nil {
 					lg.ErrorWithBadge(task_name, "error →", err.Error())
 					return err
@@ -89,6 +96,7 @@ func CreateTasksFromWorkspaces(
 					ws_hash = ws.Hash(workspaces)
 				}
 
+				t.CacheLog(&ctx.cache, ws_hash, out)
 				t.Cache(&ctx.cache, &ws, ws_hash)
 			}
 
