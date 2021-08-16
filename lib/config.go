@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"strings"
+
 	"github.com/bmatcuk/doublestar/v4"
 )
 
@@ -16,6 +18,7 @@ type ConfigInputs struct {
 
 type Config struct {
 	Workspaces []string
+	Commands   map[string]string
 	Rules      map[string]Rule
 	Inputs     ConfigInputs
 	Overrides  map[string]ConfigOverride
@@ -24,16 +27,24 @@ type Config struct {
 func (c Config) GetAllRulesForWS(ws_path string) map[string]Rule {
 	var rules = map[string]Rule{}
 
+	var expand_cmd = func(rule Rule) Rule {
+		var cmd = strings.Split(rule.Cmd, " ")[0]
+		if expanded_cmd, ok := c.Commands[cmd]; ok {
+			rule.Cmd = strings.Replace(rule.Cmd, cmd, expanded_cmd, 1)
+		}
+		return rule
+	}
+
 	// Adding default rules
 	for name, rule := range c.Rules {
-		rules[name] = rule
+		rules[name] = expand_cmd(rule)
 	}
 
 	// Adding rule overrides
 	for group_name, group := range c.Overrides {
 		if val, _ := doublestar.Match(group_name, ws_path); val {
 			for name, rule := range group.Rules {
-				rules[name] = rule
+				rules[name] = expand_cmd(rule)
 			}
 		}
 	}

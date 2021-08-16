@@ -17,9 +17,12 @@
         "**/node_modules"
       ]
     },
+    "commands": {
+      "@typescript": "tsc -p ./tsconfig.json"
+    },
     "rules": {
       "build": {
-        "cmd": "tsc -p ./tsconfig.json",
+        "cmd": "@typescript",
         "cacheOutput": true,
         "deps": [
           "@build",
@@ -47,7 +50,7 @@
       "**/ts/pkg-b-ts": {
         "rules": {
           "build": {
-            "cmd": "tsc -p ./",
+            "cmd": "@typescript",
             "deps": [
               "@build",
               "test",

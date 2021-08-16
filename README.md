@@ -17,7 +17,8 @@
 - [x] Rebuild affected by a rule change
   - [x] Use a hash of all rules that apply to a WS
   - [x] Move preprocessed rules to WS
-- [ ] Add reusable command definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
+- [x] Add reusable command definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
+- [ ] Store STDOUT + STDERR of a command and replay output
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated ws
@@ -37,7 +38,6 @@
   - [x] Task execution
   - [x] Task dependencies
   - [ ] File System
-- [ ] Store STDOUT + STDERR of a command and replay output
 - [ ] REFACTOR: Generic create a task from a rule
 - [ ] Different info
   - [ ] Show what's included in hash for a workspace – `scu show-hash pkg-a` or `scu show-hash pkg-a target`
