@@ -19,6 +19,7 @@
   - [x] Move preprocessed rules to WS
 - [x] Add reusable command definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
 - [x] Store STDOUT + STDERR of a command and replay output
+- [ ] Throw an error when pnpm errors
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated ws

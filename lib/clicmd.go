@@ -1,53 +1,39 @@
 package lib
 
 import (
-	"bufio"
-	"io"
 	"os"
-	"os/exec"
 	"strings"
+
+	"github.com/ionrock/procs"
 )
 
 type Cmd struct {
 	name   string
 	dir    string
 	cmd    string
-	params []string
 	stdout func(msg string)
 }
 
-func NewCmd(name string, dir string, cmd string, params []string, stdout func(msg string)) Cmd {
+func NewCmd(name string, dir string, cmd string, stdout func(msg string)) Cmd {
 	return Cmd{
-		name, dir, cmd, params, stdout,
+		name, dir, cmd, stdout,
 	}
 }
 
 func (c Cmd) Run() (string, error) {
-	var params = []string{}
-
-	for _, param := range c.params {
-		params = append(params, os.ExpandEnv(param))
-	}
-	var cmd = exec.Command(c.cmd, params...)
-	cmd.Dir = c.dir
-
-	var stdout, _ = cmd.StdoutPipe()
-	var stderr, _ = cmd.StderrPipe()
-
-	cmd.Start()
-
-	var combined = io.MultiReader(stdout, stderr)
-	var scanner = bufio.NewScanner(combined)
+	var cmd = procs.NewProcess(c.cmd)
 	var out = []string{}
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		var m = scanner.Text()
-		if len(m) > 0 {
-			out = append(out, m)
-			c.stdout(m)
-		}
-	}
-	var err = cmd.Wait()
+	cmd.Dir = c.dir
+	cmd.Env = procs.ParseEnv(os.Environ())
 
+	cmd.OutputHandler = func(line string) string {
+		if len(line) > 0 {
+			c.stdout(line)
+			out = append(out, line)
+		}
+		return line
+	}
+
+	var err = cmd.Run()
 	return strings.Join(out, "\n"), err
 }
