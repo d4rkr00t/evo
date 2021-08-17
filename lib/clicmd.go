@@ -26,8 +26,9 @@ func (c Cmd) Run() (string, error) {
 	var cmd = procs.NewProcess(strings.Join(args, " "))
 	var out = []string{}
 	cmd.Dir = c.dir
-	cmd.Env = procs.ParseEnv(os.Environ())
 
+	cmd.Env = procs.ParseEnv(os.Environ())
+	cmd.Env["CWD"] = c.dir
 	for _, env_string := range envs {
 		var split_env_string = strings.Split(env_string, "=")
 		if len(split_env_string) == 2 {

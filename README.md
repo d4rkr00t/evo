@@ -20,7 +20,7 @@
 - [x] Add reusable command definition to a config – should be able to run a command defined in a config in multiple rules like `@typescript <params>`
 - [x] Store STDOUT + STDERR of a command and replay output
 - [x] Rename to "evo" from "evoke"
-- [ ] Throw an error when pnpm errors
+- [x] Throw an error when pnpm errors
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated ws
@@ -69,3 +69,4 @@
 - [ ] Remote cache
 - [ ] Per rule inputs config (?)
 - [ ] Run multiple commands e.g. `cmd: ["tsc", "echo"]` (?)
+- [ ] Fix race condition in cache, when command updates the hash it may be still old
