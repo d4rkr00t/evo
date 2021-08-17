@@ -17,9 +17,10 @@ func GetNodeModulesBinPath(p string) string {
 	return path.Join(GetNodeModulesPath(p), ".bin")
 }
 
-func InstallNodeDeps(root string, lg *LoggerGroup) {
+func InstallNodeDeps(root string, lg *LoggerGroup) error {
 	var cmd = NewCmd("pnpm install", root, "pnpm install", func(msg string) {
 		lg.LogWithBadge("pnpm", msg)
 	})
-	cmd.Run()
+	var _, err = cmd.Run()
+	return err
 }
