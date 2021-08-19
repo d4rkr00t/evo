@@ -128,7 +128,6 @@ func run_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]st
 	var run_lg = ctx.logger.CreateGroup()
 
 	run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(ctx.target)))
-	run_lg.LogVerbose("Creating tasks...")
 
 	var tasks = CreateTasksFromWorkspaces(
 		ctx.target,
@@ -142,6 +141,8 @@ func run_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]st
 	if len(tasks) > 0 {
 		run_lg.LogVerbose("Executing tasks...")
 		RunTasks(ctx, &tasks, &run_lg)
+	} else {
+		run_lg.Warn("No tasks found, skipping...")
 	}
 
 	run_lg.End(ctx.stats.StopMeasure("run"))

@@ -31,7 +31,12 @@ func CreateTasksFromWorkspaces(
 		}
 
 		var ws = (*workspaces)[ws_name]
-		var rule = ws.GetRule(cmd)
+		var rule, has_rule = ws.GetRule(cmd)
+
+		if !has_rule {
+			return
+		}
+
 		var deps = []string{}
 
 		for _, dep := range rule.Deps {

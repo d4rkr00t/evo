@@ -42,8 +42,9 @@ func NewWorkspace(project_path string, ws_path string, includes []string, exclud
 	}
 }
 
-func (w Workspace) GetRule(name string) Rule {
-	return w.Rules[name]
+func (w Workspace) GetRule(name string) (Rule, bool) {
+	var rule, ok = w.Rules[name]
+	return rule, ok
 }
 
 func (w Workspace) Hash(workspaces *WorkspacesMap) string {

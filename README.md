@@ -10,10 +10,10 @@
   - [x] Remove project struct
   - [x] Split Run function into stages
   - [x] Create task runner
-- [x] Proper dependency tracking for deciding when ws is updated
+- [x] Proper dependency tracking for deciding when WS is updated
   - [x] Cache WS state
-  - [x] Use ws_files_hash + dependencies_hash as a ws_hash
-  - [x] Use ws states to build dependencies cache
+  - [x] Use WS_files_hash + dependencies_hash as a WS_hash
+  - [x] Use WS states to build dependencies cache
 - [x] Rebuild affected by a rule change
   - [x] Use a hash of all rules that apply to a WS
   - [x] Move preprocessed rules to WS
@@ -21,10 +21,11 @@
 - [x] Store STDOUT + STDERR of a command and replay output
 - [x] Rename to "evo" from "evoke"
 - [x] Throw an error when pnpm errors
+- [x] Throw if target doesn't exist
 - [ ] Workspaces struct
   - [ ] Store all WS
-  - [ ] Store all updated ws
-  - [ ] Store all affected ws
+  - [ ] Store all updated WS
+  - [ ] Store all affected WS
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -36,6 +37,10 @@
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
   - [ ] Duplicate WS
+  - [ ] Rules
+    - [ ] check that dependencies exist
+    - [ ] check cycles
+    - [ ] check that command exist
 - [ ] Error handling
   - [x] Task execution
   - [x] Task dependencies
@@ -70,3 +75,7 @@
 - [ ] Per rule inputs config (?)
 - [ ] Run multiple commands e.g. `cmd: ["tsc", "echo"]` (?)
 - [ ] Fix race condition in cache, when command updates the hash it may be still old
+- [ ] `--force` to force run a command, ignoring cache
+- [ ] Implicit dependencies
+- [ ] Stricter overrides
+  - [ ] Replace glob with a relative path to a group or a certain package
