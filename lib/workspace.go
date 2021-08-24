@@ -5,10 +5,12 @@ import (
 	"encoding/hex"
 	"evo/main/lib/cache"
 	"evo/main/lib/fileutils"
+	"fmt"
 	"io"
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 )
 
@@ -119,10 +121,11 @@ func (w Workspace) get_rules_hash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func GetWorkspaces(root_path string, conf *Config, cc *cache.Cache) WorkspacesMap {
+func GetWorkspaces(root_path string, conf *Config, cc *cache.Cache) (WorkspacesMap, error) {
 	var workspaces = make(map[string]Workspace)
 	var wg sync.WaitGroup
 	var queue = make(chan Workspace)
+	var duplicates = []string{}
 
 	for _, wc := range conf.Workspaces {
 		var ws_glob = path.Join(root_path, wc, "package.json")
@@ -139,14 +142,22 @@ func GetWorkspaces(root_path string, conf *Config, cc *cache.Cache) WorkspacesMa
 
 	go func() {
 		for ws := range queue {
-			workspaces[ws.Name] = ws
+			if val, ok := workspaces[ws.Name]; ok {
+				duplicates = append(duplicates, fmt.Sprintf("%s → %s → %s", ws.Name, ws.RelPath, val.RelPath))
+			} else {
+				workspaces[ws.Name] = ws
+			}
 			wg.Done()
 		}
 	}()
 
 	wg.Wait()
 
-	return workspaces
+	if len(duplicates) > 0 {
+		return workspaces, fmt.Errorf("duplicate workspaces [ %s ]", strings.Join(duplicates, " | "))
+	}
+
+	return workspaces, nil
 }
 
 func InvalidateWorkspaces(workspaces *WorkspacesMap, target string, cc *cache.Cache) map[string]string {

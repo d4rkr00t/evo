@@ -81,8 +81,15 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, DepGraph, ma
 	var invalidate_lg = ctx.logger.CreateGroup()
 	invalidate_lg.Start("Invalidating workspaces...")
 
-	var workspaces = GetWorkspaces(ctx.root, &ctx.config, &ctx.cache)
+	var workspaces, ws_err = GetWorkspaces(ctx.root, &ctx.config, &ctx.cache)
 	var dep_graph = NewDepGraph(&workspaces)
+
+	if ws_err != nil {
+		invalidate_lg.ErrorWithBadge("error", ws_err.Error())
+		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
+		return false, workspaces, dep_graph, nil, nil
+	}
+
 	var updated_ws = InvalidateWorkspaces(&workspaces, ctx.target, &ctx.cache)
 
 	if len(updated_ws) > 0 {

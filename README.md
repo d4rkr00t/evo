@@ -39,7 +39,7 @@
 - [ ] Validations
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
-  - [ ] Duplicate WS
+  - [x] Duplicate WS
   - [ ] Rules
     - [ ] check that dependencies exist
     - [ ] check cycles
