@@ -37,7 +37,7 @@
       }
     },
     "overrides": {
-      "**/opaline/core": {
+      "packages/opaline/core": {
         "rules": {
           "test": {
             "cmd": "ava --config ./ava.config.cjs",
@@ -47,7 +47,7 @@
           }
         }
       },
-      "**/ts/pkg-b-ts": {
+      "packages/ts/pkg-b-ts": {
         "rules": {
           "build": {
             "cmd": "@typescript",
@@ -66,7 +66,7 @@
           }
         }
       },
-      "**/dummy/*": {
+      "packages/dummy": {
         "inputs": {
           "includes": [
             "**/*.js"

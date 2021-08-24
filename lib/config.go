@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"path"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -24,7 +25,7 @@ type Config struct {
 	Overrides  map[string]ConfigOverride
 }
 
-func (c Config) GetAllRulesForWS(ws_path string) map[string]Rule {
+func (c Config) GetAllRulesForWS(root_path string, ws_path string) map[string]Rule {
 	var rules = map[string]Rule{}
 
 	var expand_cmd = func(rule Rule) Rule {
@@ -42,7 +43,8 @@ func (c Config) GetAllRulesForWS(ws_path string) map[string]Rule {
 
 	// Adding rule overrides
 	for group_name, group := range c.Overrides {
-		if val, _ := doublestar.Match(group_name, ws_path); val {
+		var abs_group_path = path.Join(root_path, group_name)
+		if strings.HasPrefix(ws_path, abs_group_path) {
 			for name, rule := range group.Rules {
 				rules[name] = expand_cmd(rule)
 			}

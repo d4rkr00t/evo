@@ -22,6 +22,8 @@
 - [x] Rename to "evo" from "evoke"
 - [x] Throw an error when pnpm errors
 - [x] Throw if target doesn't exist
+- [x] Stricter overrides
+  - [x] Replace glob with a relative path to a group or a certain package
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated WS
@@ -50,10 +52,11 @@
   - [ ] Show what's included in hash for a workspace – `evo show-hash pkg-a` or `evo show-hash pkg-a target`
   - [ ] Show dependencies of a workspace – `evo show-deps pkg-a`
   - [ ] Show rule with all overrides – `evo show-rule build pkg-a`
+  - [ ] Show all rules for a WS with overrides – `evo show-rules pkg-a`
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] REFACTOR: Refactor logger to interfaces
 - [ ] REFACTOR: Refactor cache to interfaces
-- [ ] Throw an error when not in a EVO project
+- [ ] Throw an error when not in an EVO project
 - [ ] Pretty print duration
 - [ ] Watch file changes during task run
   - [ ] Update FileSystem cache only when a file changes
@@ -73,9 +76,6 @@
 - [ ] Rebuild examples with a real world use cases
 - [ ] Remote cache
 - [ ] Per rule inputs config (?)
-- [ ] Run multiple commands e.g. `cmd: ["tsc", "echo"]` (?)
-- [ ] Fix race condition in cache, when command updates the hash it may be still old
 - [ ] `--force` to force run a command, ignoring cache
 - [ ] Implicit dependencies
-- [ ] Stricter overrides
-  - [ ] Replace glob with a relative path to a group or a certain package
+- [ ] Skip target for a WS, e.g. skip tests for a flakey package. Target should have `skip: true`
