@@ -33,8 +33,9 @@
   - [x] Install packages
   - [x] Check if node_modules folder exists
   - [x] Link packages
-  - [ ] Link dev dependencies
+  - [x] Link dev dependencies
   - [ ] Link binaries
+  - [ ] Link peer dependencies
 - [ ] Validations
   - [ ] Validate external dependencies
   - [ ] Validate dep cycles
@@ -79,3 +80,4 @@
 - [ ] `--force` to force run a command, ignoring cache
 - [ ] Implicit dependencies
 - [ ] Skip target for a WS, e.g. skip tests for a flakey package. Target should have `skip: true`
+- [ ] Log Group, do not print extra line if no log before end

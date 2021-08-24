@@ -30,6 +30,12 @@ func NewWorkspace(root_path string, ws_path string, includes []string, excludes 
 	var package_json = NewPackageJson(package_json_path)
 	var rel_path, _ = filepath.Rel(root_path, ws_path)
 
+	var Deps = package_json.Dependencies
+
+	for dep, ver := range package_json.DevDependencies {
+		Deps[dep] = ver
+	}
+
 	return Workspace{
 		Name:     package_json.Name,
 		Path:     ws_path,

@@ -9,11 +9,12 @@ import (
 )
 
 type PackageJson struct {
-	Path         string
-	Name         string
-	Version      string
-	Evo          Config
-	Dependencies map[string]string
+	Path            string
+	Name            string
+	Version         string
+	Evo             Config
+	Dependencies    map[string]string
+	DevDependencies map[string]string
 }
 
 func NewPackageJson(path string) PackageJson {
