@@ -44,3 +44,13 @@ func ValidateExternalDeps(workspaces *WorkspacesMap, root_pkg_json PackageJson) 
 
 	return nil
 }
+
+func ValidateDepsGraph(dg *DepGraph) error {
+	var cycles, path = dg.HasCycles()
+
+	if cycles {
+		return fmt.Errorf("cycle in the dependecy graph [ %s ]", path)
+	}
+
+	return nil
+}

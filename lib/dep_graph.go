@@ -2,6 +2,7 @@ package lib
 
 import (
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -21,7 +22,42 @@ func NewDepGraph(workspaces *WorkspacesMap) DepGraph {
 	}
 }
 
-func (dg DepGraph) GetDependant(ws_name string) []string {
+func (dg DepGraph) HasCycles() (bool, string) {
+	var visited = map[string]int{}
+
+	var dfs func(ws_name string, path []string) (bool, []string)
+	dfs = func(ws_name string, path []string) (bool, []string) {
+		if visited[ws_name] == 2 {
+			return false, path
+		}
+
+		if visited[ws_name] == 1 {
+			return true, path
+		}
+
+		visited[ws_name] = 1
+		for _, dep_name := range dg.direct[ws_name] {
+			var cycle, path = dfs(dep_name, append(append([]string{}, path...), dep_name))
+			if cycle {
+				return true, path
+			}
+		}
+
+		visited[ws_name] = 2
+		return false, path
+	}
+
+	for ws_name := range dg.direct {
+		var cycle, path = dfs(ws_name, []string{ws_name})
+		if cycle {
+			return true, strings.Join(path, " → ")
+		}
+	}
+
+	return false, ""
+}
+
+func (dg DepGraph) GetAllDependant(ws_name string) []string {
 	var dependant = map[string]bool{}
 	var queue = dg.inverse[ws_name]
 
@@ -51,7 +87,7 @@ func (dg DepGraph) GetAffected(workspaces *WorkspacesMap, updated *map[string]st
 		mu.Lock()
 		affected[ws_name] = ws_hash
 		mu.Unlock()
-		for _, name := range dg.GetDependant(ws_name) {
+		for _, name := range dg.GetAllDependant(ws_name) {
 			if _, ok := (*updated)[name]; !ok {
 				wg.Add(1)
 				guard <- struct{}{}

@@ -38,7 +38,7 @@
   - [ ] Link peer dependencies
 - [ ] Validations
   - [x] Validate external dependencies
-  - [ ] Validate dep cycles
+  - [x] Validate dep cycles
   - [x] Duplicate WS
   - [ ] Rules
     - [ ] check that dependencies exist
