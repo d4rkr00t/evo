@@ -82,7 +82,10 @@ func (lg LoggerGroup) InfoWithBadge(badge string, msg ...string) {
 }
 
 func (lg LoggerGroup) ErrorWithBadge(badge string, msg ...string) {
-	fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.RedString(badge), strings.Join(msg, " "))
+	var processed_msg = strings.Join(msg, " ")
+	for _, line := range strings.Split(processed_msg, "\n") {
+		fmt.Printf("%s %s: %s\n", color.HiBlackString("│"), color.RedString(badge), line)
+	}
 }
 
 func (lg LoggerGroup) LogWithBadgeVerbose(badge string, msg ...string) {

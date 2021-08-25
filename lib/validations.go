@@ -39,7 +39,7 @@ func ValidateExternalDeps(workspaces *WorkspacesMap, root_pkg_json PackageJson) 
 	}
 
 	if len(err) > 0 {
-		return errors.New(strings.Join(err, " | "))
+		return errors.New(strings.Join(err, "\n"))
 	}
 
 	return nil
