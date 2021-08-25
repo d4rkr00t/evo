@@ -138,7 +138,7 @@ func linking_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[strin
 	var linking_lg = ctx.logger.CreateGroup()
 	linking_lg.Start("Linking workspaces...")
 	LinkWorkspaces(ctx.root, workspaces, updated_ws)
-	linking_lg.End(ctx.stats.StopMeasure("linking"))
+	linking_lg.EndCollapsed(ctx.stats.StopMeasure("linking"))
 	return true, nil
 }
 

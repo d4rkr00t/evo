@@ -94,11 +94,19 @@ func (lg LoggerGroup) LogWithBadgeVerbose(badge string, msg ...string) {
 	}
 }
 
-func (lg LoggerGroup) End(dur time.Duration) {
-	lg.Log()
+func (lg LoggerGroup) end(dur time.Duration) {
 	if dur != 0 {
 		fmt.Printf("%s Completed in %s\n", color.HiBlackString(strings.ToLower("└")), color.GreenString(dur.String()))
 	} else {
 		fmt.Printf("%s Completed\n", color.HiBlackString(strings.ToLower("└")))
 	}
+}
+
+func (lg LoggerGroup) End(dur time.Duration) {
+	lg.Log()
+	lg.end(dur)
+}
+
+func (lg LoggerGroup) EndCollapsed(dur time.Duration) {
+	lg.end(dur)
 }
