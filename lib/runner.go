@@ -90,6 +90,12 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, DepGraph, ma
 		return false, workspaces, dep_graph, nil, nil
 	}
 
+	if err := ValidateExternalDeps(&workspaces, ctx.root_pkg_json); err != nil {
+		invalidate_lg.ErrorWithBadge("error", err.Error())
+		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
+		return false, workspaces, dep_graph, nil, nil
+	}
+
 	var updated_ws = InvalidateWorkspaces(&workspaces, ctx.target, &ctx.cache)
 
 	if len(updated_ws) > 0 {

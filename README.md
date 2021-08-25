@@ -37,7 +37,7 @@
   - [ ] Link binaries
   - [ ] Link peer dependencies
 - [ ] Validations
-  - [ ] Validate external dependencies
+  - [x] Validate external dependencies
   - [ ] Validate dep cycles
   - [x] Duplicate WS
   - [ ] Rules

@@ -108,7 +108,7 @@ func (w Workspace) get_rules_hash() string {
 	var h = sha1.New()
 	var rules_list = []string{}
 
-	for rule_name, _ := range w.Rules {
+	for rule_name := range w.Rules {
 		rules_list = append(rules_list, rule_name)
 	}
 
