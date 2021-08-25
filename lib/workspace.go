@@ -106,7 +106,7 @@ func (w Workspace) get_deps_hash(workspaces *WorkspacesMap) string {
 
 func (w Workspace) get_rules_hash() string {
 	var h = sha1.New()
-	var rules_list = w.get_rules()
+	var rules_list = w.get_rules_names()
 
 	for _, rule := range rules_list {
 		io.WriteString(h, rule)
@@ -115,7 +115,7 @@ func (w Workspace) get_rules_hash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (w Workspace) get_rules() []string {
+func (w Workspace) get_rules_names() []string {
 	var rules_list = []string{}
 	var rules = []string{}
 

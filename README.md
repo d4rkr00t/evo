@@ -24,6 +24,9 @@
 - [x] Throw if target doesn't exist
 - [x] Stricter overrides
   - [x] Replace glob with a relative path to a group or a certain package
+- [x] Simple Error handling
+  - [x] Task execution
+  - [x] Task dependencies
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated WS
@@ -44,15 +47,11 @@
     - [ ] check that dependencies exist
     - [ ] check cycles
     - [ ] check that command exist
-- [ ] Error handling
-  - [x] Task execution
-  - [x] Task dependencies
-- [ ] REFACTOR: Generic create a task from a rule
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
-  - [ ] Show dependencies of a workspace – `evo show-deps pkg-a`
-  - [ ] Show rule with all overrides – `evo show-rule build pkg-a`
-  - [ ] Show all rules for a WS with overrides – `evo show-rules pkg-a`
+  - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
+  - [ ] Show rule with all overrides – `evo show-rule build pkg-a` (?)
+- [ ] REFACTOR: Generic create a task from a rule
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] REFACTOR: Refactor logger to interfaces
 - [ ] REFACTOR: Refactor cache to interfaces

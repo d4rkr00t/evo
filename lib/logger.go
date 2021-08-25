@@ -110,3 +110,8 @@ func (lg LoggerGroup) End(dur time.Duration) {
 func (lg LoggerGroup) EndCollapsed(dur time.Duration) {
 	lg.end(dur)
 }
+
+func (lg LoggerGroup) EndPlain() {
+	lg.Log()
+	fmt.Printf("%s ●\n", color.HiBlackString(strings.ToLower("└")))
+}
