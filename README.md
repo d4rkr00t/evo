@@ -47,10 +47,9 @@
 - [ ] Error handling
   - [x] Task execution
   - [x] Task dependencies
-  - [ ] File System
 - [ ] REFACTOR: Generic create a task from a rule
 - [ ] Different info
-  - [ ] Show what's included in hash for a workspace – `evo show-hash pkg-a` or `evo show-hash pkg-a target`
+  - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [ ] Show dependencies of a workspace – `evo show-deps pkg-a`
   - [ ] Show rule with all overrides – `evo show-rule build pkg-a`
   - [ ] Show all rules for a WS with overrides – `evo show-rules pkg-a`
@@ -65,6 +64,7 @@
   - [ ] In memory cache of file checksums, update only when update time of a file changed
     - [ ] Preserve cache on disk
   - [ ] Add / remove files from cache
+  - [ ] Error handling
 - [ ] More commands
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency

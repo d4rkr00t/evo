@@ -106,7 +106,18 @@ func (w Workspace) get_deps_hash(workspaces *WorkspacesMap) string {
 
 func (w Workspace) get_rules_hash() string {
 	var h = sha1.New()
+	var rules_list = w.get_rules()
+
+	for _, rule := range rules_list {
+		io.WriteString(h, rule)
+	}
+
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (w Workspace) get_rules() []string {
 	var rules_list = []string{}
+	var rules = []string{}
 
 	for rule_name := range w.Rules {
 		rules_list = append(rules_list, rule_name)
@@ -115,10 +126,10 @@ func (w Workspace) get_rules_hash() string {
 	sort.Strings(rules_list)
 
 	for _, rule_name := range rules_list {
-		io.WriteString(h, w.Rules[rule_name].String())
+		rules = append(rules, w.Rules[rule_name].String())
 	}
 
-	return hex.EncodeToString(h.Sum(nil))
+	return rules
 }
 
 func GetWorkspaces(root_path string, conf *Config, cc *cache.Cache) (WorkspacesMap, error) {

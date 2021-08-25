@@ -16,8 +16,10 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
+	ShowHashCmd.PersistentFlags().String("cwd", "", "Override CWD")
 
 	rootCmd.AddCommand(RunCmd)
+	rootCmd.AddCommand(ShowHashCmd)
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 
 	if err := rootCmd.Execute(); err != nil {
