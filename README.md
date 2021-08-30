@@ -38,7 +38,7 @@
   - [x] Link packages
   - [x] Link dev dependencies
   - [ ] Link binaries
-  - [ ] Link peer dependencies
+  - [ ] Link peer dependencies (?)
 - [ ] Validations
   - [x] Validate external dependencies
   - [x] Validate dep cycles
@@ -53,7 +53,9 @@
   - [ ] Show rule with all overrides – `evo show-rule build pkg-a` (?)
 - [ ] REFACTOR: Generic create a task from a rule
 - [ ] Scoped runs – `evo run build pkg-a`
-- [ ] REFACTOR: Refactor logger to interfaces
+- [ ] REFACTOR: Refactor logger
+  - [ ] use to interfaces
+  - [ ] Cleaner API
 - [ ] REFACTOR: Refactor cache to interfaces
 - [ ] Throw an error when not in an EVO project
 - [ ] Pretty print duration
@@ -79,4 +81,3 @@
 - [ ] `--force` to force run a command, ignoring cache
 - [ ] Implicit dependencies
 - [ ] Skip target for a WS, e.g. skip tests for a flakey package. Target should have `skip: true`
-- [ ] Log Group, do not print extra line if no log before end

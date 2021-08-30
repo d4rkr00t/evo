@@ -123,6 +123,7 @@ type TaskResult struct {
 func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
+	var mesure_mu sync.Mutex
 	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
 	var queue_size = num_goroutines * 2
 	var pqueue = make(chan string, queue_size)
@@ -148,21 +149,21 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 		go func() {
 			defer wg.Done()
 			for task_id := range pqueue {
-				mu.RLock()
-				var task = (*tasks)[task_id]
-				mu.RUnlock()
-
-				atomic.AddInt64(&in_progress, 1)
 				mu.Lock()
-				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
+				var task = (*tasks)[task_id]
+				atomic.AddInt64(&in_progress, 1)
 				mu.Unlock()
+				mesure_mu.Lock()
+				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
+				mesure_mu.Unlock()
 
 				var err = task.Run(ctx, &task)
 
 				// TODO: Fix this lock later
-				mu.Lock()
+				mesure_mu.Lock()
 				ctx.stats.StopMeasure(task_id)
-				mu.Unlock()
+				mesure_mu.Unlock()
+
 				atomic.AddInt64(&in_progress, -1)
 
 				dqueue <- TaskResult{task_id, err}
