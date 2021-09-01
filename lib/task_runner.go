@@ -93,16 +93,9 @@ func CreateTasksFromWorkspaces(
 					return err
 				}
 
-				if t.CacheOutput {
-					ws_hash = ws.Hash(workspaces)
-				}
-
+				ws_hash = ws.Hash(workspaces)
 				t.CacheLog(&ctx.cache, ws_hash, out)
-				t.Cache(&ctx.cache, &ws, ws_hash)
 			}
-
-			ws.CacheState(&ctx.cache, ws_hash)
-			t.CacheState(&ctx.cache, ws_hash)
 
 			return nil
 		}, rule.CacheOutput)
@@ -120,7 +113,7 @@ type TaskResult struct {
 	err     error
 }
 
-func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
+func RunTasks(ctx *Context, tasks *map[string]Task, workspaces *WorkspacesMap, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var mesure_mu sync.Mutex
@@ -134,7 +127,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 
 	lg.LogWithBadge("threads", fmt.Sprint(num_goroutines))
-	lg.LogWithBadge("tasks", fmt.Sprint(len(*tasks)))
+	lg.LogWithBadge("tasks", " ", fmt.Sprint(len(*tasks)))
 	lg.LogVerbose("queue size ->", fmt.Sprint(queue_size), "| num cpus ->", fmt.Sprint(runtime.NumCPU()))
 	lg.Log()
 
@@ -151,8 +144,10 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 			for task_id := range pqueue {
 				mu.Lock()
 				var task = (*tasks)[task_id]
-				atomic.AddInt64(&in_progress, 1)
 				mu.Unlock()
+
+				atomic.AddInt64(&in_progress, 1)
+
 				mesure_mu.Lock()
 				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
 				mesure_mu.Unlock()
@@ -183,7 +178,9 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 			mu.Lock()
 			var task = (*tasks)[task_id]
 			if err == nil {
+				mesure_mu.Lock()
 				lg.SuccessWithBadge(task_id, "done in "+color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
+				mesure_mu.Unlock()
 				task.status = TASK_STATUS_SUCCESS
 			} else {
 				task.status = TASK_STATUS_FAILURE
@@ -218,6 +215,27 @@ func RunTasks(ctx *Context, tasks *map[string]Task, lg *LoggerGroup) {
 	}
 
 	wg.Wait()
+
+	var ws_to_hash = map[string]string{}
+	var sorted_task = top_sort_tasks(tasks)
+
+	for _, task_id := range sorted_task {
+		var task = (*tasks)[task_id]
+		if task.status != TASK_STATUS_SUCCESS {
+			continue
+		}
+		var ws_name = task.ws_name
+		var ws = (*workspaces)[ws_name]
+
+		if _, ok := ws_to_hash[ws_name]; !ok {
+			ws_to_hash[ws_name] = ws.Hash(workspaces)
+			ws.CacheState(&ctx.cache, ws_to_hash[ws_name])
+		}
+
+		task.Cache(&ctx.cache, &ws, ws_to_hash[ws_name])
+		task.CacheState(&ctx.cache, ws_to_hash[ws_name])
+	}
+
 	ctx.stats.StopMeasure("runtasks")
 }
 
@@ -240,6 +258,33 @@ func find_unblocked_tasks(tasks *map[string]Task) []string {
 
 		if all_deps_finished {
 			result = append(result, task_id)
+		}
+	}
+
+	return result
+}
+
+func top_sort_tasks(tasks *map[string]Task) []string {
+	var result = []string{}
+	var visited = map[string]bool{}
+
+	var process func(task_id string)
+	process = func(task_id string) {
+		var task = (*tasks)[task_id]
+
+		for _, dep := range task.Deps {
+			if _, ok := visited[dep]; !ok {
+				process(dep)
+			}
+		}
+
+		visited[task_id] = true
+		result = append(result, task_id)
+	}
+
+	for task_id := range *tasks {
+		if _, ok := visited[task_id]; !ok {
+			process(task_id)
 		}
 	}
 

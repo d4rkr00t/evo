@@ -27,6 +27,10 @@
 - [x] Simple Error handling
   - [x] Task execution
   - [x] Task dependencies
+- [x] Cache tasks afterwards
+  - [x] Re-hash once per WS
+  - [x] Top sort tasks
+- [ ] Race condition leads to cache pollution
 - [ ] Workspaces struct
   - [ ] Store all WS
   - [ ] Store all updated WS

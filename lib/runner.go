@@ -159,7 +159,7 @@ func run_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]st
 
 	if len(tasks) > 0 {
 		run_lg.LogVerbose("Executing tasks...")
-		RunTasks(ctx, &tasks, &run_lg)
+		RunTasks(ctx, &tasks, workspaces, &run_lg)
 	} else {
 		run_lg.Warn("No tasks found, skipping...")
 	}
