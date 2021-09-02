@@ -11,9 +11,9 @@ func ShowHash(ctx Context, ws_name string) {
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
 	ctx.logger.LogWithBadge("query", " show hash of", ws_name)
 
-	var workspaces, _ = GetWorkspaces(ctx.root, &ctx.config, &ctx.cache)
+	var wm, _ = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
 
-	var ws, ok = workspaces[ws_name]
+	var ws, ok = wm.workspaces[ws_name]
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
 		return
@@ -44,7 +44,7 @@ func ShowHash(ctx Context, ws_name string) {
 
 	lg.Log()
 	lg.Log("Hash:")
-	lg.Log("–", ws.Hash(&workspaces))
+	lg.Log("–", ws.Hash(&wm))
 
 	lg.End(ctx.stats.StopMeasure("show-hash"))
 }
@@ -55,9 +55,9 @@ func ShowRules(ctx Context, ws_name string) {
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
 	ctx.logger.LogWithBadge("query", " show hash of", ws_name)
 
-	var workspaces, _ = GetWorkspaces(ctx.root, &ctx.config, &ctx.cache)
+	var wm, _ = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
 
-	var ws, ok = workspaces[ws_name]
+	var ws, ok = wm.workspaces[ws_name]
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
 		return

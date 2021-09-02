@@ -23,17 +23,17 @@ func Run(ctx Context) {
 		return
 	}
 
-	should_continue, workspaces, _, updated_ws, affected_ws := invalidate_workspaces_step(&ctx)
+	should_continue, wm := invalidate_workspaces_step(&ctx)
 	if !should_continue {
 		return
 	}
 
-	should_continue, _ = linking_step(&ctx, &workspaces, &updated_ws)
+	should_continue, _ = linking_step(&ctx, &wm)
 	if !should_continue {
 		return
 	}
 
-	run_step(&ctx, &workspaces, &updated_ws, &affected_ws)
+	run_step(&ctx, &wm)
 }
 
 func print_total_time(ctx *Context) {
@@ -76,73 +76,72 @@ func install_dependencies_step(ctx *Context) (bool, error) {
 	return true, nil
 }
 
-func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, DepGraph, map[string]string, map[string]string) {
+func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
 	ctx.stats.StartMeasure("invalidate", MEASURE_KIND_STAGE)
 	var invalidate_lg = ctx.logger.CreateGroup()
 	invalidate_lg.Start("Invalidating workspaces...")
 
-	var workspaces, ws_err = GetWorkspaces(ctx.root, &ctx.config, &ctx.cache)
-	var dep_graph = NewDepGraph(&workspaces)
+	var wm, ws_err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
 
 	if ws_err != nil {
 		invalidate_lg.ErrorWithBadge("error", ws_err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, workspaces, dep_graph, nil, nil
+		return false, wm
 	}
 
-	if err := ValidateExternalDeps(&workspaces, ctx.root_pkg_json); err != nil {
+	if err := ValidateExternalDeps(&wm, ctx.root_pkg_json); err != nil {
 		invalidate_lg.ErrorWithBadge("error", err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, workspaces, dep_graph, nil, nil
+		return false, wm
 	}
 
-	if err := ValidateDepsGraph(&dep_graph); err != nil {
+	if err := ValidateDepsGraph(&wm.dep_graph); err != nil {
 		invalidate_lg.ErrorWithBadge("error", err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, workspaces, dep_graph, nil, nil
+		return false, wm
 	}
 
-	var updated_ws = InvalidateWorkspaces(&workspaces, ctx.target, &ctx.cache)
+	wm.Invalidate(ctx.target)
 
-	if len(updated_ws) > 0 {
+	if len(wm.updated) > 0 {
 		invalidate_lg.LogWithBadge(
 			"updated",
-			color.CyanString(fmt.Sprint((len(updated_ws)))),
+			color.CyanString(fmt.Sprint((len(wm.updated)))),
 			"of",
-			color.CyanString(fmt.Sprint((len(workspaces)))),
+			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
 			"workspaces",
 		)
 
 		invalidate_lg.LogVerbose("")
 		invalidate_lg.LogVerbose("Calculating affected workspaces...")
-		var affected_ws = dep_graph.GetAffected(&workspaces, &updated_ws)
+		wm.GetAffected()
 		invalidate_lg.LogWithBadge(
 			"affected",
-			color.CyanString(fmt.Sprint((len(affected_ws)))),
+			color.CyanString(fmt.Sprint((len(wm.affected)))),
 			"of",
-			color.CyanString(fmt.Sprint((len(workspaces)))),
+			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
 			"workspaces",
 		)
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 
-		return true, workspaces, dep_graph, updated_ws, affected_ws
+		return true, wm
 	}
 
 	invalidate_lg.Log("Everything is up-to-date.")
 	invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-	return false, workspaces, dep_graph, updated_ws, map[string]string{}
+	return false, wm
 }
 
-func linking_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]string) (bool, error) {
+func linking_step(ctx *Context, wm *WorkspacesMap) (bool, error) {
 	ctx.stats.StartMeasure("linking", MEASURE_KIND_STAGE)
 	var linking_lg = ctx.logger.CreateGroup()
 	linking_lg.Start("Linking workspaces...")
-	LinkWorkspaces(ctx.root, workspaces, updated_ws)
+	LinkWorkspaces(ctx.root, wm)
 	linking_lg.EndCollapsed(ctx.stats.StopMeasure("linking"))
 	return true, nil
 }
 
-func run_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]string, affected_ws *map[string]string) (bool, error) {
+func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 	ctx.stats.StartMeasure("run", MEASURE_KIND_STAGE)
 	var run_lg = ctx.logger.CreateGroup()
 
@@ -151,8 +150,6 @@ func run_step(ctx *Context, workspaces *WorkspacesMap, updated_ws *map[string]st
 	var tasks = CreateTasksFromWorkspaces(
 		ctx.target,
 		workspaces,
-		updated_ws,
-		affected_ws,
 		&ctx.config,
 		&run_lg,
 	)

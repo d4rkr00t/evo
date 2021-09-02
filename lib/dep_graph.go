@@ -1,9 +1,7 @@
 package lib
 
 import (
-	"runtime"
 	"strings"
-	"sync"
 )
 
 type deps = map[string][]string
@@ -13,7 +11,7 @@ type DepGraph struct {
 	inverse deps
 }
 
-func NewDepGraph(workspaces *WorkspacesMap) DepGraph {
+func NewDepGraph(workspaces *map[string]Workspace) DepGraph {
 	var direct = build_direct(workspaces)
 	var inverse = build_inverse(workspaces)
 	return DepGraph{
@@ -77,38 +75,7 @@ func (dg DepGraph) GetAllDependant(ws_name string) []string {
 	return result
 }
 
-func (dg DepGraph) GetAffected(workspaces *WorkspacesMap, updated *map[string]string) map[string]string {
-	var affected = map[string]string{}
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	var guard = make(chan struct{}, runtime.NumCPU())
-
-	for ws_name, ws_hash := range *updated {
-		mu.Lock()
-		affected[ws_name] = ws_hash
-		mu.Unlock()
-		for _, name := range dg.GetAllDependant(ws_name) {
-			if _, ok := (*updated)[name]; !ok {
-				wg.Add(1)
-				guard <- struct{}{}
-				go func(name string) {
-					var hash = (*workspaces)[name].Hash(workspaces)
-					mu.Lock()
-					affected[name] = hash
-					<-guard
-					mu.Unlock()
-					wg.Done()
-				}(name)
-			}
-		}
-	}
-
-	wg.Wait()
-
-	return affected
-}
-
-func build_direct(workspaces *WorkspacesMap) deps {
+func build_direct(workspaces *map[string]Workspace) deps {
 	var graph = make(deps)
 
 	for _, ws := range *workspaces {
@@ -126,7 +93,7 @@ func build_direct(workspaces *WorkspacesMap) deps {
 	return graph
 }
 
-func build_inverse(workspaces *WorkspacesMap) deps {
+func build_inverse(workspaces *map[string]Workspace) deps {
 	var graph = make(deps)
 
 	for _, ws := range *workspaces {

@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-func LinkWorkspaces(root string, workspaces *WorkspacesMap, updated *map[string]string) {
-	for ws_name := range *updated {
-		var ws = (*workspaces)[ws_name]
+func LinkWorkspaces(root string, wm *WorkspacesMap) {
+	for ws_name := range wm.updated {
+		var ws = wm.workspaces[ws_name]
 		var node_modules = GetNodeModulesPath(ws.Path)
 
 		os.RemoveAll(node_modules)
 
 		for dep := range ws.Deps {
-			if dep_ws, ok := (*workspaces)[dep]; ok {
+			if dep_ws, ok := wm.workspaces[dep]; ok {
 				link_local_ws(&ws, &dep_ws)
 			} else {
 				link_external(root, &ws, dep)

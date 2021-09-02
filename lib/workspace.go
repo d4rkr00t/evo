@@ -5,13 +5,10 @@ import (
 	"encoding/hex"
 	"evo/main/lib/cache"
 	"evo/main/lib/fileutils"
-	"fmt"
 	"io"
 	"path"
 	"path/filepath"
 	"sort"
-	"strings"
-	"sync"
 )
 
 type Workspace struct {
@@ -24,8 +21,6 @@ type Workspace struct {
 	Rules    map[string]Rule
 	cache    *cache.Cache
 }
-
-type WorkspacesMap = map[string]Workspace
 
 func NewWorkspace(root_path string, ws_path string, includes []string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
 	var package_json_path = path.Join(ws_path, "package.json")
@@ -83,13 +78,17 @@ func (w Workspace) get_files() []string {
 	return files
 }
 
-func (w Workspace) get_deps_hash(workspaces *WorkspacesMap) string {
+func (w Workspace) get_deps_hash(wm *WorkspacesMap) string {
 	var h = sha1.New()
 	var deps_list = []string{}
 
 	for dep_name, dep_version := range w.Deps {
-		if dep_ws, ok := (*workspaces)[dep_name]; ok {
-			deps_list = append(deps_list, dep_name+":"+dep_ws.GetCacheState())
+		if ws, ok := wm.workspaces[dep_name]; ok {
+			var hash, ok = wm.hashes[dep_name]
+			if !ok {
+				hash = ws.GetCacheState()
+			}
+			deps_list = append(deps_list, dep_name+":"+hash)
 		} else {
 			deps_list = append(deps_list, dep_name+":"+dep_version)
 		}
@@ -130,75 +129,4 @@ func (w Workspace) get_rules_names() []string {
 	}
 
 	return rules
-}
-
-func GetWorkspaces(root_path string, conf *Config, cc *cache.Cache) (WorkspacesMap, error) {
-	var workspaces = make(map[string]Workspace)
-	var wg sync.WaitGroup
-	var queue = make(chan Workspace)
-	var duplicates = []string{}
-
-	for _, wc := range conf.Workspaces {
-		var ws_glob = path.Join(root_path, wc, "package.json")
-		var matches, _ = filepath.Glob(ws_glob)
-		for _, ws_path := range matches {
-			wg.Add(1)
-			go func(ws_path string) {
-				var includes, excludes = conf.GetInputs(ws_path)
-				var rules = conf.GetAllRulesForWS(root_path, ws_path)
-				queue <- NewWorkspace(root_path, ws_path, includes, excludes, cc, rules)
-			}(path.Dir(ws_path))
-		}
-	}
-
-	go func() {
-		for ws := range queue {
-			if val, ok := workspaces[ws.Name]; ok {
-				duplicates = append(duplicates, fmt.Sprintf("%s → %s → %s", ws.Name, ws.RelPath, val.RelPath))
-			} else {
-				workspaces[ws.Name] = ws
-			}
-			wg.Done()
-		}
-	}()
-
-	wg.Wait()
-
-	if len(duplicates) > 0 {
-		return workspaces, fmt.Errorf("duplicate workspaces [ %s ]", strings.Join(duplicates, " | "))
-	}
-
-	return workspaces, nil
-}
-
-func InvalidateWorkspaces(workspaces *WorkspacesMap, target string, cc *cache.Cache) map[string]string {
-	var updated = map[string]string{}
-	var wg sync.WaitGroup
-	var queue = make(chan []string)
-
-	for name, ws := range *workspaces {
-		wg.Add(1)
-		go func(name string, ws Workspace) {
-			var ws_hash = ws.Hash(workspaces)
-			var state_key = ClearTaskName(GetTaskName(target, ws.Name))
-			if cc.ReadData(state_key) == ws_hash {
-				queue <- []string{}
-			} else {
-				queue <- []string{name, ws_hash}
-			}
-		}(name, ws)
-	}
-
-	go func() {
-		for dat := range queue {
-			if len(dat) > 0 {
-				updated[dat[0]] = dat[1]
-			}
-			wg.Done()
-		}
-	}()
-
-	wg.Wait()
-
-	return updated
 }

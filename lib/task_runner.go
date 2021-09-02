@@ -14,9 +14,7 @@ import (
 
 func CreateTasksFromWorkspaces(
 	cmd string,
-	workspaces *WorkspacesMap,
-	updated_ws *map[string]string,
-	affected_ws *map[string]string,
+	wm *WorkspacesMap,
 	config *Config,
 	lg *LoggerGroup,
 ) map[string]Task {
@@ -30,7 +28,7 @@ func CreateTasksFromWorkspaces(
 			return
 		}
 
-		var ws = (*workspaces)[ws_name]
+		var ws = wm.workspaces[ws_name]
 		var rule, has_rule = ws.GetRule(cmd)
 
 		if !has_rule {
@@ -43,7 +41,7 @@ func CreateTasksFromWorkspaces(
 			if dep[0] == '@' {
 				dep = dep[1:]
 				for dep_name := range ws.Deps {
-					if _, ok := (*affected_ws)[dep_name]; ok {
+					if _, ok := wm.affected[dep_name]; ok {
 						deps = append(deps, dep_name+":"+dep)
 						__create_tasks(dep, dep_name)
 					}
@@ -55,8 +53,8 @@ func CreateTasksFromWorkspaces(
 		}
 
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) error {
-			var ws = (*workspaces)[ws.Name]
-			var ws_hash = ws.Hash(workspaces)
+			var ws = wm.workspaces[ws.Name]
+			var ws_hash = ws.Hash(wm)
 
 			for _, dep := range t.Deps {
 				if tasks[dep].status == TASK_STATUS_FAILURE {
@@ -93,7 +91,7 @@ func CreateTasksFromWorkspaces(
 					return err
 				}
 
-				ws_hash = ws.Hash(workspaces)
+				ws_hash = ws.Hash(wm)
 				t.CacheLog(&ctx.cache, ws_hash, out)
 			}
 
@@ -101,7 +99,7 @@ func CreateTasksFromWorkspaces(
 		}, rule.CacheOutput)
 	}
 
-	for ws := range *affected_ws {
+	for ws := range wm.affected {
 		__create_tasks(cmd, ws)
 	}
 
@@ -113,7 +111,7 @@ type TaskResult struct {
 	err     error
 }
 
-func RunTasks(ctx *Context, tasks *map[string]Task, workspaces *WorkspacesMap, lg *LoggerGroup) {
+func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var mesure_mu sync.Mutex
@@ -216,25 +214,27 @@ func RunTasks(ctx *Context, tasks *map[string]Task, workspaces *WorkspacesMap, l
 
 	wg.Wait()
 
-	var ws_to_hash = map[string]string{}
-	var sorted_task = top_sort_tasks(tasks)
+	lg.LogVerbose()
+	lg.LogWithBadgeVerbose("start", "   Re-hashing affected workspaces...")
+	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
+	wm.RehashAffected(lg)
+	lg.LogWithBadgeVerbose("done", "    in", ctx.stats.StopMeasure("rehash").String())
 
-	for _, task_id := range sorted_task {
-		var task = (*tasks)[task_id]
+	lg.LogVerbose()
+	lg.LogWithBadgeVerbose("start", "Caching tasks results...")
+	ctx.stats.StartMeasure("cachetasks", MEASURE_KIND_STAGE)
+	for _, task := range *tasks {
 		if task.status != TASK_STATUS_SUCCESS {
 			continue
 		}
 		var ws_name = task.ws_name
-		var ws = (*workspaces)[ws_name]
+		var ws = wm.workspaces[ws_name]
 
-		if _, ok := ws_to_hash[ws_name]; !ok {
-			ws_to_hash[ws_name] = ws.Hash(workspaces)
-			ws.CacheState(&ctx.cache, ws_to_hash[ws_name])
-		}
-
-		task.Cache(&ctx.cache, &ws, ws_to_hash[ws_name])
-		task.CacheState(&ctx.cache, ws_to_hash[ws_name])
+		ws.CacheState(&ctx.cache, wm.hashes[ws_name])
+		task.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
+		task.CacheState(&ctx.cache, wm.hashes[ws_name])
 	}
+	lg.LogWithBadgeVerbose("done", " in", ctx.stats.StopMeasure("cachetasks").String())
 
 	ctx.stats.StopMeasure("runtasks")
 }
@@ -258,33 +258,6 @@ func find_unblocked_tasks(tasks *map[string]Task) []string {
 
 		if all_deps_finished {
 			result = append(result, task_id)
-		}
-	}
-
-	return result
-}
-
-func top_sort_tasks(tasks *map[string]Task) []string {
-	var result = []string{}
-	var visited = map[string]bool{}
-
-	var process func(task_id string)
-	process = func(task_id string) {
-		var task = (*tasks)[task_id]
-
-		for _, dep := range task.Deps {
-			if _, ok := visited[dep]; !ok {
-				process(dep)
-			}
-		}
-
-		visited[task_id] = true
-		result = append(result, task_id)
-	}
-
-	for task_id := range *tasks {
-		if _, ok := visited[task_id]; !ok {
-			process(task_id)
 		}
 	}
 

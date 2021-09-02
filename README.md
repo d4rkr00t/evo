@@ -30,11 +30,11 @@
 - [x] Cache tasks afterwards
   - [x] Re-hash once per WS
   - [x] Top sort tasks
-- [ ] Race condition leads to cache pollution
-- [ ] Workspaces struct
-  - [ ] Store all WS
-  - [ ] Store all updated WS
-  - [ ] Store all affected WS
+- [x] Race condition leads to cache pollution
+- [x] Workspaces struct
+  - [x] Store all WS
+  - [x] Store all updated WS
+  - [x] Store all affected WS
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages

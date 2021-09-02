@@ -6,12 +6,12 @@ import (
 	"strings"
 )
 
-func ValidateExternalDeps(workspaces *WorkspacesMap, root_pkg_json PackageJson) error {
+func ValidateExternalDeps(wm *WorkspacesMap, root_pkg_json PackageJson) error {
 	var err = []string{}
 
-	for _, ws := range *workspaces {
+	for _, ws := range wm.workspaces {
 		for dep_name, dep_ver := range ws.Deps {
-			if _, ok := (*workspaces)[dep_name]; ok {
+			if _, ok := wm.workspaces[dep_name]; ok {
 				continue
 			}
 
