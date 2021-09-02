@@ -53,7 +53,7 @@ func ShowRules(ctx Context, ws_name string) {
 	ctx.stats.StartMeasure("show-rules", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
-	ctx.logger.LogWithBadge("query", " show hash of", ws_name)
+	ctx.logger.LogWithBadge("query", " show rules for", ws_name)
 
 	var wm, _ = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
 
