@@ -119,7 +119,6 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	var queue_size = num_goroutines * 2
 	var pqueue = make(chan string, queue_size)
 	var dqueue = make(chan TaskResult)
-	var count_done = 0
 	var in_progress int64
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
@@ -168,8 +167,6 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	lg.LogVerbose()
 	go func() {
 		for task_result := range dqueue {
-			count_done += 1
-
 			var task_id = task_result.task_id
 			var err = task_result.err
 
@@ -189,25 +186,38 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 			for _, ntask_id := range next_tasks {
 				var ntask = (*tasks)[ntask_id]
-				ntask.status = TASK_STATUS_RUNNING
-				(*tasks)[ntask_id] = ntask
-				go func(tid string) {
-					pqueue <- tid
-					lg.LogWithBadgeVerbose(tid, "added to the queue")
-				}(ntask_id)
+				if ntask.status == TASK_STATUS_PENDING {
+					ntask.status = TASK_STATUS_RUNNING
+					(*tasks)[ntask_id] = ntask
+					go func(tid string) {
+						pqueue <- tid
+						lg.LogWithBadgeVerbose(tid, "added to the queue")
+					}(ntask_id)
+				}
 			}
-			mu.Unlock()
 
-			if count_done == len(*tasks) {
+			var all_done = true
+			for _, task := range *tasks {
+				if task.status == TASK_STATUS_PENDING || task.status == TASK_STATUS_RUNNING {
+					all_done = false
+					break
+				}
+			}
+
+			if all_done {
 				close(pqueue)
 			}
+
+			mu.Unlock()
 		}
 	}()
 
 	for task_id, task := range *tasks {
 		if len(task.Deps) == 0 {
+			mu.Lock()
 			task.status = TASK_STATUS_RUNNING
 			(*tasks)[task_id] = task
+			mu.Unlock()
 			pqueue <- task_id
 		}
 	}
