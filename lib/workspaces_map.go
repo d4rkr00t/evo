@@ -39,11 +39,14 @@ func NewWorkspaceMap(root_path string, conf *Config, cc *cache.Cache) (Workspace
 func (wm *WorkspacesMap) Invalidate(target string) map[string]bool {
 	var wg sync.WaitGroup
 	var queue = make(chan []string)
+	var mu sync.RWMutex
 
 	for name, ws := range wm.workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
+			mu.RLock()
 			var ws_hash = ws.Hash(wm)
+			mu.RLock()
 			var state_key = ClearTaskName(GetTaskName(target, ws.Name))
 			if wm.cache.ReadData(state_key) == ws_hash {
 				queue <- []string{}

@@ -51,6 +51,8 @@
     - [ ] check that dependencies exist
     - [ ] check cycles
     - [ ] check that command exist
+- [ ] Accumulate errors and print them at the end
+- [ ] Replace task runner output with a spinner
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`

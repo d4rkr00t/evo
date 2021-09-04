@@ -120,6 +120,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	var pqueue = make(chan string, queue_size)
 	var dqueue = make(chan TaskResult)
 	var in_progress int64
+	var closed = false
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 
@@ -204,23 +205,30 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 				}
 			}
 
-			if all_done {
+			if all_done && !closed {
 				close(pqueue)
+				closed = true
 			}
 
 			mu.Unlock()
 		}
 	}()
 
+	var pushed = 0
+	mu.Lock()
 	for task_id, task := range *tasks {
+		if pushed >= queue_size {
+			break
+		}
+
 		if len(task.Deps) == 0 {
-			mu.Lock()
 			task.status = TASK_STATUS_RUNNING
 			(*tasks)[task_id] = task
-			mu.Unlock()
+			pushed += 1
 			pqueue <- task_id
 		}
 	}
+	mu.Unlock()
 
 	wg.Wait()
 
