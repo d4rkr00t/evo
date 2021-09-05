@@ -67,6 +67,8 @@ func CreateTasksFromWorkspaces(
 			var run = func() (string, error) {
 				var cmd = NewCmd(task_name, ws.Path, rule.Cmd, func(msg string) {
 					lg.InfoWithBadge(task_name, "→ "+msg)
+				}, func(msg string) {
+					lg.ErrorWithBadge(task_name, "→ "+msg)
 				})
 				return cmd.Run()
 			}

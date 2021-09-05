@@ -13,11 +13,12 @@ type Cmd struct {
 	dir    string
 	cmd    string
 	stdout func(msg string)
+	stderr func(msg string)
 }
 
-func NewCmd(name string, dir string, cmd string, stdout func(msg string)) Cmd {
+func NewCmd(name string, dir string, cmd string, stdout func(msg string), stderr func(msg string)) Cmd {
 	return Cmd{
-		name, dir, cmd, stdout,
+		name, dir, cmd, stdout, stderr,
 	}
 }
 

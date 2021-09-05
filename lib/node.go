@@ -20,6 +20,8 @@ func GetNodeModulesBinPath(p string) string {
 func InstallNodeDeps(root string, lg *LoggerGroup) error {
 	var cmd = NewCmd("pnpm install", root, "pnpm install", func(msg string) {
 		lg.LogWithBadge("pnpm", msg)
+	}, func(msg string) {
+		lg.ErrorWithBadge("pnpm", msg)
 	})
 	var _, err = cmd.Run()
 	return err

@@ -53,6 +53,12 @@
     - [ ] check that command exist
 - [ ] Accumulate errors and print them at the end
 - [ ] Replace task runner output with a spinner
+- [ ] FileSystem module
+  - [ ] In memory cache of file checksums, update only when update time of a file changed
+    - [ ] Preserve cache on disk
+  - [ ] Add / remove files from cache
+  - [ ] Error handling
+- [ ] Refactor task runner
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
@@ -67,11 +73,6 @@
 - [ ] Pretty print duration
 - [ ] Watch file changes during task run
   - [ ] Update FileSystem cache only when a file changes
-- [ ] FileSystem module
-  - [ ] In memory cache of file checksums, update only when update time of a file changed
-    - [ ] Preserve cache on disk
-  - [ ] Add / remove files from cache
-  - [ ] Error handling
 - [ ] More commands
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency
