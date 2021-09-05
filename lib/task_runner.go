@@ -8,7 +8,9 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 )
 
@@ -59,37 +61,37 @@ func CreateTasksFromWorkspaces(
 			for _, dep := range t.Deps {
 				if tasks[dep].status == TASK_STATUS_FAILURE {
 					var msg = fmt.Sprintf("cannot continue, dependency \"%s\" has failed", color.CyanString(tasks[dep].task_name))
-					lg.Badge(task_name).Error("error →", msg)
+					lg.Verbose().Badge(task_name).Error("error →", msg)
 					return errors.New(msg)
 				}
 			}
 
 			var run = func() (string, error) {
 				var cmd = NewCmd(task_name, ws.Path, rule.Cmd, func(msg string) {
-					lg.Badge(task_name).Info("→ " + msg)
+					lg.Verbose().Badge(task_name).Info("→ " + msg)
 				}, func(msg string) {
-					lg.Badge(task_name).Error("→ ", msg)
+					lg.Verbose().Badge(task_name).Error("→ ", msg)
 				})
 				return cmd.Run()
 			}
 
 			if !t.Invalidate(&ctx.cache, ws_hash) {
-				lg.Badge(task_name).Success("cache hit:", color.HiBlackString(ws_hash))
+				lg.Verbose().Badge(task_name).Success("cache hit:", color.HiBlackString(ws_hash))
 				var out = t.GetLogCache(&ctx.cache, ws_hash)
 				if len(out) > 0 {
-					lg.Badge(task_name).Info("→ replaying output...")
+					lg.Verbose().Badge(task_name).Info("→ replaying output...")
 					for _, line := range strings.Split(out, "\n") {
-						lg.Badge(task_name).Info("→ " + line)
+						lg.Verbose().Badge(task_name).Info("→ " + line)
 					}
 				}
 				if t.CacheOutput {
 					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
-				lg.Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
+				lg.Verbose().Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
 				var out, err = run()
 				if err != nil {
-					lg.Badge(task_name).Error("error →", err.Error())
+					lg.Verbose().Badge(task_name).Error("error →", err.Error())
 					return err
 				}
 
@@ -133,8 +135,16 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 	wg.Add(num_goroutines)
 
+	var s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+
 	lg.Log("Running tasks...")
 	lg.Log()
+
+	if !lg.logger.verbose {
+		s.Start()
+		s.Prefix = fmt.Sprintf("%s ", color.HiBlackString("│"))
+		s.Suffix = fmt.Sprintf("  done: %s / %s", "0", fmt.Sprint(len(*tasks)))
+	}
 
 	lg.Verbose().Log("Creating go routines...")
 
@@ -176,7 +186,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 			var task = (*tasks)[task_id]
 			if err == nil {
 				mesure_mu.Lock()
-				lg.Badge(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
+				lg.Verbose().Badge(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
 				mesure_mu.Unlock()
 				task.status = TASK_STATUS_SUCCESS
 			} else {
@@ -199,12 +209,17 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 			}
 
 			var all_done = true
+			var done_count = 0
 			for _, task := range *tasks {
 				if task.status == TASK_STATUS_PENDING || task.status == TASK_STATUS_RUNNING {
 					all_done = false
-					break
+					// break
+				} else {
+					done_count += 1
 				}
 			}
+
+			s.Suffix = fmt.Sprintf("   done: %s / %s", fmt.Sprint(done_count), fmt.Sprint(len(*tasks)))
 
 			if all_done && !closed {
 				close(pqueue)
@@ -256,6 +271,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	lg.Verbose().Badge("done").Info(" in", ctx.stats.StopMeasure("cachetasks").String())
 
 	ctx.stats.StopMeasure("runtasks")
+	s.Stop()
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

@@ -52,12 +52,13 @@
     - [ ] check cycles
     - [ ] check that command exist
 - [ ] Accumulate errors and print them at the end
-- [ ] Replace task runner output with a spinner
+- [x] Replace task runner output with a spinner
 - [ ] FileSystem module
   - [ ] In memory cache of file checksums, update only when update time of a file changed
     - [ ] Preserve cache on disk
   - [ ] Add / remove files from cache
   - [ ] Error handling
+- [ ] SANDBOXING !!!
 - [ ] Refactor task runner
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`

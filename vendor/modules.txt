@@ -1,6 +1,9 @@
 # github.com/bmatcuk/doublestar/v4 v4.0.2
 ## explicit
 github.com/bmatcuk/doublestar/v4
+# github.com/briandowns/spinner v1.16.0
+## explicit
+github.com/briandowns/spinner
 # github.com/fatih/color v1.12.0
 ## explicit
 github.com/fatih/color
@@ -14,7 +17,8 @@ github.com/inconshreveable/mousetrap
 github.com/ionrock/procs
 # github.com/mattn/go-colorable v0.1.8
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.12
+# github.com/mattn/go-isatty v0.0.13
+## explicit
 github.com/mattn/go-isatty
 # github.com/mattn/go-shellwords v1.0.12
 ## explicit
@@ -27,6 +31,7 @@ github.com/otiai10/copy
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# golang.org/x/sys v0.0.0-20210510120138-977fb7262007
+# golang.org/x/sys v0.0.0-20210903071746-97244b99971b
+## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
