@@ -47,7 +47,7 @@ func (c Cmd) Run() (string, error) {
 
 	cmd.ErrHandler = func(line string) string {
 		if len(line) > 0 {
-			c.stdout(line)
+			c.stderr(line)
 		}
 		return line
 	}
