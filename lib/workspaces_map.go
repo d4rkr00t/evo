@@ -46,22 +46,22 @@ func (wm *WorkspacesMap) Invalidate(target string) map[string]bool {
 		go func(name string, ws Workspace) {
 			mu.RLock()
 			var ws_hash = ws.Hash(wm)
-			mu.RLock()
+			mu.RUnlock()
 			var state_key = ClearTaskName(GetTaskName(target, ws.Name))
 			if wm.cache.ReadData(state_key) == ws_hash {
-				queue <- []string{}
-			} else {
 				queue <- []string{name, ws_hash}
+			} else {
+				queue <- []string{name, ws_hash, "updated"}
 			}
 		}(name, ws)
 	}
 
 	go func() {
 		for dat := range queue {
-			if len(dat) > 0 {
-				wm.updated[dat[0]] = true
-				wm.hashes[dat[0]] = dat[1]
-			}
+			mu.Lock()
+			wm.updated[dat[0]] = len(dat) == 3
+			wm.hashes[dat[0]] = dat[1]
+			mu.Unlock()
 			wg.Done()
 		}
 	}()
