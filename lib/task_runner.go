@@ -54,7 +54,7 @@ func CreateTasksFromWorkspaces(
 			}
 		}
 
-		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) error {
+		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) (string, error) {
 			var ws = wm.workspaces[ws.Name]
 			var ws_hash = ws.Hash(wm)
 
@@ -62,7 +62,7 @@ func CreateTasksFromWorkspaces(
 				if tasks[dep].status == TASK_STATUS_FAILURE {
 					var msg = fmt.Sprintf("cannot continue, dependency \"%s\" has failed", color.CyanString(tasks[dep].task_name))
 					lg.Verbose().Badge(task_name).Error("error →", msg)
-					return errors.New(msg)
+					return "", errors.New(msg)
 				}
 			}
 
@@ -92,14 +92,14 @@ func CreateTasksFromWorkspaces(
 				var out, err = run()
 				if err != nil {
 					lg.Verbose().Badge(task_name).Error("error →", err.Error())
-					return err
+					return out, err
 				}
 
 				ws_hash = ws.Hash(wm)
 				t.CacheLog(&ctx.cache, ws_hash, out)
 			}
 
-			return nil
+			return "", nil
 		}, rule.CacheOutput)
 	}
 
@@ -113,18 +113,20 @@ func CreateTasksFromWorkspaces(
 type TaskResult struct {
 	task_id string
 	err     error
+	out     string
 }
 
 func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *LoggerGroup) {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var mesure_mu sync.Mutex
-	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.8, float64(len(*tasks))))
+	var num_goroutines = int(math.Min(float64(runtime.NumCPU())*0.5, float64(len(*tasks))))
 	var queue_size = num_goroutines * 2
 	var pqueue = make(chan string, queue_size)
 	var dqueue = make(chan TaskResult)
 	var in_progress int64
 	var closed = false
+	var errors = []TaskResult{}
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 
@@ -135,15 +137,15 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 	wg.Add(num_goroutines)
 
-	var s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+	var progress_spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
 	lg.Log("Running tasks...")
 	lg.Log()
 
 	if !lg.logger.verbose {
-		s.Start()
-		s.Prefix = fmt.Sprintf("%s ", color.HiBlackString("│"))
-		s.Suffix = fmt.Sprintf("  done: %s / %s", "0", fmt.Sprint(len(*tasks)))
+		progress_spinner.Start()
+		progress_spinner.Prefix = color.HiBlackString("│ ")
+		progress_spinner.Suffix = fmt.Sprintf(" done: %s / %s", "0", fmt.Sprint(len(*tasks)))
 	}
 
 	lg.Verbose().Log("Creating go routines...")
@@ -162,7 +164,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 				ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
 				mesure_mu.Unlock()
 
-				var err = task.Run(ctx, &task)
+				var out, err = task.Run(ctx, &task)
 
 				mesure_mu.Lock()
 				ctx.stats.StopMeasure(task_id)
@@ -170,7 +172,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 				atomic.AddInt64(&in_progress, -1)
 
-				dqueue <- TaskResult{task_id, err}
+				dqueue <- TaskResult{task_id, err, out}
 			}
 		}()
 	}
@@ -191,6 +193,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 				task.status = TASK_STATUS_SUCCESS
 			} else {
 				task.status = TASK_STATUS_FAILURE
+				errors = append(errors, task_result)
 			}
 			(*tasks)[task_id] = task
 
@@ -213,13 +216,12 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 			for _, task := range *tasks {
 				if task.status == TASK_STATUS_PENDING || task.status == TASK_STATUS_RUNNING {
 					all_done = false
-					// break
 				} else {
 					done_count += 1
 				}
 			}
 
-			s.Suffix = fmt.Sprintf("   done: %s / %s", fmt.Sprint(done_count), fmt.Sprint(len(*tasks)))
+			progress_spinner.Suffix = fmt.Sprintf("   done: %s / %s", fmt.Sprint(done_count), fmt.Sprint(len(*tasks)))
 
 			if all_done && !closed {
 				close(pqueue)
@@ -245,12 +247,13 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 		}
 	}
 	mu.Unlock()
-
 	wg.Wait()
 
 	lg.Verbose().Log()
 	lg.Verbose().Badge("start").Info("   Re-hashing affected workspaces...")
+
 	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
+
 	wm.RehashAffected(lg)
 	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("rehash").String())
 
@@ -271,7 +274,22 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	lg.Verbose().Badge("done").Info(" in", ctx.stats.StopMeasure("cachetasks").String())
 
 	ctx.stats.StopMeasure("runtasks")
-	s.Stop()
+	progress_spinner.Stop()
+
+	if !lg.logger.verbose {
+		fmt.Println()
+	}
+
+	lg.Log()
+	if len(errors) > 0 {
+		lg.Log()
+		lg.Log("Errors:")
+		lg.Log()
+	}
+
+	for _, task_result := range errors {
+		lg.Badge(task_result.task_id).Error(task_result.err.Error(), task_result.out)
+	}
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

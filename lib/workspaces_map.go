@@ -59,7 +59,9 @@ func (wm *WorkspacesMap) Invalidate(target string) map[string]bool {
 	go func() {
 		for dat := range queue {
 			mu.Lock()
-			wm.updated[dat[0]] = len(dat) == 3
+			if len(dat) == 3 {
+				wm.updated[dat[0]] = len(dat) == 3
+			}
 			wm.hashes[dat[0]] = dat[1]
 			mu.Unlock()
 			wg.Done()

@@ -42,7 +42,6 @@ func (l Logger) CreateGroup() LoggerGroup {
 	return LoggerGroup{
 		logger: &l,
 		badge:  "",
-		logged: false,
 		condition: func() bool {
 			return true
 		},
@@ -57,7 +56,6 @@ type LoggerGroup struct {
 	logger    *Logger
 	condition func() bool
 	badge     string
-	logged    bool
 }
 
 func (lg LoggerGroup) Verbose() LoggerGroup {
@@ -81,9 +79,9 @@ func (lg *LoggerGroup) __reset__() {
 
 func (lg *LoggerGroup) end(dur time.Duration) {
 	if dur != 0 {
-		fmt.Printf("%s Completed in %s\n", color.HiBlackString(strings.ToLower("└")), color.GreenString(dur.String()))
+		fmt.Printf("%s Completed in %s\n", color.HiBlackString("└"), color.GreenString(dur.String()))
 	} else {
-		fmt.Printf("%s Completed\n", color.HiBlackString(strings.ToLower("└")))
+		fmt.Printf("%s Completed\n", color.HiBlackString("└"))
 	}
 }
 
@@ -97,8 +95,6 @@ func (lg LoggerGroup) Log(msg ...string) {
 		lg.__reset__()
 		return
 	}
-
-	lg.logged = true
 
 	var processed_msg = strings.Join(msg, " ")
 
@@ -146,9 +142,7 @@ func (lg LoggerGroup) Error(msg ...string) {
 }
 
 func (lg *LoggerGroup) End(dur time.Duration) {
-	if lg.logged {
-		lg.Log()
-	}
+	lg.Log()
 	lg.end(dur)
 }
 

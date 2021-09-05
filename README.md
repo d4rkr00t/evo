@@ -1,3 +1,62 @@
+## TODO
+
+- [ ] Add dependency install and linking
+  - [x] Cache project state
+  - [x] Install packages
+  - [x] Check if node_modules folder exists
+  - [x] Link packages
+  - [x] Link dev dependencies
+  - [ ] Link binaries
+  - [ ] Link peer dependencies (?)
+- [ ] Validations
+  - [x] Validate external dependencies
+  - [x] Validate dep cycles
+  - [x] Duplicate WS
+  - [ ] Rules
+    - [ ] check that dependencies exist
+    - [ ] check cycles
+    - [ ] check that command exist
+- [ ] FileSystem module
+  - [ ] In memory cache of file checksums, update only when update time of a file changed
+    - [ ] Preserve cache on disk
+  - [ ] Add / remove files from cache
+  - [ ] Error handling
+- [ ] SANDBOXING !!!
+- [ ] Refactor task runner
+- [ ] Different info
+  - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
+  - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
+  - [ ] Why a package is affected – `evo why pkg-a`
+- [ ] REFACTOR: Generic create a task from a rule
+- [ ] Scoped runs – `evo run build pkg-a`
+- [ ] REFACTOR: Refactor logger
+  - [ ] use to interfaces
+  - [ ] Cleaner API
+- [ ] REFACTOR: Refactor cache to interfaces
+- [ ] Throw an error when not in an EVO project
+- [ ] Pretty print duration
+- [ ] Watch file changes during task run
+  - [ ] Update FileSystem cache only when a file changes
+- [ ] More commands
+  - [ ] `evo add dep@ver` to add a dependency
+  - [ ] `evo remove dep` to remove a dependency
+  - [ ] `evo clear cache`
+  - [ ] `evo clear output` – clears all outputs from packages
+- [ ] Generators
+  - [ ] Generate a project from pnpm/yarn workspace and npm scripts
+- [ ] TESTS!!!
+- [ ] Watch mode
+- [ ] Rebuild examples with a real world use cases
+- [ ] Remote cache
+- [ ] Per rule inputs config (?)
+- [ ] `--force` to force run a command, ignoring cache
+- [ ] Implicit dependencies
+- [ ] Skip target for a WS, e.g. skip tests for a flakey package. Target should have `skip: true`
+
+---
+
+## DONE
+
 - [x] Replace `build` with `run`
 - [x] Add configuration
   - [x] Namespace config
@@ -35,57 +94,5 @@
   - [x] Store all WS
   - [x] Store all updated WS
   - [x] Store all affected WS
-- [ ] Add dependency install and linking
-  - [x] Cache project state
-  - [x] Install packages
-  - [x] Check if node_modules folder exists
-  - [x] Link packages
-  - [x] Link dev dependencies
-  - [ ] Link binaries
-  - [ ] Link peer dependencies (?)
-- [ ] Validations
-  - [x] Validate external dependencies
-  - [x] Validate dep cycles
-  - [x] Duplicate WS
-  - [ ] Rules
-    - [ ] check that dependencies exist
-    - [ ] check cycles
-    - [ ] check that command exist
-- [ ] Accumulate errors and print them at the end
 - [x] Replace task runner output with a spinner
-- [ ] FileSystem module
-  - [ ] In memory cache of file checksums, update only when update time of a file changed
-    - [ ] Preserve cache on disk
-  - [ ] Add / remove files from cache
-  - [ ] Error handling
-- [ ] SANDBOXING !!!
-- [ ] Refactor task runner
-- [ ] Different info
-  - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
-  - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
-  - [ ] Show rule with all overrides – `evo show-rule build pkg-a` (?)
-- [ ] REFACTOR: Generic create a task from a rule
-- [ ] Scoped runs – `evo run build pkg-a`
-- [ ] REFACTOR: Refactor logger
-  - [ ] use to interfaces
-  - [ ] Cleaner API
-- [ ] REFACTOR: Refactor cache to interfaces
-- [ ] Throw an error when not in an EVO project
-- [ ] Pretty print duration
-- [ ] Watch file changes during task run
-  - [ ] Update FileSystem cache only when a file changes
-- [ ] More commands
-  - [ ] `evo add dep@ver` to add a dependency
-  - [ ] `evo remove dep` to remove a dependency
-  - [ ] `evo clear cache`
-  - [ ] `evo clear output` – clears all outputs from packages
-- [ ] Generators
-  - [ ] Generate a project from pnpm/yarn workspace and npm scripts
-- [ ] TESTS!!!
-- [ ] Watch mode
-- [ ] Rebuild examples with a real world use cases
-- [ ] Remote cache
-- [ ] Per rule inputs config (?)
-- [ ] `--force` to force run a command, ignoring cache
-- [ ] Implicit dependencies
-- [ ] Skip target for a WS, e.g. skip tests for a flakey package. Target should have `skip: true`
+- [x] Accumulate errors and print them at the end

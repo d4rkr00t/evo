@@ -14,7 +14,7 @@ type Task struct {
 	CacheOutput bool
 }
 
-type task_run = func(ctx *Context, t *Task) error
+type task_run = func(ctx *Context, t *Task) (string, error)
 
 const (
 	TASK_STATUS_PENDING = iota
