@@ -71,10 +71,10 @@ func ShowRules(ctx Context, ws_name string) {
 
 		lg.Start(rule_name)
 
-		lg.LogWithBadge("cmd", "  ", rule.Cmd)
-		lg.LogWithBadge("cache", "", fmt.Sprint(rule.CacheOutput))
+		lg.Badge("cwd").Info("  ", rule.Cmd)
+		lg.Badge("cache").Info("", fmt.Sprint(rule.CacheOutput))
 		if len(rule.Deps) > 0 {
-			lg.LogWithBadge("deps", " ", strings.Join(rule.Deps, " | "))
+			lg.Badge("deps").Info(" ", strings.Join(rule.Deps, " | "))
 		}
 
 		lg.EndPlain()

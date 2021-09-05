@@ -117,7 +117,7 @@ func (wm *WorkspacesMap) RehashAffected(lg *LoggerGroup) {
 		}
 
 		wm.hashes[ws_name] = ws.Hash(wm)
-		lg.LogWithBadgeVerbose("rehashed", ws_name, wm.hashes[ws_name])
+		lg.Verbose().Badge("rehashed").Info(ws_name, wm.hashes[ws_name])
 	}
 
 	for ws_name := range wm.affected {

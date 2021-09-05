@@ -64,7 +64,7 @@ func install_dependencies_step(ctx *Context) (bool, error) {
 		var err = InstallNodeDeps(ctx.root, &install_lg)
 
 		if err != nil {
-			install_lg.ErrorWithBadge("pnpm", err.Error())
+			install_lg.Badge("pnpm").Error(err.Error())
 			install_lg.End(ctx.stats.StopMeasure("install"))
 			return false, err
 		}
@@ -84,19 +84,19 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
 	var wm, ws_err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
 
 	if ws_err != nil {
-		invalidate_lg.ErrorWithBadge("error", ws_err.Error())
+		invalidate_lg.Badge("error").Error(ws_err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 		return false, wm
 	}
 
 	if err := ValidateExternalDeps(&wm, ctx.root_pkg_json); err != nil {
-		invalidate_lg.ErrorWithBadge("error", err.Error())
+		invalidate_lg.Badge("error").Error(err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 		return false, wm
 	}
 
 	if err := ValidateDepsGraph(&wm.dep_graph); err != nil {
-		invalidate_lg.ErrorWithBadge("error", err.Error())
+		invalidate_lg.Badge("error").Error(err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 		return false, wm
 	}
@@ -104,19 +104,17 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
 	wm.Invalidate(ctx.target)
 
 	if len(wm.updated) > 0 {
-		invalidate_lg.LogWithBadge(
-			"updated",
+		invalidate_lg.Badge("updated").Info(
 			color.CyanString(fmt.Sprint((len(wm.updated)))),
 			"of",
 			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
 			"workspaces",
 		)
 
-		invalidate_lg.LogVerbose("")
-		invalidate_lg.LogVerbose("Calculating affected workspaces...")
+		invalidate_lg.Verbose().Log("")
+		invalidate_lg.Verbose().Log("Calculating affected workspaces...")
 		wm.GetAffected()
-		invalidate_lg.LogWithBadge(
-			"affected",
+		invalidate_lg.Badge("affected").Info(
 			color.CyanString(fmt.Sprint((len(wm.affected)))),
 			"of",
 			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
@@ -137,7 +135,7 @@ func linking_step(ctx *Context, wm *WorkspacesMap) (bool, error) {
 	var linking_lg = ctx.logger.CreateGroup()
 	linking_lg.Start("Linking workspaces...")
 	LinkWorkspaces(ctx.root, wm)
-	linking_lg.EndCollapsed(ctx.stats.StopMeasure("linking"))
+	linking_lg.End(ctx.stats.StopMeasure("linking"))
 	return true, nil
 }
 
@@ -155,7 +153,7 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 	)
 
 	if len(tasks) > 0 {
-		run_lg.LogVerbose("Executing tasks...")
+		run_lg.Verbose().Log("Executing tasks...")
 		RunTasks(ctx, &tasks, workspaces, &run_lg)
 	} else {
 		run_lg.Warn("No tasks found, skipping...")

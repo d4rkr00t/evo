@@ -59,37 +59,37 @@ func CreateTasksFromWorkspaces(
 			for _, dep := range t.Deps {
 				if tasks[dep].status == TASK_STATUS_FAILURE {
 					var msg = fmt.Sprintf("cannot continue, dependency \"%s\" has failed", color.CyanString(tasks[dep].task_name))
-					lg.ErrorWithBadge(task_name, "error →", msg)
+					lg.Badge(task_name).Error("error →", msg)
 					return errors.New(msg)
 				}
 			}
 
 			var run = func() (string, error) {
 				var cmd = NewCmd(task_name, ws.Path, rule.Cmd, func(msg string) {
-					lg.InfoWithBadge(task_name, "→ "+msg)
+					lg.Badge(task_name).Info("→ " + msg)
 				}, func(msg string) {
-					lg.ErrorWithBadge(task_name, "→ "+msg)
+					lg.Badge(task_name).Error("→ ", msg)
 				})
 				return cmd.Run()
 			}
 
 			if !t.Invalidate(&ctx.cache, ws_hash) {
-				lg.SuccessWithBadge(task_name, "cache hit:", color.HiBlackString(ws_hash))
+				lg.Badge(task_name).Success("cache hit:", color.HiBlackString(ws_hash))
 				var out = t.GetLogCache(&ctx.cache, ws_hash)
 				if len(out) > 0 {
-					lg.InfoWithBadge(task_name, "→ replaying output...")
+					lg.Badge(task_name).Info("→ replaying output...")
 					for _, line := range strings.Split(out, "\n") {
-						lg.InfoWithBadge(task_name, "→ "+line)
+						lg.Badge(task_name).Info("→ " + line)
 					}
 				}
 				if t.CacheOutput {
 					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
 				}
 			} else {
-				lg.InfoWithBadge(task_name, "running →", color.HiBlackString(rule.Cmd))
+				lg.Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
 				var out, err = run()
 				if err != nil {
-					lg.ErrorWithBadge(task_name, "error →", err.Error())
+					lg.Badge(task_name).Error("error →", err.Error())
 					return err
 				}
 
@@ -126,9 +126,9 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 
-	lg.LogWithBadge("threads", fmt.Sprint(num_goroutines))
-	lg.LogWithBadge("tasks", " ", fmt.Sprint(len(*tasks)))
-	lg.LogVerbose("queue size ->", fmt.Sprint(queue_size), "| num cpus ->", fmt.Sprint(runtime.NumCPU()))
+	lg.Badge("threads").Info(fmt.Sprint(num_goroutines))
+	lg.Badge("tasks").Info(" ", fmt.Sprint(len(*tasks)))
+	lg.Verbose().Log("queue size ->", fmt.Sprint(queue_size), "| num cpus ->", fmt.Sprint(runtime.NumCPU()))
 	lg.Log()
 
 	wg.Add(num_goroutines)
@@ -136,7 +136,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	lg.Log("Running tasks...")
 	lg.Log()
 
-	lg.LogVerbose("Creating go routines...")
+	lg.Verbose().Log("Creating go routines...")
 
 	for i := 0; i < num_goroutines; i++ {
 		go func() {
@@ -154,7 +154,6 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 				var err = task.Run(ctx, &task)
 
-				// TODO: Fix this lock later
 				mesure_mu.Lock()
 				ctx.stats.StopMeasure(task_id)
 				mesure_mu.Unlock()
@@ -166,8 +165,8 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 		}()
 	}
 
-	lg.LogVerbose("Starting done routine...")
-	lg.LogVerbose()
+	lg.Verbose().Log("Starting done routine...")
+	lg.Verbose().Log()
 	go func() {
 		for task_result := range dqueue {
 			var task_id = task_result.task_id
@@ -177,7 +176,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 			var task = (*tasks)[task_id]
 			if err == nil {
 				mesure_mu.Lock()
-				lg.SuccessWithBadge(task_id, "done in "+color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
+				lg.Badge(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
 				mesure_mu.Unlock()
 				task.status = TASK_STATUS_SUCCESS
 			} else {
@@ -194,7 +193,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 					(*tasks)[ntask_id] = ntask
 					go func(tid string) {
 						pqueue <- tid
-						lg.LogWithBadgeVerbose(tid, "added to the queue")
+						lg.Verbose().Badge(tid).Log("added to the queue")
 					}(ntask_id)
 				}
 			}
@@ -234,14 +233,14 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 	wg.Wait()
 
-	lg.LogVerbose()
-	lg.LogWithBadgeVerbose("start", "   Re-hashing affected workspaces...")
+	lg.Verbose().Log()
+	lg.Verbose().Badge("start").Info("   Re-hashing affected workspaces...")
 	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
 	wm.RehashAffected(lg)
-	lg.LogWithBadgeVerbose("done", "    in", ctx.stats.StopMeasure("rehash").String())
+	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("rehash").String())
 
-	lg.LogVerbose()
-	lg.LogWithBadgeVerbose("start", "Caching tasks results...")
+	lg.Verbose().Log()
+	lg.Verbose().Badge("start").Info("Caching tasks results...")
 	ctx.stats.StartMeasure("cachetasks", MEASURE_KIND_STAGE)
 	for _, task := range *tasks {
 		if task.status != TASK_STATUS_SUCCESS {
@@ -254,7 +253,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 		task.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
 		task.CacheState(&ctx.cache, wm.hashes[ws_name])
 	}
-	lg.LogWithBadgeVerbose("done", " in", ctx.stats.StopMeasure("cachetasks").String())
+	lg.Verbose().Badge("done").Info(" in", ctx.stats.StopMeasure("cachetasks").String())
 
 	ctx.stats.StopMeasure("runtasks")
 }
