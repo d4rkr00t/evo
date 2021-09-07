@@ -159,9 +159,9 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 		run_lg.Warn("No tasks found, skipping...")
 	}
 
-	if !run_lg.logger.verbose {
-		run_lg.Log()
-	}
+	// if !run_lg.logger.verbose {
+	// 	run_lg.Log()
+	// }
 
 	run_lg.End(ctx.stats.StopMeasure("run"))
 	return false, nil

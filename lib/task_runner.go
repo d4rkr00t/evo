@@ -280,16 +280,15 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 		fmt.Println()
 	}
 
-	lg.Log()
 	if len(errors) > 0 {
 		lg.Log()
 		lg.Log("Errors:")
 		lg.Log()
+		for _, task_result := range errors {
+			lg.Badge(task_result.task_id).Error(task_result.err.Error(), task_result.out)
+		}
 	}
 
-	for _, task_result := range errors {
-		lg.Badge(task_result.task_id).Error(task_result.err.Error(), task_result.out)
-	}
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

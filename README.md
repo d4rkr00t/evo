@@ -21,6 +21,7 @@
     - [ ] Preserve cache on disk
   - [ ] Add / remove files from cache
   - [ ] Error handling
+- [ ] Non-zero exit code when had failing tasks
 - [ ] SANDBOXING !!!
 - [ ] Refactor task runner
 - [ ] Different info
