@@ -29,6 +29,10 @@ func NewWorkspace(root_path string, ws_path string, includes []string, excludes 
 
 	var Deps = package_json.Dependencies
 
+	if Deps == nil {
+		Deps = map[string]string{}
+	}
+
 	for dep, ver := range package_json.DevDependencies {
 		Deps[dep] = ver
 	}
@@ -37,7 +41,7 @@ func NewWorkspace(root_path string, ws_path string, includes []string, excludes 
 		Name:     package_json.Name,
 		Path:     ws_path,
 		RelPath:  rel_path,
-		Deps:     package_json.Dependencies,
+		Deps:     Deps,
 		Includes: includes,
 		Excludes: excludes,
 		Rules:    rules,
