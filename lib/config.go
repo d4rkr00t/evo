@@ -2,6 +2,7 @@ package lib
 
 import (
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -41,8 +42,15 @@ func (c Config) GetAllRulesForWS(root_path string, ws_path string) map[string]Ru
 		rules[name] = expand_cmd(rule)
 	}
 
+	var override_groups = []string{}
+	for group_name := range c.Overrides {
+		override_groups = append(override_groups, group_name)
+	}
+	sort.Strings(override_groups)
+
 	// Adding rule overrides
-	for group_name, group := range c.Overrides {
+	for _, group_name := range override_groups {
+		var group = c.Overrides[group_name]
 		var abs_group_path = path.Join(root_path, group_name)
 		if strings.HasPrefix(ws_path, abs_group_path) {
 			for name, rule := range group.Rules {
