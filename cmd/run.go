@@ -44,6 +44,10 @@ var RunCmd = &cobra.Command{
 			pkg_json.GetConfig(),
 		)
 
-		lib.Run(ctx)
+		var err = lib.Run(ctx)
+
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }

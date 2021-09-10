@@ -116,7 +116,7 @@ type TaskResult struct {
 	out     string
 }
 
-func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *LoggerGroup) {
+func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *LoggerGroup) error {
 	var wg sync.WaitGroup
 	var mu sync.RWMutex
 	var mesure_mu sync.Mutex
@@ -126,7 +126,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	var dqueue = make(chan TaskResult)
 	var in_progress int64
 	var closed = false
-	var errors = []TaskResult{}
+	var task_errors = []TaskResult{}
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 
@@ -193,7 +193,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 				task.status = TASK_STATUS_SUCCESS
 			} else {
 				task.status = TASK_STATUS_FAILURE
-				errors = append(errors, task_result)
+				task_errors = append(task_errors, task_result)
 			}
 			(*tasks)[task_id] = task
 
@@ -280,15 +280,18 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 		fmt.Println()
 	}
 
-	if len(errors) > 0 {
+	if len(task_errors) > 0 {
 		lg.Log()
 		lg.Log("Errors:")
 		lg.Log()
-		for _, task_result := range errors {
+		for _, task_result := range task_errors {
 			lg.Badge(task_result.task_id).Error(task_result.err.Error(), task_result.out)
 		}
+
+		return errors.New("")
 	}
 
+	return nil
 }
 
 func find_unblocked_tasks(tasks *map[string]Task) []string {

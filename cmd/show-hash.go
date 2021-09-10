@@ -43,6 +43,10 @@ var ShowHashCmd = &cobra.Command{
 			pkg_json.GetConfig(),
 		)
 
-		lib.ShowHash(ctx, args[0])
+		var err = lib.ShowHash(ctx, args[0])
+
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }

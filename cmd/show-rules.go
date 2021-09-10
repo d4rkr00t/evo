@@ -43,6 +43,10 @@ var ShowRulesCmd = &cobra.Command{
 			pkg_json.GetConfig(),
 		)
 
-		lib.ShowRules(ctx, args[0])
+		var err = lib.ShowRules(ctx, args[0])
+
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }

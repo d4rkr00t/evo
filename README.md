@@ -1,5 +1,11 @@
 ## TODO
 
+- [ ] Use .gitignore in addition to include/exclude in evo config
+- [ ] Skip WS if target doesn't exist
+- [ ] Running multiple targets `evo run build test lint`
+- [ ] Rule `outputs`
+- [ ] Improve unknown dependency error message
+- [ ] Put overrides to file system
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -16,12 +22,7 @@
     - [ ] check that dependencies exist
     - [ ] check cycles
     - [ ] check that command exist
-- [ ] FileSystem module
-  - [ ] In memory cache of file checksums, update only when update time of a file changed
-    - [ ] Preserve cache on disk
-  - [ ] Add / remove files from cache
-  - [ ] Error handling
-- [ ] Non-zero exit code when had failing tasks
+- [ ] Multi-spinner
 - [ ] SANDBOXING !!!
 - [ ] Refactor task runner
 - [ ] Different info
@@ -31,7 +32,7 @@
 - [ ] REFACTOR: Generic create a task from a rule
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] REFACTOR: Refactor logger
-  - [ ] use to interfaces
+  - [ ] to interfaces
   - [ ] Cleaner API
 - [ ] REFACTOR: Refactor cache to interfaces
 - [ ] Throw an error when not in an EVO project
@@ -43,7 +44,7 @@
   - [ ] `evo remove dep` to remove a dependency
   - [ ] `evo clear cache`
   - [ ] `evo clear output` – clears all outputs from packages
-- [ ] Generators
+- [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] TESTS!!!
 - [ ] Watch mode
@@ -58,6 +59,12 @@
 
 ## DONE
 
+- [x] Non-zero exit code when had failing tasks
+- [x] FileSystem module
+  - [x] In memory cache of file checksums, update only when update time of a file changed
+    - [x] Preserve cache on disk
+  - [x] Add / remove files from cache
+  - [x] Error handling
 - [x] Replace `build` with `run`
 - [x] Add configuration
   - [x] Namespace config

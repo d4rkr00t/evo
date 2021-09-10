@@ -1,22 +1,27 @@
 package lib
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
 
-func ShowHash(ctx Context, ws_name string) {
+func ShowHash(ctx Context, ws_name string) error {
 	ctx.stats.StartMeasure("show-hash", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
 	ctx.logger.LogWithBadge("query", " show hash of", ws_name)
 
-	var wm, _ = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
+	var wm, err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
+
+	if err != nil {
+		return err
+	}
 
 	var ws, ok = wm.workspaces[ws_name]
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
-		return
+		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
 	}
 
 	var lg = ctx.logger.CreateGroup()
@@ -47,20 +52,26 @@ func ShowHash(ctx Context, ws_name string) {
 	lg.Log("–", ws.Hash(&wm))
 
 	lg.End(ctx.stats.StopMeasure("show-hash"))
+
+	return nil
 }
 
-func ShowRules(ctx Context, ws_name string) {
+func ShowRules(ctx Context, ws_name string) error {
 	ctx.stats.StartMeasure("show-rules", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
 	ctx.logger.LogWithBadge("query", " show rules for", ws_name)
 
-	var wm, _ = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
+	var wm, err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
+
+	if err != nil {
+		return err
+	}
 
 	var ws, ok = wm.workspaces[ws_name]
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
-		return
+		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
 	}
 
 	ctx.logger.Log()
@@ -80,4 +91,5 @@ func ShowRules(ctx Context, ws_name string) {
 		lg.EndPlain()
 	}
 
+	return nil
 }

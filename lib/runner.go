@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func Run(ctx Context) {
+func Run(ctx Context) error {
 	ctx.stats.StartMeasure("total", MEASURE_KIND_STAGE)
 	defer print_total_time(&ctx)
 
@@ -18,22 +18,24 @@ func Run(ctx Context) {
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
 	ctx.logger.LogWithBadge("target", color.CyanString(ctx.target))
 
-	should_continue, _ := install_dependencies_step(&ctx)
+	should_continue, err := install_dependencies_step(&ctx)
 	if !should_continue {
-		return
+		return err
 	}
 
-	should_continue, wm := invalidate_workspaces_step(&ctx)
+	should_continue, wm, err := invalidate_workspaces_step(&ctx)
 	if !should_continue {
-		return
+		return err
 	}
 
-	should_continue, _ = linking_step(&ctx, &wm)
+	should_continue, err = linking_step(&ctx, &wm)
 	if !should_continue {
-		return
+		return err
 	}
 
-	run_step(&ctx, &wm)
+	_, err = run_step(&ctx, &wm)
+
+	return err
 }
 
 func print_total_time(ctx *Context) {
@@ -76,7 +78,7 @@ func install_dependencies_step(ctx *Context) (bool, error) {
 	return true, nil
 }
 
-func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
+func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 	ctx.stats.StartMeasure("invalidate", MEASURE_KIND_STAGE)
 	var invalidate_lg = ctx.logger.CreateGroup()
 	invalidate_lg.Start("Invalidating workspaces...")
@@ -86,19 +88,19 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
 	if ws_err != nil {
 		invalidate_lg.Badge("error").Error(ws_err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, wm
+		return false, wm, ws_err
 	}
 
 	if err := ValidateExternalDeps(&wm, ctx.root_pkg_json); err != nil {
 		invalidate_lg.Badge("error").Error(err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, wm
+		return false, wm, err
 	}
 
 	if err := ValidateDepsGraph(&wm.dep_graph); err != nil {
 		invalidate_lg.Badge("error").Error(err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, wm
+		return false, wm, err
 	}
 
 	wm.Invalidate(ctx.target)
@@ -110,9 +112,6 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
 			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
 			"workspaces",
 		)
-
-		invalidate_lg.Verbose().Log("")
-		invalidate_lg.Verbose().Log("Calculating affected workspaces...")
 		wm.GetAffected()
 		invalidate_lg.Badge("affected").Info(
 			color.CyanString(fmt.Sprint((len(wm.affected)))),
@@ -122,12 +121,12 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap) {
 		)
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 
-		return true, wm
+		return true, wm, nil
 	}
 
 	invalidate_lg.Log("Everything is up-to-date.")
 	invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-	return false, wm
+	return false, wm, nil
 }
 
 func linking_step(ctx *Context, wm *WorkspacesMap) (bool, error) {
@@ -151,18 +150,15 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 		&ctx.config,
 		&run_lg,
 	)
+	var err error = nil
 
 	if len(tasks) > 0 {
 		run_lg.Verbose().Log("Executing tasks...")
-		RunTasks(ctx, &tasks, workspaces, &run_lg)
+		err = RunTasks(ctx, &tasks, workspaces, &run_lg)
 	} else {
 		run_lg.Warn("No tasks found, skipping...")
 	}
 
-	// if !run_lg.logger.verbose {
-	// 	run_lg.Log()
-	// }
-
 	run_lg.End(ctx.stats.StopMeasure("run"))
-	return false, nil
+	return false, err
 }
