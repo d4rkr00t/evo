@@ -1,6 +1,5 @@
 ## TODO
 
-- [ ] Skip WS if target doesn't exist
 - [ ] Rule `outputs`
 - [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Put overrides to file system
@@ -58,6 +57,8 @@
 
 ## DONE
 
+- [x] Skip WS if target doesn't exist
+- [x] Running multiple targets `evo run build test lint`
 - [x] Non-zero exit code when had failing tasks
 - [x] FileSystem module
   - [x] In memory cache of file checksums, update only when update time of a file changed
@@ -103,4 +104,3 @@
   - [x] Store all affected WS
 - [x] Replace task runner output with a spinner
 - [x] Accumulate errors and print them at the end
-- [x] Running multiple targets `evo run build test lint`

@@ -15,7 +15,6 @@ func Run(ctx Context) error {
 	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
 	os.Setenv("ROOT", ctx.root)
 
-	ctx.logger.Log()
 	ctx.logger.LogWithBadge("root", "   "+ctx.cwd)
 	ctx.logger.LogWithBadge("targets", color.CyanString(strings.Join(ctx.target, ", ")))
 

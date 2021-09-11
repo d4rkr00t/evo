@@ -44,8 +44,11 @@ func CreateTasksFromWorkspaces(
 				dep = dep[1:]
 				for dep_name := range ws.Deps {
 					if _, ok := wm.affected[dep_name]; ok {
-						deps = append(deps, dep_name+":"+dep)
-						__create_tasks(dep, dep_name)
+						var _, has_rule = wm.workspaces[dep_name].GetRule(dep)
+						if has_rule {
+							deps = append(deps, dep_name+":"+dep)
+							__create_tasks(dep, dep_name)
+						}
 					}
 				}
 			} else {
@@ -257,6 +260,10 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
 
 	wm.RehashAffected(lg)
+	for ws_name := range wm.affected {
+		var ws = wm.workspaces[ws_name]
+		ws.CacheState(&ctx.cache, wm.hashes[ws_name])
+	}
 	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("rehash").String())
 
 	lg.Verbose().Log()
@@ -266,10 +273,10 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 		if task.status != TASK_STATUS_SUCCESS {
 			continue
 		}
+
 		var ws_name = task.ws_name
 		var ws = wm.workspaces[ws_name]
 
-		ws.CacheState(&ctx.cache, wm.hashes[ws_name])
 		task.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
 		task.CacheState(&ctx.cache, wm.hashes[ws_name])
 	}

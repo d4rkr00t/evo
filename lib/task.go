@@ -2,6 +2,7 @@ package lib
 
 import (
 	"evo/main/lib/cache"
+	"fmt"
 	"strings"
 )
 
@@ -79,4 +80,8 @@ func ClearTaskName(name string) string {
 
 func GetTaskName(target string, ws_name string) string {
 	return ws_name + ":" + target
+}
+
+func (t Task) String() string {
+	return fmt.Sprintf("%s:%s", t.ws_name, t.task_name)
 }

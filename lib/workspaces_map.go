@@ -49,6 +49,10 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 			mu.RUnlock()
 			var updated = false
 			for _, target := range targets {
+				var _, has_rule = ws.GetRule(target)
+				if !has_rule {
+					continue
+				}
 				var state_key = ClearTaskName(GetTaskName(target, ws.Name))
 				if wm.cache.ReadData(state_key) != ws_hash {
 					queue <- []string{name, ws_hash, "updated"}
@@ -57,7 +61,11 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 				}
 			}
 			if !updated {
-				queue <- []string{name, ws_hash}
+				if ws.GetCacheState() != ws_hash {
+					queue <- []string{name, ws_hash, "updated"}
+				} else {
+					queue <- []string{name, ws_hash}
+				}
 			}
 		}(name, ws)
 	}
