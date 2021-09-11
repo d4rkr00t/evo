@@ -35,7 +35,7 @@ var ShowHashCmd = &cobra.Command{
 		var ctx = lib.NewContext(
 			cwd,
 			cwd,
-			"",
+			[]string{},
 			pkg_json,
 			cache.NewCache(cwd),
 			lib.NewLogger(verbose),

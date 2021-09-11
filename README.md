@@ -1,11 +1,10 @@
 ## TODO
 
-- [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Skip WS if target doesn't exist
-- [ ] Running multiple targets `evo run build test lint`
 - [ ] Rule `outputs`
-- [ ] Improve unknown dependency error message
+- [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Put overrides to file system
+- [ ] Improve unknown dependency error message
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -104,3 +103,4 @@
   - [x] Store all affected WS
 - [x] Replace task runner output with a spinner
 - [x] Accumulate errors and print them at the end
+- [x] Running multiple targets `evo run build test lint`

@@ -36,7 +36,7 @@ func NewWorkspaceMap(root_path string, conf *Config, cc *cache.Cache) (Workspace
 	}, nil
 }
 
-func (wm *WorkspacesMap) Invalidate(target string) map[string]bool {
+func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 	var wg sync.WaitGroup
 	var queue = make(chan []string)
 	var mu sync.RWMutex
@@ -47,11 +47,17 @@ func (wm *WorkspacesMap) Invalidate(target string) map[string]bool {
 			mu.RLock()
 			var ws_hash = ws.Hash(wm)
 			mu.RUnlock()
-			var state_key = ClearTaskName(GetTaskName(target, ws.Name))
-			if wm.cache.ReadData(state_key) == ws_hash {
+			var updated = false
+			for _, target := range targets {
+				var state_key = ClearTaskName(GetTaskName(target, ws.Name))
+				if wm.cache.ReadData(state_key) != ws_hash {
+					queue <- []string{name, ws_hash, "updated"}
+					updated = true
+					break
+				}
+			}
+			if !updated {
 				queue <- []string{name, ws_hash}
-			} else {
-				queue <- []string{name, ws_hash, "updated"}
 			}
 		}(name, ws)
 	}

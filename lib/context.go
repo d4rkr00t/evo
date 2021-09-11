@@ -5,7 +5,7 @@ import "evo/main/lib/cache"
 type Context struct {
 	root          string
 	cwd           string
-	target        string
+	target        []string
 	root_pkg_json PackageJson
 	cache         cache.Cache
 	logger        Logger
@@ -16,7 +16,7 @@ type Context struct {
 func NewContext(
 	root string,
 	cwd string,
-	target string,
+	target []string,
 	root_pkg_json PackageJson,
 	cache cache.Cache,
 	logger Logger,

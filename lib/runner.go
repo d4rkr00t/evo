@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -15,8 +16,8 @@ func Run(ctx Context) error {
 	os.Setenv("ROOT", ctx.root)
 
 	ctx.logger.Log()
-	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
-	ctx.logger.LogWithBadge("target", color.CyanString(ctx.target))
+	ctx.logger.LogWithBadge("root", "   "+ctx.cwd)
+	ctx.logger.LogWithBadge("targets", color.CyanString(strings.Join(ctx.target, ", ")))
 
 	should_continue, err := install_dependencies_step(&ctx)
 	if !should_continue {
@@ -142,7 +143,7 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 	ctx.stats.StartMeasure("run", MEASURE_KIND_STAGE)
 	var run_lg = ctx.logger.CreateGroup()
 
-	run_lg.Start(fmt.Sprintf("Running target → %s", color.CyanString(ctx.target)))
+	run_lg.Start(fmt.Sprintf("Running targets → %s", color.CyanString(strings.Join(ctx.target, ", "))))
 
 	var tasks = CreateTasksFromWorkspaces(
 		ctx.target,

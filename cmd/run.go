@@ -36,7 +36,7 @@ var RunCmd = &cobra.Command{
 		var ctx = lib.NewContext(
 			cwd,
 			cwd,
-			args[0],
+			args,
 			pkg_json,
 			cache.NewCache(cwd),
 			lib.NewLogger(verbose),

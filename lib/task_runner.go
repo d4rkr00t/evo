@@ -15,7 +15,7 @@ import (
 )
 
 func CreateTasksFromWorkspaces(
-	cmd string,
+	targets []string,
 	wm *WorkspacesMap,
 	config *Config,
 	lg *LoggerGroup,
@@ -104,7 +104,9 @@ func CreateTasksFromWorkspaces(
 	}
 
 	for ws := range wm.affected {
-		__create_tasks(cmd, ws)
+		for _, target := range targets {
+			__create_tasks(target, ws)
+		}
 	}
 
 	return tasks
