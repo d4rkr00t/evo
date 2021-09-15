@@ -42,7 +42,7 @@ func GlobFiles(ws_path string, include_pattens *[]string, exclude_pattens *[]str
 			return nil
 		}
 
-		if val, _ := doublestar.Match(include_pattern, p); val {
+		if val, _ := doublestar.Match(include_pattern, p); val || len(*include_pattens) == 0 {
 			result = append(result, p)
 		}
 

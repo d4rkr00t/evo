@@ -8,15 +8,11 @@
       "packages/opaline/*",
       "packages/ts/*"
     ],
-    "inputs": {
-      "includes": [
-        "**/tsconfig.json",
-        "**/*.ts"
-      ],
-      "excludes": [
-        "**/node_modules"
-      ]
-    },
+    "excludes": [
+      "**/node_modules",
+      "*.md",
+      "package.json"
+    ],
     "commands": {
       "@typescript": "tsc -p ./tsconfig.json"
     },
@@ -25,7 +21,8 @@
         "cmd": "@typescript",
         "cacheOutput": true,
         "outputs": [
-          "dist"
+          "dist",
+          "tsconfig.tsbuildinfo"
         ],
         "deps": [
           "@build",
@@ -73,14 +70,6 @@
         }
       },
       "packages/dummy": {
-        "inputs": {
-          "includes": [
-            "**/*.js"
-          ],
-          "excludes": [
-            "**/node_modules"
-          ]
-        },
         "rules": {
           "build": {
             "cmd": "echo $ROOT",

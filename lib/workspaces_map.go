@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 )
@@ -90,30 +89,14 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 }
 
 func (wm *WorkspacesMap) GetAffected() map[string]bool {
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	var guard = make(chan struct{}, runtime.NumCPU())
-
 	for ws_name := range wm.updated {
-		mu.Lock()
 		wm.affected[ws_name] = true
-		mu.Unlock()
 		for _, name := range wm.dep_graph.GetAllDependant(ws_name) {
 			if _, ok := (wm.updated)[name]; !ok {
-				wg.Add(1)
-				guard <- struct{}{}
-				go func(name string) {
-					mu.Lock()
-					wm.affected[name] = true
-					<-guard
-					mu.Unlock()
-					wg.Done()
-				}(name)
+				wm.affected[name] = true
 			}
 		}
 	}
-
-	wg.Wait()
 
 	return wm.affected
 }
@@ -154,9 +137,9 @@ func get_workspaces(root_path string, conf *Config, cc *cache.Cache) (map[string
 		for _, ws_path := range matches {
 			wg.Add(1)
 			go func(ws_path string) {
-				var includes, excludes = conf.GetInputs(ws_path)
+				var excludes = conf.GetExcludes(ws_path)
 				var rules = conf.GetAllRulesForWS(root_path, ws_path)
-				queue <- NewWorkspace(root_path, ws_path, includes, excludes, cc, rules)
+				queue <- NewWorkspace(root_path, ws_path, excludes, cc, rules)
 			}(path.Dir(ws_path))
 		}
 	}

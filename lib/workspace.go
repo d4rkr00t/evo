@@ -16,7 +16,6 @@ type Workspace struct {
 	Path      string
 	RelPath   string
 	Deps      map[string]string
-	Includes  []string
 	Excludes  []string
 	Outputs   []string
 	Rules     map[string]Rule
@@ -25,7 +24,7 @@ type Workspace struct {
 	cache     *cache.Cache
 }
 
-func NewWorkspace(root_path string, ws_path string, includes []string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
+func NewWorkspace(root_path string, ws_path string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
 	var package_json_path = path.Join(ws_path, "package.json")
 	var package_json = NewPackageJson(package_json_path)
 	var rel_path, _ = filepath.Rel(root_path, ws_path)
@@ -46,7 +45,9 @@ func NewWorkspace(root_path string, ws_path string, includes []string, excludes 
 		outputs = append(outputs, rule.Outputs...)
 	}
 
-	var files []string = fileutils.GlobFiles(ws_path, &includes, &outputs)
+	excludes = append(excludes, outputs...)
+
+	var files []string = fileutils.GlobFiles(ws_path, &[]string{}, &excludes)
 	sort.Strings(files)
 	var fileshash = fileutils.GetFileListHash(files)
 
@@ -55,7 +56,6 @@ func NewWorkspace(root_path string, ws_path string, includes []string, excludes 
 		Path:      ws_path,
 		RelPath:   rel_path,
 		Deps:      Deps,
-		Includes:  includes,
 		Excludes:  excludes,
 		Rules:     rules,
 		Outputs:   outputs,
@@ -90,7 +90,7 @@ func (w Workspace) GetCacheState() string {
 }
 
 func (w Workspace) get_files() []string {
-	var files []string = fileutils.GlobFiles(w.Path, &w.Includes, &w.Outputs)
+	var files []string = fileutils.GlobFiles(w.Path, &[]string{}, &w.Excludes)
 	sort.Strings(files)
 	return files
 }

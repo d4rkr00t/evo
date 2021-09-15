@@ -99,8 +99,10 @@ func CreateTasksFromWorkspaces(
 				}
 
 				t.CacheLog(&ctx.cache, wm.hashes[ws_name], out)
-				t.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
 				t.CacheState(&ctx.cache, wm.hashes[ws_name])
+				if t.CacheOutput {
+					t.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
+				}
 			}
 
 			return "", nil
