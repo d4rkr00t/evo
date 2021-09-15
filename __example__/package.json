@@ -24,6 +24,9 @@
       "build": {
         "cmd": "@typescript",
         "cacheOutput": true,
+        "outputs": [
+          "dist"
+        ],
         "deps": [
           "@build",
           "test"
@@ -51,6 +54,9 @@
         "rules": {
           "build": {
             "cmd": "@typescript",
+            "outputs": [
+              "dist"
+            ],
             "deps": [
               "@build",
               "test",
@@ -80,8 +86,7 @@
             "cmd": "echo $ROOT",
             "deps": [
               "@build"
-            ],
-            "cacheOutput": true
+            ]
           }
         }
       }
@@ -89,10 +94,6 @@
   },
   "engines": {
     "node": ">= 10"
-  },
-  "scripts": {
-    "build": "go build main.go && cp ./main ~/.bin-temp/scu",
-    "dev": "watchexec -w ./ -e go npm run build"
   },
   "dependencies": {
     "@babel/parser": "^7.8.4",

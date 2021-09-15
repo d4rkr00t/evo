@@ -98,8 +98,9 @@ func CreateTasksFromWorkspaces(
 					return out, err
 				}
 
-				ws_hash = ws.Hash(wm)
-				t.CacheLog(&ctx.cache, ws_hash, out)
+				t.CacheLog(&ctx.cache, wm.hashes[ws_name], out)
+				t.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
+				t.CacheState(&ctx.cache, wm.hashes[ws_name])
 			}
 
 			return "", nil
@@ -255,32 +256,13 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	wg.Wait()
 
 	lg.Verbose().Log()
-	lg.Verbose().Badge("start").Info("   Re-hashing affected workspaces...")
-
+	lg.Verbose().Badge("start").Info("   Updating state of workspaces...")
 	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
-
-	wm.RehashAffected(lg)
 	for ws_name := range wm.affected {
 		var ws = wm.workspaces[ws_name]
 		ws.CacheState(&ctx.cache, wm.hashes[ws_name])
 	}
 	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("rehash").String())
-
-	lg.Verbose().Log()
-	lg.Verbose().Badge("start").Info("Caching tasks results...")
-	ctx.stats.StartMeasure("cachetasks", MEASURE_KIND_STAGE)
-	for _, task := range *tasks {
-		if task.status != TASK_STATUS_SUCCESS {
-			continue
-		}
-
-		var ws_name = task.ws_name
-		var ws = wm.workspaces[ws_name]
-
-		task.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
-		task.CacheState(&ctx.cache, wm.hashes[ws_name])
-	}
-	lg.Verbose().Badge("done").Info(" in", ctx.stats.StopMeasure("cachetasks").String())
 
 	ctx.stats.StopMeasure("runtasks")
 	progress_spinner.Stop()

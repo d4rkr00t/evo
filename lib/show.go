@@ -42,7 +42,7 @@ func ShowHash(ctx Context, ws_name string) error {
 
 	lg.Log()
 	lg.Log("Rules:")
-	var rules = ws.get_rules_names()
+	var rules = get_rules_names(&ws.Rules)
 	for _, rule := range rules {
 		lg.Log("–", rule)
 	}

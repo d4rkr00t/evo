@@ -41,11 +41,13 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 	var queue = make(chan []string)
 	var mu sync.RWMutex
 
+	wm.RehashAll()
+
 	for name, ws := range wm.workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
 			mu.RLock()
-			var ws_hash = ws.Hash(wm)
+			var ws_hash = wm.hashes[ws.Name]
 			mu.RUnlock()
 			var updated = false
 			for _, target := range targets {
@@ -116,7 +118,7 @@ func (wm *WorkspacesMap) GetAffected() map[string]bool {
 	return wm.affected
 }
 
-func (wm *WorkspacesMap) RehashAffected(lg *LoggerGroup) {
+func (wm *WorkspacesMap) RehashAll() {
 	var visited = map[string]bool{}
 
 	var process func(ws_name string)
@@ -126,17 +128,14 @@ func (wm *WorkspacesMap) RehashAffected(lg *LoggerGroup) {
 
 		for dep := range ws.Deps {
 			if _, ok := visited[dep]; !ok {
-				if _, ok := wm.affected[dep]; ok {
-					process(dep)
-				}
+				process(dep)
 			}
 		}
 
 		wm.hashes[ws_name] = ws.Hash(wm)
-		lg.Verbose().Badge("rehashed").Info(ws_name, wm.hashes[ws_name])
 	}
 
-	for ws_name := range wm.affected {
+	for ws_name := range wm.workspaces {
 		if _, ok := visited[ws_name]; !ok {
 			process(ws_name)
 		}

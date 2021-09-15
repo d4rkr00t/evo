@@ -8,6 +8,7 @@ import (
 type Rule struct {
 	Cmd         string
 	Deps        []string
+	Outputs     []string
 	CacheOutput bool
 }
 

@@ -12,14 +12,17 @@ import (
 )
 
 type Workspace struct {
-	Name     string
-	Path     string
-	RelPath  string
-	Deps     map[string]string
-	Includes []string
-	Excludes []string
-	Rules    map[string]Rule
-	cache    *cache.Cache
+	Name      string
+	Path      string
+	RelPath   string
+	Deps      map[string]string
+	Includes  []string
+	Excludes  []string
+	Outputs   []string
+	Rules     map[string]Rule
+	FilesHash string
+	RulesHash string
+	cache     *cache.Cache
 }
 
 func NewWorkspace(root_path string, ws_path string, includes []string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
@@ -37,15 +40,28 @@ func NewWorkspace(root_path string, ws_path string, includes []string, excludes 
 		Deps[dep] = ver
 	}
 
+	var outputs = []string{}
+
+	for _, rule := range rules {
+		outputs = append(outputs, rule.Outputs...)
+	}
+
+	var files []string = fileutils.GlobFiles(ws_path, &includes, &outputs)
+	sort.Strings(files)
+	var fileshash = fileutils.GetFileListHash(files)
+
 	return Workspace{
-		Name:     package_json.Name,
-		Path:     ws_path,
-		RelPath:  rel_path,
-		Deps:     Deps,
-		Includes: includes,
-		Excludes: excludes,
-		Rules:    rules,
-		cache:    cc,
+		Name:      package_json.Name,
+		Path:      ws_path,
+		RelPath:   rel_path,
+		Deps:      Deps,
+		Includes:  includes,
+		Excludes:  excludes,
+		Rules:     rules,
+		Outputs:   outputs,
+		FilesHash: fileshash,
+		RulesHash: get_rules_hash(rules),
+		cache:     cc,
 	}
 }
 
@@ -55,12 +71,9 @@ func (w Workspace) GetRule(name string) (Rule, bool) {
 }
 
 func (w Workspace) Hash(workspaces *WorkspacesMap) string {
-	var files = w.get_files()
-	var fileshash = fileutils.GetFileListHash(files)
 	var depshash = w.get_deps_hash(workspaces)
-	var ruleshash = w.get_rules_hash()
 	var h = sha1.New()
-	io.WriteString(h, depshash+":"+fileshash+":"+ruleshash)
+	io.WriteString(h, depshash+":"+w.FilesHash+":"+w.RulesHash)
 	return hex.EncodeToString(h.Sum(nil))
 }
 
@@ -77,7 +90,7 @@ func (w Workspace) GetCacheState() string {
 }
 
 func (w Workspace) get_files() []string {
-	var files []string = fileutils.GlobFiles(w.Path, &w.Includes, &w.Excludes)
+	var files []string = fileutils.GlobFiles(w.Path, &w.Includes, &w.Outputs)
 	sort.Strings(files)
 	return files
 }
@@ -107,9 +120,9 @@ func (w Workspace) get_deps_hash(wm *WorkspacesMap) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (w Workspace) get_rules_hash() string {
+func get_rules_hash(rules map[string]Rule) string {
 	var h = sha1.New()
-	var rules_list = w.get_rules_names()
+	var rules_list = get_rules_names(&rules)
 
 	for _, rule := range rules_list {
 		io.WriteString(h, rule)
@@ -118,18 +131,18 @@ func (w Workspace) get_rules_hash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (w Workspace) get_rules_names() []string {
+func get_rules_names(Rules *map[string]Rule) []string {
 	var rules_list = []string{}
 	var rules = []string{}
 
-	for rule_name := range w.Rules {
+	for rule_name := range *Rules {
 		rules_list = append(rules_list, rule_name)
 	}
 
 	sort.Strings(rules_list)
 
 	for _, rule_name := range rules_list {
-		rules = append(rules, w.Rules[rule_name].String())
+		rules = append(rules, (*Rules)[rule_name].String())
 	}
 
 	return rules
