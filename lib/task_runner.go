@@ -43,7 +43,7 @@ func CreateTasksFromWorkspaces(
 			if dep[0] == '@' {
 				dep = dep[1:]
 				for dep_name := range ws.Deps {
-					if _, ok := wm.affected[dep_name]; ok {
+					if _, ok := wm.updated[dep_name]; ok {
 						var _, has_rule = wm.workspaces[dep_name].GetRule(dep)
 						if has_rule {
 							deps = append(deps, dep_name+":"+dep)
@@ -109,7 +109,7 @@ func CreateTasksFromWorkspaces(
 		}, rule.CacheOutput)
 	}
 
-	for ws := range wm.affected {
+	for ws := range wm.updated {
 		for _, target := range targets {
 			__create_tasks(target, ws)
 		}
@@ -260,7 +260,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	lg.Verbose().Log()
 	lg.Verbose().Badge("start").Info("   Updating state of workspaces...")
 	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
-	for ws_name := range wm.affected {
+	for ws_name := range wm.updated {
 		var ws = wm.workspaces[ws_name]
 		ws.CacheState(&ctx.cache, wm.hashes[ws_name])
 	}

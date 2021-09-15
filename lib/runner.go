@@ -112,13 +112,6 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
 			"workspaces",
 		)
-		wm.GetAffected()
-		invalidate_lg.Badge("affected").Info(
-			color.CyanString(fmt.Sprint((len(wm.affected)))),
-			"of",
-			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
-			"workspaces",
-		)
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 
 		return true, wm, nil

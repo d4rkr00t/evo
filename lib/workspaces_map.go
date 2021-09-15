@@ -13,7 +13,6 @@ type WorkspacesMap struct {
 	workspaces map[string]Workspace
 	hashes     map[string]string
 	updated    map[string]bool
-	affected   map[string]bool
 	dep_graph  DepGraph
 	cache      *cache.Cache
 }
@@ -30,7 +29,6 @@ func NewWorkspaceMap(root_path string, conf *Config, cc *cache.Cache) (Workspace
 		dep_graph:  NewDepGraph(&workspaces),
 		hashes:     map[string]string{},
 		updated:    map[string]bool{},
-		affected:   map[string]bool{},
 		cache:      cc,
 	}, nil
 }
@@ -86,19 +84,6 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 	wg.Wait()
 
 	return wm.updated
-}
-
-func (wm *WorkspacesMap) GetAffected() map[string]bool {
-	for ws_name := range wm.updated {
-		wm.affected[ws_name] = true
-		for _, name := range wm.dep_graph.GetAllDependant(ws_name) {
-			if _, ok := (wm.updated)[name]; !ok {
-				wm.affected[name] = true
-			}
-		}
-	}
-
-	return wm.affected
 }
 
 func (wm *WorkspacesMap) RehashAll() {
