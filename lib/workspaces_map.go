@@ -83,7 +83,10 @@ func (wm *WorkspacesMap) RehashAll() {
 
 	var process func(ws_name string)
 	process = func(ws_name string) {
-		var ws = wm.workspaces[ws_name]
+		var ws, ok = wm.workspaces[ws_name]
+		if !ok {
+			return
+		}
 		visited[ws_name] = true
 
 		for dep := range ws.Deps {
@@ -93,6 +96,7 @@ func (wm *WorkspacesMap) RehashAll() {
 		}
 
 		ws.Rehash(wm)
+		wm.workspaces[ws.Name] = ws
 	}
 
 	for ws_name := range wm.workspaces {
