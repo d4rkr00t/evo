@@ -22,6 +22,7 @@ type Workspace struct {
 	FilesHash string
 	RulesHash string
 	cache     *cache.Cache
+	hash      string
 }
 
 func NewWorkspace(root_path string, ws_path string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
@@ -70,11 +71,12 @@ func (w Workspace) GetRule(name string) (Rule, bool) {
 	return rule, ok
 }
 
-func (w Workspace) Hash(workspaces *WorkspacesMap) string {
+func (w *Workspace) Rehash(workspaces *WorkspacesMap) string {
 	var depshash = w.get_deps_hash(workspaces)
 	var h = sha1.New()
 	io.WriteString(h, depshash+":"+w.FilesHash+":"+w.RulesHash)
-	return hex.EncodeToString(h.Sum(nil))
+	w.hash = hex.EncodeToString(h.Sum(nil))
+	return w.hash
 }
 
 func (w Workspace) GetStateKey() string {
@@ -101,11 +103,7 @@ func (w Workspace) get_deps_hash(wm *WorkspacesMap) string {
 
 	for dep_name, dep_version := range w.Deps {
 		if ws, ok := wm.workspaces[dep_name]; ok {
-			var hash, ok = wm.hashes[dep_name]
-			if !ok {
-				hash = ws.GetCacheState()
-			}
-			deps_list = append(deps_list, dep_name+":"+hash)
+			deps_list = append(deps_list, dep_name+":"+ws.hash)
 		} else {
 			deps_list = append(deps_list, dep_name+":"+dep_version)
 		}

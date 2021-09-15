@@ -1,8 +1,7 @@
 ## TODO
 
-- [ ] Pre-hash workspace
+- [ ] Cache only outputs of the target
 - [ ] Make sure target outputs exist
-- [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Put overrides to file system
 - [ ] Improve unknown dependency error message
 - [ ] Add dependency install and linking
@@ -23,6 +22,7 @@
     - [ ] check that command exist
     - [ ] check all required fields
       - [ ] provide schema (?)
+- [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Multi-spinner
 - [ ] SANDBOXING !!!
 - [ ] Refactor task runner
@@ -60,6 +60,7 @@
 
 ## DONE
 
+- [x] Pre-hash workspace
 - [x] Rule `outputs`
 - [x] Skip WS if target doesn't exist
 - [x] Running multiple targets `evo run build test lint`

@@ -59,7 +59,6 @@ func CreateTasksFromWorkspaces(
 
 		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) (string, error) {
 			var ws = wm.workspaces[ws.Name]
-			var ws_hash = ws.Hash(wm)
 
 			for _, dep := range t.Deps {
 				if tasks[dep].status == TASK_STATUS_FAILURE {
@@ -78,9 +77,9 @@ func CreateTasksFromWorkspaces(
 				return cmd.Run()
 			}
 
-			if !t.Invalidate(&ctx.cache, ws_hash) {
-				lg.Verbose().Badge(task_name).Success("cache hit:", color.HiBlackString(ws_hash))
-				var out = t.GetLogCache(&ctx.cache, ws_hash)
+			if !t.Invalidate(&ctx.cache, ws.hash) {
+				lg.Verbose().Badge(task_name).Success("cache hit:", color.HiBlackString(ws.hash))
+				var out = t.GetLogCache(&ctx.cache, ws.hash)
 				if len(out) > 0 {
 					lg.Verbose().Badge(task_name).Info("→ replaying output...")
 					for _, line := range strings.Split(out, "\n") {
@@ -88,7 +87,7 @@ func CreateTasksFromWorkspaces(
 					}
 				}
 				if t.CacheOutput {
-					ctx.cache.RestoreDir(t.GetCacheKey(ws_hash), ws.Path)
+					ctx.cache.RestoreDir(t.GetCacheKey(ws.hash), ws.Path)
 				}
 			} else {
 				lg.Verbose().Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
@@ -98,10 +97,10 @@ func CreateTasksFromWorkspaces(
 					return out, err
 				}
 
-				t.CacheLog(&ctx.cache, wm.hashes[ws_name], out)
-				t.CacheState(&ctx.cache, wm.hashes[ws_name])
+				t.CacheLog(&ctx.cache, ws.hash, out)
+				t.CacheState(&ctx.cache, ws.hash)
 				if t.CacheOutput {
-					t.Cache(&ctx.cache, &ws, wm.hashes[ws_name])
+					t.Cache(&ctx.cache, &ws, ws.hash)
 				}
 			}
 
@@ -259,12 +258,12 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 
 	lg.Verbose().Log()
 	lg.Verbose().Badge("start").Info("   Updating state of workspaces...")
-	ctx.stats.StartMeasure("rehash", MEASURE_KIND_STAGE)
+	ctx.stats.StartMeasure("wsstate", MEASURE_KIND_STAGE)
 	for ws_name := range wm.updated {
 		var ws = wm.workspaces[ws_name]
-		ws.CacheState(&ctx.cache, wm.hashes[ws_name])
+		ws.CacheState(&ctx.cache, ws.hash)
 	}
-	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("rehash").String())
+	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("wsstate").String())
 
 	ctx.stats.StopMeasure("runtasks")
 	progress_spinner.Stop()

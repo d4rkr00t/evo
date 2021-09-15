@@ -11,7 +11,6 @@ import (
 
 type WorkspacesMap struct {
 	workspaces map[string]Workspace
-	hashes     map[string]string
 	updated    map[string]bool
 	dep_graph  DepGraph
 	cache      *cache.Cache
@@ -27,7 +26,6 @@ func NewWorkspaceMap(root_path string, conf *Config, cc *cache.Cache) (Workspace
 	return WorkspacesMap{
 		workspaces: workspaces,
 		dep_graph:  NewDepGraph(&workspaces),
-		hashes:     map[string]string{},
 		updated:    map[string]bool{},
 		cache:      cc,
 	}, nil
@@ -43,9 +41,6 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 	for name, ws := range wm.workspaces {
 		wg.Add(1)
 		go func(name string, ws Workspace) {
-			mu.RLock()
-			var ws_hash = wm.hashes[ws.Name]
-			mu.RUnlock()
 			var updated = false
 			for _, target := range targets {
 				var _, has_rule = ws.GetRule(target)
@@ -53,18 +48,16 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 					continue
 				}
 				var state_key = ClearTaskName(GetTaskName(target, ws.Name))
-				if wm.cache.ReadData(state_key) != ws_hash {
-					queue <- []string{name, ws_hash, "updated"}
+				if wm.cache.ReadData(state_key) != ws.hash {
+					queue <- []string{name, "updated"}
 					updated = true
 					break
 				}
 			}
+
+			// Not updated or no matched rules, ignore
 			if !updated {
-				if ws.GetCacheState() != ws_hash {
-					queue <- []string{name, ws_hash, "updated"}
-				} else {
-					queue <- []string{name, ws_hash}
-				}
+				queue <- []string{name}
 			}
 		}(name, ws)
 	}
@@ -72,10 +65,9 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 	go func() {
 		for dat := range queue {
 			mu.Lock()
-			if len(dat) == 3 {
-				wm.updated[dat[0]] = len(dat) == 3
+			if len(dat) == 2 {
+				wm.updated[dat[0]] = true
 			}
-			wm.hashes[dat[0]] = dat[1]
 			mu.Unlock()
 			wg.Done()
 		}
@@ -100,7 +92,7 @@ func (wm *WorkspacesMap) RehashAll() {
 			}
 		}
 
-		wm.hashes[ws_name] = ws.Hash(wm)
+		ws.Rehash(wm)
 	}
 
 	for ws_name := range wm.workspaces {

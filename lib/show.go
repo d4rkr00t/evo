@@ -19,6 +19,8 @@ func ShowHash(ctx Context, ws_name string) error {
 	}
 
 	var ws, ok = wm.workspaces[ws_name]
+	ws.Rehash(&wm)
+
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
 		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
@@ -49,7 +51,7 @@ func ShowHash(ctx Context, ws_name string) error {
 
 	lg.Log()
 	lg.Log("Hash:")
-	lg.Log("–", ws.Hash(&wm))
+	lg.Log("–", ws.hash)
 
 	lg.End(ctx.stats.StopMeasure("show-hash"))
 

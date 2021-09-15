@@ -106,7 +106,7 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 	wm.Invalidate(ctx.target)
 
 	if len(wm.updated) > 0 {
-		invalidate_lg.Badge("updated").Info(
+		invalidate_lg.Badge("affected").Info(
 			color.CyanString(fmt.Sprint((len(wm.updated)))),
 			"of",
 			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
