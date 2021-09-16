@@ -4,6 +4,7 @@
 - [ ] Make sure target outputs exist
 - [ ] Put overrides to file system
 - [ ] Improve unknown dependency error message
+- [ ] Use semver comparison for dependencies
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages

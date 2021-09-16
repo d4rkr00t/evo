@@ -10,10 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var RunCmd = &cobra.Command{
-	Use:   "run <command>",
-	Short: "Run a project's commmand",
-	Long:  "Run a project's command",
+var ShowAffectedCmd = &cobra.Command{
+	Use:   "show-affected",
+	Short: "Show what packages are affected by the changes",
+	Long:  "Show what packages are affected by the changes",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("target name is required")
@@ -30,12 +30,11 @@ var RunCmd = &cobra.Command{
 		}
 
 		var verbose, _ = cmd.Flags().GetBool("verbose")
-
 		var pkg_json = lib.NewPackageJson(path.Join(cwd, "package.json"))
 		var ctx = lib.NewContext(
 			cwd,
 			cwd,
-			args,
+			[]string{},
 			pkg_json,
 			cache.NewCache(cwd),
 			lib.NewLogger(verbose),
@@ -43,7 +42,7 @@ var RunCmd = &cobra.Command{
 			pkg_json.GetConfig(),
 		)
 
-		var err = lib.Run(ctx)
+		var err = lib.ShowAffected(ctx, args)
 
 		if err != nil {
 			os.Exit(1)

@@ -95,3 +95,30 @@ func ShowRules(ctx Context, ws_name string) error {
 
 	return nil
 }
+
+func ShowAffected(ctx Context, target []string) error {
+	ctx.stats.StartMeasure("show-affected", MEASURE_KIND_STAGE)
+	ctx.logger.Log()
+	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
+	ctx.logger.LogWithBadge("query", " show affected")
+
+	var wm, err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
+
+	if err != nil {
+		return err
+	}
+
+	wm.RehashAll()
+	wm.Invalidate(target)
+
+	var lg = ctx.logger.CreateGroup()
+	lg.Start("Affected packages:")
+
+	for ws_name := range wm.updated {
+		lg.Badge(ws_name).Info(wm.workspaces[ws_name].hash)
+	}
+
+	lg.End(ctx.stats.StopMeasure("show-affected"))
+
+	return nil
+}
