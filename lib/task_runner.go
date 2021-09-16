@@ -89,6 +89,7 @@ func CreateTasksFromWorkspaces(
 				if t.CacheOutput {
 					ctx.cache.RestoreDir(t.GetCacheKey(ws.hash), ws.Path)
 				}
+				t.CacheState(&ctx.cache, ws.hash)
 			} else {
 				lg.Verbose().Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
 				var out, err = run()
