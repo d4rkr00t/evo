@@ -17,11 +17,11 @@ type PackageJson struct {
 	DevDependencies map[string]string
 }
 
-func NewPackageJson(path string) PackageJson {
+func NewPackageJson(package_json_path string) PackageJson {
 	var p PackageJson
-	var dat, _ = ioutil.ReadFile(path)
+	var dat, _ = ioutil.ReadFile(package_json_path)
 	json.Unmarshal(dat, &p)
-	p.Path = path
+	p.Path = package_json_path
 	return p
 }
 

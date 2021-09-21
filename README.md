@@ -1,9 +1,11 @@
 ## TODO
 
-- [ ] Make sure target outputs exist
 - [ ] Put overrides to file system
 - [ ] Improve unknown dependency error message
 - [ ] Use semver comparison for dependencies
+- [ ] Test infra
+- [ ] Make sure target outputs exist
+- [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -17,8 +19,8 @@
   - [x] Validate dep cycles
   - [x] Duplicate WS
   - [ ] Rules
-    - [ ] check that dependencies exist
     - [ ] check cycles
+    - [ ] check that dependencies exist
     - [ ] check that command exist
     - [ ] check all required fields
       - [ ] provide schema (?)
@@ -31,10 +33,9 @@
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
   - [ ] Why a package is affected – `evo why pkg-a`
 - [ ] REFACTOR: Generic create a task from a rule
-- [ ] Scoped runs – `evo run build pkg-a`
 - [ ] REFACTOR: Refactor logger
   - [ ] to interfaces
-  - [ ] Cleaner API
+  - [x] Cleaner API
 - [ ] REFACTOR: Refactor cache to interfaces
 - [ ] Throw an error when not in an EVO project
 - [ ] Pretty print duration
@@ -60,6 +61,7 @@
 
 ## DONE
 
+- [x] Fail when not in `evo` project
 - [x] Cache only outputs of the target
 - [x] Get rid of `cacheOutputs`
 - [x] Pre-hash workspace

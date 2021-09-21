@@ -31,19 +31,25 @@ var ShowRulesCmd = &cobra.Command{
 		}
 
 		var verbose, _ = cmd.Flags().GetBool("verbose")
-		var pkg_json = lib.NewPackageJson(path.Join(cwd, "package.json"))
-		var ctx = lib.NewContext(
-			cwd,
-			cwd,
-			[]string{},
-			pkg_json,
-			cache.NewCache(cwd),
-			lib.NewLogger(verbose),
-			lib.NewStats(),
-			pkg_json.GetConfig(),
-		)
+		var root_pkg_json, err = lib.FindRootPackageJson(cwd)
+		var logger = lib.NewLogger(verbose)
 
-		var err = lib.ShowRules(ctx, args[0])
+		if err == nil {
+			var ctx = lib.NewContext(
+				path.Dir(root_pkg_json.Path),
+				cwd,
+				args,
+				root_pkg_json,
+				cache.NewCache(cwd),
+				logger,
+				lib.NewStats(),
+				root_pkg_json.GetConfig(),
+			)
+
+			err = lib.ShowRules(ctx, args[0])
+		} else {
+			logger.Log("Error: Not in evo project!")
+		}
 
 		if err != nil {
 			os.Exit(1)
