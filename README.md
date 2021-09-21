@@ -5,6 +5,13 @@
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Put overrides to file system
 - [ ] Improve unknown dependency error message
+- [ ] REFACTOR: create tasks from workspaces
+  - [ ] REFACTOR: Generic create a task from a rule
+- [ ] REFACTOR: Refactor cache to interfaces
+- [ ] REFACTOR: Task runner
+- [ ] REFACTOR: Refactor logger
+  - [ ] to interfaces
+  - [x] Cleaner API
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -24,32 +31,27 @@
     - [ ] check all required fields
       - [ ] provide schema (?)
 - [ ] Use .gitignore in addition to include/exclude in evo config
+- [ ] Pretty print duration
 - [ ] Multi-spinner
 - [ ] SANDBOXING !!!
-- [ ] Refactor task runner
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
   - [ ] Why a package is affected – `evo why pkg-a`
-- [ ] REFACTOR: Generic create a task from a rule
-- [ ] REFACTOR: Refactor logger
-  - [ ] to interfaces
-  - [x] Cleaner API
-- [ ] REFACTOR: Refactor cache to interfaces
-- [ ] Throw an error when not in an EVO project
-- [ ] Pretty print duration
-- [ ] Watch file changes during task run
-  - [ ] Update FileSystem cache only when a file changes
+- [ ] FileSystem
+  - [ ] Cache file check-sums
+  - [ ] Update file check sums only when modified time is after previous update
+  - [ ] Watch file changes during task run
+    - [ ] Update FileSystem cache only when a file changes
 - [ ] More commands
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
+- [ ] Remote cache
+- [ ] Watch mode
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
-- [ ] TESTS!!!
-- [ ] Watch mode
-- [ ] Remote cache
 - [ ] `--force` to force run a command, ignoring cache (?)
 - [ ] Use semver comparison for dependencies (?)
 
@@ -57,6 +59,7 @@
 
 ## DONE
 
+- [x] Throw an error when not in an EVO project
 - [x] Fail when not in `evo` project
 - [x] Cache only outputs of the target
 - [x] Get rid of `cacheOutputs`
