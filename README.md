@@ -1,11 +1,10 @@
 ## TODO
 
-- [ ] Put overrides to file system
-- [ ] Improve unknown dependency error message
-- [ ] Use semver comparison for dependencies
 - [ ] Test infra
 - [ ] Make sure target outputs exist
 - [ ] Scoped runs – `evo run build pkg-a`
+- [ ] Put overrides to file system
+- [ ] Improve unknown dependency error message
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -50,12 +49,9 @@
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] TESTS!!!
 - [ ] Watch mode
-- [ ] Rebuild examples with a real world use cases
 - [ ] Remote cache
-- [ ] Per rule inputs config (?)
-- [ ] `--force` to force run a command, ignoring cache
-- [ ] Implicit dependencies
-- [ ] Skip target for a WS, e.g. skip tests for a flakey package. Target should have `skip: true`
+- [ ] `--force` to force run a command, ignoring cache (?)
+- [ ] Use semver comparison for dependencies (?)
 
 ---
 

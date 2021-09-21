@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func ValidateExternalDeps(wm *WorkspacesMap, root_pkg_json PackageJson) error {
@@ -19,20 +21,20 @@ func ValidateExternalDeps(wm *WorkspacesMap, root_pkg_json PackageJson) error {
 				if ver != dep_ver {
 					err = append(
 						err,
-						fmt.Sprintf("Dependency '%s' of a package '%s' doesn't match root package.json version '%s' != '%s'", dep_name, ws.Name, dep_ver, ver),
+						fmt.Sprintf("Dependency '%s' of a package '%s' doesn't match %s version '%s' != '%s'", color.CyanString(dep_name), color.GreenString(ws.Name), color.YellowString("root package.json"), color.GreenString(dep_ver), color.YellowString(ver)),
 					)
 				}
 			} else if ver, ok := root_pkg_json.DevDependencies[dep_name]; ok {
 				if ver != dep_ver {
 					err = append(
 						err,
-						fmt.Sprintf("Dependency '%s' of a package '%s' doesn't match root package.json version '%s' != '%s'", dep_name, ws.Name, dep_ver, ver),
+						fmt.Sprintf("Dependency '%s' of a package '%s' doesn't match %s version '%s' != '%s'", color.CyanString(dep_name), color.GreenString(ws.Name), color.YellowString("root package.json"), color.GreenString(dep_ver), color.YellowString(ver)),
 					)
 				}
 			} else {
 				err = append(
 					err,
-					fmt.Sprintf("Unknown dependency '%s' of a package '%s'", dep_name, ws.Name),
+					fmt.Sprintf("Unknown dependency '%s' of a package '%s'", color.CyanString(dep_name), color.GreenString(dep_name)),
 				)
 			}
 		}
