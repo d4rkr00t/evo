@@ -14,19 +14,16 @@
       "package.json"
     ],
     "commands": {
-      "@typescript": "tsc -p ./tsconfig.json"
+      "@typescript": "tsc -p tsconfig.json"
     },
     "rules": {
       "build": {
         "cmd": "@typescript",
-        "cacheOutput": true,
         "outputs": [
-          "dist",
-          "tsconfig.tsbuildinfo"
+          "dist"
         ],
         "deps": [
-          "@build",
-          "test"
+          "@build"
         ]
       },
       "test": {
@@ -56,10 +53,8 @@
             ],
             "deps": [
               "@build",
-              "test",
               "lint"
-            ],
-            "cacheOutput": true
+            ]
           },
           "lint": {
             "cmd": "echo 'LINT'",

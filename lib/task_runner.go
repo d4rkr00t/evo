@@ -57,7 +57,7 @@ func CreateTasksFromWorkspaces(
 			}
 		}
 
-		tasks[task_name] = NewTask(ws_name, task_name, deps, func(ctx *Context, t *Task) (string, error) {
+		tasks[task_name] = NewTask(ws_name, task_name, deps, rule.Outputs, func(ctx *Context, t *Task) (string, error) {
 			var ws = wm.workspaces[ws.Name]
 
 			for _, dep := range t.Deps {
@@ -86,8 +86,8 @@ func CreateTasksFromWorkspaces(
 						lg.Verbose().Badge(task_name).Info("→ " + line)
 					}
 				}
-				if t.CacheOutput {
-					ctx.cache.RestoreDir(t.GetCacheKey(ws.hash), ws.Path)
+				if t.HasOutputs() {
+					ctx.cache.RestoreOutputs(t.GetCacheKey(ws.hash), ws.Path, rule.Outputs)
 				}
 				t.CacheState(&ctx.cache, ws.hash)
 			} else {
@@ -100,13 +100,13 @@ func CreateTasksFromWorkspaces(
 
 				t.CacheLog(&ctx.cache, ws.hash, out)
 				t.CacheState(&ctx.cache, ws.hash)
-				if t.CacheOutput {
+				if t.HasOutputs() {
 					t.Cache(&ctx.cache, &ws, ws.hash)
 				}
 			}
 
 			return "", nil
-		}, rule.CacheOutput)
+		})
 	}
 
 	for ws := range wm.updated {

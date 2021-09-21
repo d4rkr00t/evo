@@ -7,12 +7,12 @@ import (
 )
 
 type Task struct {
-	ws_name     string
-	task_name   string
-	status      int
-	Deps        []string
-	Run         task_run
-	CacheOutput bool
+	ws_name   string
+	task_name string
+	status    int
+	Deps      []string
+	Run       task_run
+	Outputs   []string
 }
 
 type task_run = func(ctx *Context, t *Task) (string, error)
@@ -24,14 +24,14 @@ const (
 	TASK_STATUS_FAILURE = iota
 )
 
-func NewTask(ws_name string, task_name string, deps []string, run task_run, cache_output bool) Task {
+func NewTask(ws_name string, task_name string, deps []string, outputs []string, run task_run) Task {
 	return Task{
-		ws_name:     ws_name,
-		task_name:   task_name,
-		status:      TASK_STATUS_PENDING,
-		Deps:        deps,
-		Run:         run,
-		CacheOutput: cache_output,
+		ws_name:   ws_name,
+		task_name: task_name,
+		status:    TASK_STATUS_PENDING,
+		Deps:      deps,
+		Run:       run,
+		Outputs:   outputs,
 	}
 }
 
@@ -44,11 +44,11 @@ func (t Task) Invalidate(cc *cache.Cache, ws_hash string) bool {
 }
 
 func (t Task) Cache(cc *cache.Cache, ws *Workspace, ws_hash string) {
-	if t.CacheOutput {
+	if len(t.Outputs) > 0 {
 		var ignores = cache.CacheDirIgnores{
 			"node_modules": true,
 		}
-		cc.CacheDir(t.GetCacheKey(ws_hash), ws.Path, ignores)
+		cc.CacheOutputs(t.GetCacheKey(ws_hash), ws.Path, t.Outputs, ignores)
 	} else {
 		cc.CacheData(t.GetCacheKey(ws_hash), "")
 	}
@@ -72,6 +72,10 @@ func (t Task) GetCacheState(c *cache.Cache) string {
 
 func (t Task) GetLogCache(c *cache.Cache, ws_hash string) string {
 	return c.ReadData(t.GetCacheKey(ws_hash) + ":log")
+}
+
+func (t Task) HasOutputs() bool {
+	return len(t.Outputs) > 0
 }
 
 func ClearTaskName(name string) string {

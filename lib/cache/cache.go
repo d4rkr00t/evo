@@ -40,17 +40,21 @@ func (c Cache) ReadData(key string) string {
 	return string(dat)
 }
 
-func (c Cache) CacheDir(key string, dpath string, ignores CacheDirIgnores) {
-	copy.Copy(dpath, c.get_cache_path(key), copy.Options{
-		Skip: func(src string) (bool, error) {
-			var rel_src, _ = filepath.Rel(dpath, src)
-			return ignores[rel_src], nil
-		},
-	})
+func (c Cache) CacheOutputs(key string, dpath string, outputs []string, ignores CacheDirIgnores) {
+	for _, o := range outputs {
+		copy.Copy(path.Join(dpath, o), path.Join(c.get_cache_path(key), o), copy.Options{
+			Skip: func(src string) (bool, error) {
+				var rel_src, _ = filepath.Rel(dpath, src)
+				return ignores[rel_src], nil
+			},
+		})
+	}
 }
 
-func (c Cache) RestoreDir(key string, dpath string) {
-	copy.Copy(c.get_cache_path(key), dpath)
+func (c Cache) RestoreOutputs(key string, dpath string, outputs []string) {
+	for _, o := range outputs {
+		copy.Copy(path.Join(c.get_cache_path(key), o), path.Join(dpath, o))
+	}
 }
 
 func (c Cache) get_cache_path(p string) string {

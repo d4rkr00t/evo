@@ -1,6 +1,5 @@
 ## TODO
 
-- [ ] Cache only outputs of the target
 - [ ] Make sure target outputs exist
 - [ ] Put overrides to file system
 - [ ] Improve unknown dependency error message
@@ -44,8 +43,8 @@
 - [ ] More commands
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency
-  - [ ] `evo clear cache`
-  - [ ] `evo clear output` – clears all outputs from packages
+  - [ ] `evo clear-cache <package>`
+  - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] TESTS!!!
@@ -61,6 +60,8 @@
 
 ## DONE
 
+- [x] Cache only outputs of the target
+- [x] Get rid of `cacheOutputs`
 - [x] Pre-hash workspace
 - [x] Rule `outputs`
 - [x] Skip WS if target doesn't exist
