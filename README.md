@@ -1,7 +1,9 @@
 ## TODO
 
-- [ ] Test infra
+- [ ] Simple Test infra
 - [ ] Make sure target outputs exist
+  - [ ] After task run
+  - [ ] On package invalidate
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Put overrides to file system
 - [ ] Improve unknown dependency error message

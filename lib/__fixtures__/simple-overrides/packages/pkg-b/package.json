@@ -1,0 +1,7 @@
+{
+  "name": "pkg-b",
+  "description": "hello",
+  "dependencies": {
+    "pkg-a": "@"
+  }
+}

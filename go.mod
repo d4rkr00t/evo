@@ -12,5 +12,6 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/otiai10/copy v1.6.0
 	github.com/spf13/cobra v1.2.1
+	github.com/stretchr/testify v1.7.0 // indirect
 	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
 )

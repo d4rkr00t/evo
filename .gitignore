@@ -3,3 +3,5 @@ main
 package-lock.json
 node_modules
 __example__/packages/opaline/*/dist
+cov.html
+lib/__testfs__
