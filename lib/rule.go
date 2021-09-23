@@ -13,5 +13,5 @@ type Rule struct {
 }
 
 func (r Rule) String() string {
-	return fmt.Sprintf("%s:%s:%v", r.Cmd, strings.Join(r.Deps, ","), r.CacheOutput)
+	return fmt.Sprintf("%s:%s:%v", r.Cmd, strings.Join(r.Deps, ","), strings.Join(r.Outputs, ","))
 }
