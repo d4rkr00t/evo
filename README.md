@@ -1,19 +1,10 @@
 ## TODO
 
-- [ ] Simple Test infra
 - [ ] Make sure target outputs exist
   - [ ] After task run
   - [ ] On package invalidate
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Put overrides to file system
-- [ ] Improve unknown dependency error message
-- [ ] REFACTOR: create tasks from workspaces
-  - [ ] REFACTOR: Generic create a task from a rule
-- [ ] REFACTOR: Refactor cache to interfaces
-- [ ] REFACTOR: Task runner
-- [ ] REFACTOR: Refactor logger
-  - [ ] to interfaces
-  - [x] Cleaner API
 - [ ] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages
@@ -21,7 +12,15 @@
   - [x] Link packages
   - [x] Link dev dependencies
   - [ ] Link binaries
-  - [ ] Link peer dependencies (?)
+- [ ] REFACTOR: create tasks from workspaces
+  - [ ] REFACTOR: Generic create a task from a rule
+- [ ] REFACTOR: Refactor cache to interfaces
+- [ ] REFACTOR: Task runner
+- [ ] REFACTOR: Refactor logger
+  - [ ] to interfaces
+  - [x] Cleaner API
+- [ ] SANDBOXING !!!
+- [ ] Improve unknown dependency error message
 - [ ] Validations
   - [x] Validate external dependencies
   - [x] Validate dep cycles
@@ -35,7 +34,6 @@
 - [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Pretty print duration
 - [ ] Multi-spinner
-- [ ] SANDBOXING !!!
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
@@ -61,6 +59,7 @@
 
 ## DONE
 
+- [x] Simple Test infra
 - [x] Throw an error when not in an EVO project
 - [x] Fail when not in `evo` project
 - [x] Cache only outputs of the target

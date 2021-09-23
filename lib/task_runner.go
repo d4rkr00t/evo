@@ -98,11 +98,15 @@ func CreateTasksFromWorkspaces(
 					return out, err
 				}
 
-				t.CacheLog(&ctx.cache, ws.hash, out)
-				t.CacheState(&ctx.cache, ws.hash)
 				if t.HasOutputs() {
+					var err = t.ValidateOutputs(ws.Path)
+					if err != nil {
+						return out, err
+					}
 					t.Cache(&ctx.cache, &ws, ws.hash)
 				}
+				t.CacheLog(&ctx.cache, ws.hash, out)
+				t.CacheState(&ctx.cache, ws.hash)
 			}
 
 			return "", nil

@@ -2,8 +2,12 @@ package lib
 
 import (
 	"evo/main/lib/cache"
+	"evo/main/lib/fileutils"
 	"fmt"
+	"path"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 type Task struct {
@@ -78,14 +82,30 @@ func (t Task) HasOutputs() bool {
 	return len(t.Outputs) > 0
 }
 
+func (t Task) ValidateOutputs(ws_path string) error {
+	var missing = []string{}
+
+	for _, out := range t.Outputs {
+		if !fileutils.Exist(path.Join(ws_path, out)) {
+			missing = append(missing, out)
+		}
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("task \"%s\" didn't produce expected outputs: %s", color.CyanString(t.task_name), color.YellowString(strings.Join(missing, ", ")))
+	}
+
+	return nil
+}
+
+func (t Task) String() string {
+	return fmt.Sprintf("%s:%s", t.ws_name, t.task_name)
+}
+
 func ClearTaskName(name string) string {
 	return strings.Replace(name, "/", "__", -1)
 }
 
 func GetTaskName(target string, ws_name string) string {
 	return ws_name + ":" + target
-}
-
-func (t Task) String() string {
-	return fmt.Sprintf("%s:%s", t.ws_name, t.task_name)
 }
