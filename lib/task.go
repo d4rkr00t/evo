@@ -4,6 +4,7 @@ import (
 	"evo/main/lib/cache"
 	"evo/main/lib/fileutils"
 	"fmt"
+	"os"
 	"path"
 	"strings"
 
@@ -96,6 +97,12 @@ func (t Task) ValidateOutputs(ws_path string) error {
 	}
 
 	return nil
+}
+
+func (t Task) CleanOutputs(ws_path string) {
+	for _, out := range t.Outputs {
+		os.RemoveAll(path.Join(ws_path, out))
+	}
 }
 
 func (t Task) String() string {

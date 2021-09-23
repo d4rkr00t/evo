@@ -87,10 +87,13 @@ func CreateTasksFromWorkspaces(
 					}
 				}
 				if t.HasOutputs() {
+					t.CleanOutputs(ws.Path)
 					ctx.cache.RestoreOutputs(t.GetCacheKey(ws.hash), ws.Path, rule.Outputs)
 				}
 				t.CacheState(&ctx.cache, ws.hash)
 			} else {
+				lg.Verbose().Badge(task_name).Info("cleaning outputs...")
+				t.CleanOutputs(ws.Path)
 				lg.Verbose().Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
 				var out, err = run()
 				if err != nil {
@@ -262,7 +265,7 @@ func RunTasks(ctx *Context, tasks *map[string]Task, wm *WorkspacesMap, lg *Logge
 	wg.Wait()
 
 	lg.Verbose().Log()
-	lg.Verbose().Badge("start").Info("   Updating state of workspaces...")
+	lg.Verbose().Badge("start").Info("   Updating states of workspaces...")
 	ctx.stats.StartMeasure("wsstate", MEASURE_KIND_STAGE)
 	for ws_name := range wm.updated {
 		var ws = wm.workspaces[ws_name]

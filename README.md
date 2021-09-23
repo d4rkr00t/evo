@@ -1,7 +1,7 @@
 ## TODO
 
 - [ ] Make sure target outputs exist
-  - [ ] After task run
+  - [x] After task run
   - [ ] On package invalidate
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Put overrides to file system
@@ -59,6 +59,7 @@
 
 ## DONE
 
+- [x] Clean task outputs before task run
 - [x] Simple Test infra
 - [x] Throw an error when not in an EVO project
 - [x] Fail when not in `evo` project
