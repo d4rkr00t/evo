@@ -22,6 +22,8 @@ var RunCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwd_err = cmd.Flags().GetString("cwd")
+		var scope, _ = cmd.Flags().GetStringSlice("scope")
+
 		var os_cwd, _ = os.Getwd()
 		if cwd_err != nil {
 			cwd = os_cwd
@@ -38,6 +40,7 @@ var RunCmd = &cobra.Command{
 				path.Dir(root_pkg_json.Path),
 				cwd,
 				args,
+				scope,
 				root_pkg_json,
 				cache.NewCache(cwd),
 				logger,

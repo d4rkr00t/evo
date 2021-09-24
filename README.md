@@ -1,9 +1,9 @@
 ## TODO
 
+- [ ] Detect scope from `cwd`
 - [ ] Make sure target outputs exist
   - [x] After task run
   - [ ] On package invalidate
-- [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Put overrides to file system
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create a task from a rule
@@ -12,6 +12,7 @@
 - [ ] REFACTOR: Refactor logger
   - [ ] to interfaces
   - [x] Cleaner API
+  - [ ] Add debug level to the logger
 - [ ] SANDBOXING !!!
 - [ ] Improve unknown dependency error message
 - [ ] Validations
@@ -41,6 +42,7 @@
   - [ ] `evo remove dep` to remove a dependency
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
+  - [ ] `evo show-scope <package>` – show what packages are in scope
 - [ ] Remote cache
 - [ ] Watch mode
 - [ ] Generators / Templates
@@ -52,6 +54,7 @@
 
 ## DONE
 
+- [x] Scoped runs – `evo run build pkg-a`
 - [x] Add dependency install and linking
   - [x] Cache project state
   - [x] Install packages

@@ -38,6 +38,7 @@ var ShowAffectedCmd = &cobra.Command{
 				path.Dir(root_pkg_json.Path),
 				cwd,
 				args,
+				[]string{},
 				root_pkg_json,
 				cache.NewCache(cwd),
 				logger,

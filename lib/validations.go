@@ -34,7 +34,7 @@ func ValidateExternalDeps(wm *WorkspacesMap, root_pkg_json PackageJson) error {
 			} else {
 				err = append(
 					err,
-					fmt.Sprintf("Unknown dependency '%s' of a package '%s'", color.CyanString(dep_name), color.GreenString(dep_name)),
+					fmt.Sprintf("Unknown dependency '%s' of a package '%s'", color.CyanString(dep_name), color.GreenString(ws.Name)),
 				)
 			}
 		}

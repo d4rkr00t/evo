@@ -15,6 +15,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified target packages")
 	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
 	ShowHashCmd.PersistentFlags().String("cwd", "", "Override CWD")
 	ShowRulesCmd.PersistentFlags().String("cwd", "", "Override CWD")

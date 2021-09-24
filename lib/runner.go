@@ -16,6 +16,9 @@ func Run(ctx Context) error {
 	os.Setenv("ROOT", ctx.root)
 
 	ctx.logger.LogWithBadge("root", "   "+ctx.cwd)
+	if len(ctx.scope) > 0 {
+		ctx.logger.LogWithBadge("scope", "  "+color.YellowString(strings.Join(ctx.scope, ", ")))
+	}
 	ctx.logger.LogWithBadge("targets", color.CyanString(strings.Join(ctx.target, ", ")))
 
 	should_continue, err := install_dependencies_step(&ctx)
@@ -85,6 +88,10 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 
 	var wm, ws_err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
 
+	if len(ctx.scope) > 0 {
+		wm.ReduceToScope(ctx.scope)
+	}
+
 	if ws_err != nil {
 		invalidate_lg.Badge("error").Error(ws_err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
@@ -106,11 +113,16 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 	wm.Invalidate(ctx.target)
 
 	if len(wm.updated) > 0 {
+		var scoped_badge = ""
+		if len(ctx.scope) > 0 {
+			scoped_badge = "[scoped]"
+		}
 		invalidate_lg.Badge("affected").Info(
 			color.CyanString(fmt.Sprint((len(wm.updated)))),
 			"of",
 			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
 			"workspaces",
+			scoped_badge,
 		)
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 

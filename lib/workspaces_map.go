@@ -78,6 +78,33 @@ func (wm *WorkspacesMap) Invalidate(targets []string) map[string]bool {
 	return wm.updated
 }
 
+func (wm *WorkspacesMap) ReduceToScope(scope []string) {
+	var all_in_scope = map[string]Workspace{}
+
+	var idx = 0
+	for len(scope) > idx {
+		var scope_name = scope[idx]
+		if ws, ok := wm.workspaces[scope_name]; ok {
+			all_in_scope[scope_name] = ws
+
+			for dep_name := range ws.Deps {
+				if _, ok := wm.workspaces[dep_name]; ok {
+					if _, ok := all_in_scope[dep_name]; !ok {
+						scope = append(scope, dep_name)
+					}
+				}
+			}
+
+			scope = append(scope, wm.dep_graph.direct[ws.Name]...)
+		}
+
+		idx += 1
+	}
+
+	wm.workspaces = all_in_scope
+	wm.dep_graph = NewDepGraph(&all_in_scope)
+}
+
 func (wm *WorkspacesMap) RehashAll() {
 	var visited = map[string]bool{}
 
