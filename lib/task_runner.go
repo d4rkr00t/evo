@@ -88,6 +88,7 @@ func CreateTasksFromWorkspaces(
 				}
 				if t.HasOutputs() {
 					t.CleanOutputs(ws.Path)
+					lg.Verbose().Badge(task_name).Info("restoring outputs from cache...")
 					ctx.cache.RestoreOutputs(t.GetCacheKey(ws.hash), ws.Path, rule.Outputs)
 				}
 				t.CacheState(&ctx.cache, ws.hash)
