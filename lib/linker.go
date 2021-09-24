@@ -32,6 +32,18 @@ func link_local_ws(ws *Workspace, dep_ws *Workspace) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	var bin_dir = path.Join(ws.Path, "node_modules", ".bin")
+	os.MkdirAll(bin_dir, 0700)
+	for bin_name, bin_target := range dep_ws.PkgJson.Bin {
+		var bin_link_src = path.Join(ws.Path, "node_modules", foldername_from_packagename(dep_ws.Name), bin_target)
+		var bin_link_target = path.Join(bin_dir, bin_name)
+		var data = fmt.Sprintf("#!/usr/bin/env node\nrequire(\"%s\")", bin_link_src)
+		var err = os.WriteFile(bin_link_target, []byte(data), 0744)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
 
 func link_external(cwd string, ws *Workspace, name string) {

@@ -2,6 +2,7 @@ package lib
 
 import (
 	"os"
+	"path"
 	"strings"
 
 	"github.com/ionrock/procs"
@@ -26,8 +27,10 @@ func (c Cmd) Run() (string, error) {
 	var envs, args, _ = shellwords.ParseWithEnvs(c.cmd)
 	var cmd = procs.NewProcess(strings.Join(args, " "))
 	var out = []string{}
-	cmd.Dir = c.dir
+	var old_path = os.Getenv("PATH")
+	os.Setenv("PATH", path.Join(c.dir, "node_modules", ".bin")+":"+os.ExpandEnv("$PATH"))
 
+	cmd.Dir = c.dir
 	cmd.Env = procs.ParseEnv(os.Environ())
 	cmd.Env["CWD"] = c.dir
 	for _, env_string := range envs {
@@ -53,5 +56,6 @@ func (c Cmd) Run() (string, error) {
 	}
 
 	var err = cmd.Run()
+	os.Setenv("PATH", old_path)
 	return strings.Join(out, "\n"), err
 }

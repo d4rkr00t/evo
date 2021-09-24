@@ -15,6 +15,7 @@ type PackageJson struct {
 	Evo             Config
 	Dependencies    map[string]string
 	DevDependencies map[string]string
+	Bin             map[string]string
 }
 
 func NewPackageJson(package_json_path string) PackageJson {

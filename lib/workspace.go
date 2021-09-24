@@ -21,6 +21,7 @@ type Workspace struct {
 	Rules     map[string]Rule
 	FilesHash string
 	RulesHash string
+	PkgJson   PackageJson
 	cache     *cache.Cache
 	hash      string
 }
@@ -62,6 +63,7 @@ func NewWorkspace(root_path string, ws_path string, excludes []string, cc *cache
 		Outputs:   outputs,
 		FilesHash: fileshash,
 		RulesHash: get_rules_hash(rules),
+		PkgJson:   package_json,
 		cache:     cc,
 	}
 }

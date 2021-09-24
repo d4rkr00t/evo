@@ -64,6 +64,26 @@
           }
         }
       },
+      "packages/ts/pkg-c-ts": {
+        "rules": {
+          "build": {
+            "cmd": "@typescript",
+            "outputs": [
+              "dist"
+            ],
+            "deps": [
+              "@build",
+              "pkgbints"
+            ]
+          },
+          "pkgbints": {
+            "cmd": "pkg-bin-ts",
+            "deps": [
+              "@build"
+            ]
+          }
+        }
+      },
       "packages/dummy": {
         "rules": {
           "build": {

@@ -5,13 +5,6 @@
   - [ ] On package invalidate
 - [ ] Scoped runs – `evo run build pkg-a`
 - [ ] Put overrides to file system
-- [ ] Add dependency install and linking
-  - [x] Cache project state
-  - [x] Install packages
-  - [x] Check if node_modules folder exists
-  - [x] Link packages
-  - [x] Link dev dependencies
-  - [ ] Link binaries
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create a task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
@@ -59,6 +52,13 @@
 
 ## DONE
 
+- [x] Add dependency install and linking
+  - [x] Cache project state
+  - [x] Install packages
+  - [x] Check if node_modules folder exists
+  - [x] Link packages
+  - [x] Link dev dependencies
+  - [x] Link binaries
 - [x] Clean task outputs before task run
 - [x] Simple Test infra
 - [x] Throw an error when not in an EVO project

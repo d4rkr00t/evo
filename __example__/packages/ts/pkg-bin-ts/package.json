@@ -1,0 +1,6 @@
+{
+  "name": "pkg-bin-ts",
+  "bin": {
+    "pkg-bin-ts": "./dist/index.js"
+  }
+}
