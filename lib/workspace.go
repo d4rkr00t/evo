@@ -28,7 +28,7 @@ type Workspace struct {
 
 func NewWorkspace(root_path string, ws_path string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
 	var package_json_path = path.Join(ws_path, "package.json")
-	var package_json = NewPackageJson(package_json_path)
+	var package_json, _ = NewPackageJson(package_json_path)
 	var rel_path, _ = filepath.Rel(root_path, ws_path)
 
 	var Deps = package_json.Dependencies

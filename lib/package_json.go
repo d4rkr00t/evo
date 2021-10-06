@@ -18,12 +18,15 @@ type PackageJson struct {
 	Bin             map[string]string
 }
 
-func NewPackageJson(package_json_path string) PackageJson {
+func NewPackageJson(package_json_path string) (PackageJson, error) {
 	var p PackageJson
-	var dat, _ = ioutil.ReadFile(package_json_path)
+	var dat, err = ioutil.ReadFile(package_json_path)
+	if err != nil {
+		return p, err
+	}
 	json.Unmarshal(dat, &p)
 	p.Path = package_json_path
-	return p
+	return p, nil
 }
 
 func (p PackageJson) GetConfig() Config {

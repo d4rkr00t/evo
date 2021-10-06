@@ -34,15 +34,20 @@ var RunCmd = &cobra.Command{
 		var verbose, _ = cmd.Flags().GetBool("verbose")
 		var root_pkg_json, err = lib.FindRootPackageJson(cwd)
 		var logger = lib.NewLogger(verbose)
+		var root_path = path.Dir(root_pkg_json.Path)
+
+		if len(scope) == 0 {
+			scope = DetectScopeFromCWD(root_path, cwd)
+		}
 
 		if err == nil {
 			var ctx = lib.NewContext(
-				path.Dir(root_pkg_json.Path),
+				root_path,
 				cwd,
 				args,
 				scope,
 				root_pkg_json,
-				cache.NewCache(cwd),
+				cache.NewCache(root_path),
 				logger,
 				lib.NewStats(),
 				root_pkg_json.GetConfig(),

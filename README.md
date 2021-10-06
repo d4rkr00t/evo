@@ -1,19 +1,22 @@
 ## TODO
 
-- [ ] Detect scope from `cwd`
 - [ ] Make sure target outputs exist
   - [x] After task run
   - [ ] On package invalidate
-- [ ] Put overrides to file system
+- [ ] SANDBOXING !!!
 - [ ] REFACTOR: create tasks from workspaces
-  - [ ] REFACTOR: Generic create a task from a rule
+  - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
 - [ ] REFACTOR: Task runner
 - [ ] REFACTOR: Refactor logger
   - [ ] to interfaces
   - [x] Cleaner API
   - [ ] Add debug level to the logger
-- [ ] SANDBOXING !!!
+- [ ] FileSystem
+  - [ ] Cache file check-sums
+  - [ ] Update file check sums only when modified time is after previous update
+  - [ ] Watch file changes during task run
+    - [ ] Update FileSystem cache only when a file changes
 - [ ] Improve unknown dependency error message
 - [ ] Validations
   - [x] Validate external dependencies
@@ -25,35 +28,35 @@
     - [ ] check that command exist
     - [ ] check all required fields
       - [ ] provide schema (?)
-- [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] Pretty print duration
 - [ ] Multi-spinner
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
   - [ ] Why a package is affected – `evo why pkg-a`
-- [ ] FileSystem
-  - [ ] Cache file check-sums
-  - [ ] Update file check sums only when modified time is after previous update
-  - [ ] Watch file changes during task run
-    - [ ] Update FileSystem cache only when a file changes
 - [ ] More commands
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
   - [ ] `evo show-scope <package>` – show what packages are in scope
+- [ ] Put overrides to file system
+- [ ] Use .gitignore in addition to include/exclude in evo config
+- [ ] Detect unexpected outputs
 - [ ] Remote cache
 - [ ] Watch mode
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] `--force` to force run a command, ignoring cache (?)
 - [ ] Use semver comparison for dependencies (?)
+- [ ] Website
+  - [ ] Documentation
 
 ---
 
 ## DONE
 
+- [x] Detect scope from `cwd`
 - [x] Scoped runs – `evo run build pkg-a`
 - [x] Add dependency install and linking
   - [x] Cache project state
