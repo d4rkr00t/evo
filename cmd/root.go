@@ -24,6 +24,7 @@ func Execute() {
 	rootCmd.AddCommand(ShowHashCmd)
 	rootCmd.AddCommand(ShowRulesCmd)
 	rootCmd.AddCommand(ShowAffectedCmd)
+	rootCmd.AddCommand(ShowScopeCmd)
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 
 	if err := rootCmd.Execute(); err != nil {

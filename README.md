@@ -3,7 +3,6 @@
 - [ ] Make sure target outputs exist
   - [x] After task run
   - [ ] On package invalidate
-- [ ] SANDBOXING !!!
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
@@ -12,13 +11,10 @@
   - [ ] to interfaces
   - [x] Cleaner API
   - [ ] Add debug level to the logger
-- [ ] FileSystem
-  - [ ] Cache file check-sums
-  - [ ] Update file check sums only when modified time is after previous update
-  - [ ] Watch file changes during task run
-    - [ ] Update FileSystem cache only when a file changes
 - [ ] Improve unknown dependency error message
+- [ ] SANDBOXING !!!
 - [ ] Validations
+  - [ ] Warn on extra outputs (?)
   - [x] Validate external dependencies
   - [x] Validate dep cycles
   - [x] Duplicate WS
@@ -35,16 +31,25 @@
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
   - [ ] Why a package is affected – `evo why pkg-a`
 - [ ] More commands
+  - [x] `evo show-scope <package>` – show what packages are in scope
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
-  - [ ] `evo show-scope <package>` – show what packages are in scope
+  - [ ] `evo import`
+    - [ ] makes sure that all dependencies are on expected versions
+    - [ ] makes sure that all dependencies are lifted to the top level package.json
 - [ ] Put overrides to file system
 - [ ] Use .gitignore in addition to include/exclude in evo config
-- [ ] Detect unexpected outputs
 - [ ] Remote cache
 - [ ] Watch mode
+- [ ] FileSystem
+  - [ ] Cache file check-sums
+  - [ ] Update file check sums only when modified time is after previous update
+  - [ ] Watch file changes during task run
+    - [ ] Update FileSystem cache only when a file changes
+- [ ] Explore not managing dependencies for workspaces
+  - [ ] Let yarn/pnpm/npm manage dependencies for workspaces, drop custom linking logic
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] `--force` to force run a command, ignoring cache (?)

@@ -122,3 +122,29 @@ func ShowAffected(ctx Context, target []string) error {
 
 	return nil
 }
+
+func ShowScope(ctx Context, target string) error {
+	ctx.stats.StartMeasure("show-scope", MEASURE_KIND_STAGE)
+	ctx.logger.Log()
+	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
+	ctx.logger.LogWithBadge("query", " show scope for", target)
+
+	var wm, err = NewWorkspaceMap(ctx.root, &ctx.config, &ctx.cache)
+
+	if err != nil {
+		return err
+	}
+
+	wm.ReduceToScope([]string{target})
+
+	var lg = ctx.logger.CreateGroup()
+	lg.Start("Packages in scope:")
+
+	for ws_name := range wm.workspaces {
+		lg.Log("–", ws_name)
+	}
+
+	lg.End(ctx.stats.StopMeasure("show-scope"))
+
+	return nil
+}
