@@ -79,7 +79,7 @@ func (lg *LoggerGroup) __reset__() {
 
 func (lg *LoggerGroup) end(dur time.Duration) {
 	if dur != 0 {
-		fmt.Printf("%s Completed in %s\n", color.HiBlackString("└"), color.GreenString(dur.String()))
+		fmt.Printf("%s Completed in %s\n", color.HiBlackString("└"), color.GreenString(dur.Truncate(time.Millisecond).String()))
 	} else {
 		fmt.Printf("%s Completed\n", color.HiBlackString("└"))
 	}

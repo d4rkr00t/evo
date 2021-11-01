@@ -1,8 +1,5 @@
 ## TODO
 
-- [ ] Make sure target outputs exist
-  - [x] After task run
-  - [ ] On package invalidate
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
@@ -13,23 +10,24 @@
   - [ ] Add debug level to the logger
 - [ ] Improve unknown dependency error message
 - [ ] SANDBOXING !!!
+- [ ] Rules
+  - [ ] check cycles
+  - [ ] check that command exist
+  - [ ] check all required fields
+    - [ ] provide schema (?)
 - [ ] Validations
   - [ ] Warn on extra outputs (?)
   - [x] Validate external dependencies
   - [x] Validate dep cycles
   - [x] Duplicate WS
-  - [ ] Rules
-    - [ ] check cycles
-    - [ ] check that dependencies exist
-    - [ ] check that command exist
-    - [ ] check all required fields
-      - [ ] provide schema (?)
-- [ ] Pretty print duration
 - [ ] Multi-spinner
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
   - [ ] Why a package is affected – `evo why pkg-a`
+- [ ] Make sure target outputs exist
+  - [x] After task run
+  - [ ] On package invalidate – [if not invalidated restore outputs]
 - [ ] More commands
   - [x] `evo show-scope <package>` – show what packages are in scope
   - [ ] `evo add dep@ver` to add a dependency
@@ -61,6 +59,7 @@
 
 ## DONE
 
+- [x] Pretty print duration
 - [x] Detect scope from `cwd`
 - [x] Scoped runs – `evo run build pkg-a`
 - [x] Add dependency install and linking

@@ -42,7 +42,7 @@ func (s *Stats) StopMeasure(name string) time.Duration {
 		s.measures[name] = m
 		s.finished = append(s.finished, &m)
 
-		return m.duration
+		return m.duration.Truncate(time.Millisecond)
 	}
 
 	return 0
