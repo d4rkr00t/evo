@@ -38,6 +38,9 @@ github.com/spf13/pflag
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
+# github.com/zenthangplus/goccm v0.0.0-20211005163543-2f2e522aca15
+## explicit
+github.com/zenthangplus/goccm
 # golang.org/x/sys v0.0.0-20210903071746-97244b99971b
 ## explicit
 golang.org/x/sys/internal/unsafeheader

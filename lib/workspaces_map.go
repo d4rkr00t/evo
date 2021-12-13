@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/zenthangplus/goccm"
 )
 
 type WorkspacesMap struct {
@@ -135,22 +138,9 @@ func (wm *WorkspacesMap) RehashAll() {
 
 func get_workspaces(root_path string, conf *Config, cc *cache.Cache) (map[string]Workspace, error) {
 	var workspaces = make(map[string]Workspace)
-	var wg sync.WaitGroup
 	var queue = make(chan Workspace)
 	var duplicates = []string{}
-
-	for _, wc := range conf.Workspaces {
-		var ws_glob = path.Join(root_path, wc, "package.json")
-		var matches, _ = filepath.Glob(ws_glob)
-		for _, ws_path := range matches {
-			wg.Add(1)
-			go func(ws_path string) {
-				var excludes = conf.GetExcludes(ws_path)
-				var rules = conf.GetAllRulesForWS(root_path, ws_path)
-				queue <- NewWorkspace(root_path, ws_path, excludes, cc, rules)
-			}(path.Dir(ws_path))
-		}
-	}
+	var ccm = goccm.New(runtime.NumCPU())
 
 	go func() {
 		for ws := range queue {
@@ -159,11 +149,24 @@ func get_workspaces(root_path string, conf *Config, cc *cache.Cache) (map[string
 			} else {
 				workspaces[ws.Name] = ws
 			}
-			wg.Done()
+			ccm.Done()
 		}
 	}()
 
-	wg.Wait()
+	for _, wc := range conf.Workspaces {
+		var ws_glob = path.Join(root_path, wc, "package.json")
+		var matches, _ = filepath.Glob(ws_glob)
+		for _, ws_path := range matches {
+			ccm.Wait()
+			go func(ws_path string) {
+				var excludes = conf.GetExcludes(ws_path)
+				var rules = conf.GetAllRulesForWS(root_path, ws_path)
+				queue <- NewWorkspace(root_path, ws_path, excludes, cc, rules)
+			}(path.Dir(ws_path))
+		}
+	}
+
+	ccm.WaitAllDone()
 
 	if len(duplicates) > 0 {
 		return workspaces, fmt.Errorf("duplicate workspaces [ %s ]", strings.Join(duplicates, " | "))

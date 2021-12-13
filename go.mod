@@ -13,5 +13,6 @@ require (
 	github.com/otiai10/copy v1.6.0
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/zenthangplus/goccm v0.0.0-20211005163543-2f2e522aca15
 	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
 )

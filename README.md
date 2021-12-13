@@ -1,5 +1,8 @@
 ## TODO
 
+- [ ] https://github.com/pyr-sh/dag
+- [ ] Support yarn
+- [ ] Support npm
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
@@ -54,6 +57,12 @@
 - [ ] Use semver comparison for dependencies (?)
 - [ ] Website
   - [ ] Documentation
+- [ ] https://github.com/adrg/xdg
+- [ ] https://github.com/deckarep/golang-set
+- [ ] https://github.com/google/chrometracing
+- [ ] https://github.com/karrick/godirwalk
+- [ ] https://github.com/sabhiram/go-gitignore
+- [ ] https://github.com/zenthangplus/goccm
 
 ---
 
