@@ -149,7 +149,7 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 
 	run_lg.Start(fmt.Sprintf("Running targets → %s", color.CyanString(strings.Join(ctx.target, ", "))))
 
-	var tasks = CreateTasksFromWorkspaces(
+	var tasks_graph, tasks = CreateTasksFromWorkspaces2(
 		ctx.target,
 		workspaces,
 		&ctx.config,
@@ -159,7 +159,7 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 
 	if len(tasks) > 0 {
 		run_lg.Verbose().Log("Executing tasks...")
-		err = RunTasks(ctx, &tasks, workspaces, &run_lg)
+		err = RunTasks(ctx, &tasks_graph, &tasks, workspaces, &run_lg)
 	} else {
 		run_lg.Warn("No tasks found, skipping...")
 	}

@@ -11,6 +11,7 @@ require (
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/otiai10/copy v1.6.0
+	github.com/pyr-sh/dag v1.0.0
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/zenthangplus/goccm v0.0.0-20211005163543-2f2e522aca15

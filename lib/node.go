@@ -18,11 +18,12 @@ func GetNodeModulesBinPath(p string) string {
 }
 
 func InstallNodeDeps(root string, lg *LoggerGroup) error {
-	var cmd = NewCmd("pnpm install", root, "pnpm install", func(msg string) {
-		lg.Badge("pnpm").Info(msg)
-	}, func(msg string) {
-		lg.Badge("pnpm").Error(msg)
-	})
-	var _, err = cmd.Run()
-	return err
+	// var cmd = NewCmd("pnpm install", root, "pnpm install", func(msg string) {
+	// 	lg.Badge("pnpm").Info(msg)
+	// }, func(msg string) {
+	// 	lg.Badge("pnpm").Error(msg)
+	// })
+	// var _, err = cmd.Run()
+	// return err
+	return nil
 }
