@@ -1,13 +1,16 @@
 package lib
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 	"sync"
 
 	"github.com/fatih/color"
 	"github.com/pyr-sh/dag"
+	"golang.org/x/sync/semaphore"
 )
 
 func CreateTasksFromWorkspaces2(targets []string,
@@ -134,6 +137,8 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 	var mesure_mu sync.Mutex
 	var mu sync.RWMutex
 	var task_errors = []TaskResult{}
+	var sem = semaphore.NewWeighted(int64(runtime.NumCPU()))
+	var cc = context.TODO()
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 	lg.Badge("tasks").Info(fmt.Sprint(len(*tasks)))
@@ -144,6 +149,11 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 	tasks_graph.Walk(func(vx dag.Vertex) error {
 		var task_id = fmt.Sprint(vx)
 		var task = (*tasks)[task_id]
+
+		if err := sem.Acquire(cc, 1); err != nil {
+			panic(fmt.Sprintf("Failed to acquire semaphore: %v", err))
+		}
+		defer sem.Release(1)
 
 		mesure_mu.Lock()
 		ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)

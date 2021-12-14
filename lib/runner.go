@@ -104,11 +104,11 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 		return false, wm, err
 	}
 
-	if err := ValidateDepsGraph(&wm.dep_graph); err != nil {
-		invalidate_lg.Badge("error").Error(err.Error())
-		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
-		return false, wm, err
-	}
+	// if err := ValidateDepsGraph(&wm.dep_graph); err != nil {
+	// 	invalidate_lg.Badge("error").Error(err.Error())
+	// 	invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
+	// 	return false, wm, err
+	// }
 
 	wm.Invalidate(ctx.target)
 
