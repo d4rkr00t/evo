@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/fatih/color"
 	"github.com/pyr-sh/dag"
 	"golang.org/x/sync/semaphore"
@@ -19,13 +20,19 @@ func CreateTasksFromWorkspaces(targets []string,
 	lg *LoggerGroup) (dag.AcyclicGraph, map[string]Task) {
 	var graph dag.AcyclicGraph
 	var tasks = make(map[string]Task)
+	var visited = mapset.NewSet()
 
 	var create_tasks func(target string, ws_name string)
 	create_tasks = func(target string, ws_name string) {
 		var task_name = GetTaskName(target, ws_name)
-
 		var ws = wm.workspaces[ws_name]
 		var rule, has_rule = ws.GetRule(target)
+
+		if visited.Contains(task_name) {
+			return
+		}
+
+		visited.Add(task_name)
 
 		if !has_rule {
 			return

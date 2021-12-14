@@ -1,6 +1,6 @@
 ## TODO
 
-- [ ] https://github.com/pyr-sh/dag
+- [x] https://github.com/pyr-sh/dag
 - [ ] Support yarn
 - [ ] Support npm
 - [ ] REFACTOR: create tasks from workspaces
