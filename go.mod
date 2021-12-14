@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/briandowns/spinner v1.16.0
+	github.com/deckarep/golang-set v1.7.1
 	github.com/fatih/color v1.12.0
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/ionrock/procs v0.0.0-20180102005558-f53ef5630f1a

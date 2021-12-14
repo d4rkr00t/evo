@@ -5,6 +5,9 @@ github.com/bmatcuk/doublestar/v4
 ## explicit
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/deckarep/golang-set v1.7.1
+## explicit
+github.com/deckarep/golang-set
 # github.com/fatih/color v1.12.0
 ## explicit
 github.com/fatih/color
