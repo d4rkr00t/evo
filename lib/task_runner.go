@@ -14,7 +14,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-func CreateTasksFromWorkspaces2(targets []string,
+func CreateTasksFromWorkspaces(targets []string,
 	wm *WorkspacesMap,
 	config *Config,
 	lg *LoggerGroup) (dag.AcyclicGraph, map[string]Task) {

@@ -149,7 +149,7 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 
 	run_lg.Start(fmt.Sprintf("Running targets → %s", color.CyanString(strings.Join(ctx.target, ", "))))
 
-	var tasks_graph, tasks = CreateTasksFromWorkspaces2(
+	var tasks_graph, tasks = CreateTasksFromWorkspaces(
 		ctx.target,
 		workspaces,
 		&ctx.config,
