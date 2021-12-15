@@ -45,7 +45,10 @@ func (t Task) GetCacheKey(ws_hash string) string {
 }
 
 func (t Task) Invalidate(cc *cache.Cache, ws_hash string) bool {
-	return !cc.Has(t.GetCacheKey(ws_hash))
+	if len(t.Outputs) > 0 {
+		return !cc.Has(t.GetCacheKey(ws_hash))
+	}
+	return !cc.Has(t.GetCacheKey(ws_hash) + ":log")
 }
 
 func (t Task) Cache(cc *cache.Cache, ws *Workspace, ws_hash string) {
@@ -53,6 +56,7 @@ func (t Task) Cache(cc *cache.Cache, ws *Workspace, ws_hash string) {
 		var ignores = cache.CacheDirIgnores{
 			"node_modules": true,
 		}
+		println("cache", t.GetCacheKey(ws_hash))
 		cc.CacheOutputs(t.GetCacheKey(ws_hash), ws.Path, t.Outputs, ignores)
 	} else {
 		cc.CacheData(t.GetCacheKey(ws_hash), "")
