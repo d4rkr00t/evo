@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func ShowHash(ctx Context, ws_name string) error {
@@ -19,17 +21,19 @@ func ShowHash(ctx Context, ws_name string) error {
 	}
 
 	var ws, ok = wm.workspaces[ws_name]
-	ws.Rehash(&wm)
 
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
 		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
 	}
 
+	wm.RehashAll()
+	ws.Rehash(&wm)
+
 	var lg = ctx.logger.CreateGroup()
 	lg.Start("Package hash consists of:")
 
-	lg.Log("Files:")
+	lg.Log("Files:", color.HiBlackString(ws.FilesHash))
 	var files = ws.get_files()
 	for _, file_name := range files {
 		lg.Log("–", file_name)
@@ -43,7 +47,7 @@ func ShowHash(ctx Context, ws_name string) error {
 	}
 
 	lg.Log()
-	lg.Log("Rules:")
+	lg.Log("Rules:", color.HiBlackString(ws.RulesHash))
 	var rules = get_rules_names(&ws.Rules)
 	for _, rule := range rules {
 		lg.Log("–", rule)
