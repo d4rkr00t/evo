@@ -80,7 +80,7 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 		for _, dep := range t.Deps {
 			if (*tasks)[dep].status == TASK_STATUS_FAILURE {
 				var msg = fmt.Sprintf("cannot continue, dependency \"%s\" has failed", color.CyanString((*tasks)[dep].task_name))
-				lg.Badge(task_name).Error("error →", msg)
+				lg.Badge(task_name).Error("error → ", msg)
 				return "", errors.New(msg)
 			}
 		}
@@ -110,12 +110,13 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 			}
 			t.CacheState(&ctx.cache, ws.hash)
 		} else {
+			lg.Badge(task_name).Warn("cache miss:", color.HiBlackString(ws.hash))
 			lg.Badge(task_name).Info("cleaning outputs...")
 			t.CleanOutputs(ws.Path)
-			lg.Badge(task_name).Info("running →", color.HiBlackString(rule.Cmd))
+			lg.Badge(task_name).Info("running → ", color.HiBlackString(rule.Cmd))
 			var out, err = run()
 			if err != nil {
-				lg.Badge(task_name).Error("error →", err.Error())
+				lg.Badge(task_name).Error("error → ", err.Error())
 				return out, err
 			}
 
@@ -155,7 +156,10 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 
 	tasks_graph.Walk(func(vx dag.Vertex) error {
 		var task_id = fmt.Sprint(vx)
+
+		mu.RLock()
 		var task = (*tasks)[task_id]
+		mu.RUnlock()
 
 		if err := sem.Acquire(cc, 1); err != nil {
 			panic(fmt.Sprintf("Failed to acquire semaphore: %v", err))

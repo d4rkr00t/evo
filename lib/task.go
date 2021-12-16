@@ -45,7 +45,10 @@ func (t Task) GetCacheKey(ws_hash string) string {
 }
 
 func (t Task) Invalidate(cc *cache.Cache, ws_hash string) bool {
-	return !cc.Has(t.GetCacheKey(ws_hash))
+	if len(t.Outputs) > 0 {
+		return !cc.Has(t.GetCacheKey(ws_hash))
+	}
+	return !cc.Has(t.GetCacheKey(ws_hash) + ":log")
 }
 
 func (t Task) Cache(cc *cache.Cache, ws *Workspace, ws_hash string) {
