@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -16,6 +17,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified target packages")
+	RunCmd.PersistentFlags().Int("concurrency", runtime.NumCPU(), "Number of concurrently running tasks, defaults to a number of CPUs")
 	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
 	ShowHashCmd.PersistentFlags().String("cwd", "", "Override CWD")
 	ShowRulesCmd.PersistentFlags().String("cwd", "", "Override CWD")

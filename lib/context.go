@@ -11,6 +11,7 @@ type Context struct {
 	root          string
 	cwd           string
 	target        []string
+	concurrency   int
 	root_pkg_json PackageJson
 	cache         cache.Cache
 	logger        Logger
@@ -24,6 +25,7 @@ func NewContext(
 	cwd string,
 	target []string,
 	scope []string,
+	concurrency int,
 	root_pkg_json PackageJson,
 	cache cache.Cache,
 	logger Logger,
@@ -31,7 +33,7 @@ func NewContext(
 	config Config,
 ) Context {
 	return Context{
-		root, cwd, target, root_pkg_json,
+		root, cwd, target, concurrency, root_pkg_json,
 		cache, logger, stats, config, scope,
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"runtime"
 	"strings"
 	"sync"
 
@@ -145,7 +144,7 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 	var mesure_mu sync.Mutex
 	var mu sync.RWMutex
 	var task_errors = []TaskResult{}
-	var sem = semaphore.NewWeighted(int64(runtime.NumCPU()))
+	var sem = semaphore.NewWeighted(int64(ctx.concurrency))
 	var cc = context.TODO()
 
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)

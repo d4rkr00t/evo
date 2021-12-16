@@ -41,6 +41,7 @@ var ShowHashCmd = &cobra.Command{
 				cwd,
 				args,
 				[]string{},
+				1,
 				root_pkg_json,
 				cache.NewCache(root_path),
 				logger,

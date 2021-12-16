@@ -1,10 +1,12 @@
 ## TODO
 
-- [ ] Tasks cache should not depend on other tasks in the workspace
-- [ ] Limit concurency setting
+- [ ] Cache Improvements
+  - [ ] Tasks cache should not depend on other tasks in the workspace
+  - [ ] Workspace cache should only depend on the cache of the outputs of its dependencies
 - [ ] Support yarn
 - [ ] Support npm
 - [ ] Add random colors for tasks
+- [ ] Watchman integration and persistent graph
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
@@ -78,6 +80,7 @@
 
 ## DONE
 
+- [x] Limit concurrency setting
 - [x] Investigate rebuild cache miss
 - [x] REFACTOR: Task runner
 - [x] https://github.com/deckarep/golang-set

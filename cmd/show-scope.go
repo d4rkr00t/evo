@@ -41,6 +41,7 @@ var ShowScopeCmd = &cobra.Command{
 				cwd,
 				[]string{},
 				args,
+				1,
 				root_pkg_json,
 				cache.NewCache(root_path),
 				logger,

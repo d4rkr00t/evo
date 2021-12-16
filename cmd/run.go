@@ -23,6 +23,7 @@ var RunCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwd_err = cmd.Flags().GetString("cwd")
 		var scope, _ = cmd.Flags().GetStringSlice("scope")
+		var concurrency, _ = cmd.Flags().GetInt("concurrency")
 
 		var os_cwd, _ = os.Getwd()
 		if cwd_err != nil {
@@ -46,6 +47,7 @@ var RunCmd = &cobra.Command{
 				cwd,
 				args,
 				scope,
+				concurrency,
 				root_pkg_json,
 				cache.NewCache(root_path),
 				logger,
