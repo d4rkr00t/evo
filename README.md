@@ -1,12 +1,23 @@
 ## TODO
 
-- [x] https://github.com/pyr-sh/dag
+- [ ] Tasks cache should not depend on other tasks in the workspace
+- [ ] Limit concurency setting
 - [ ] Support yarn
 - [ ] Support npm
+- [ ] Add random colors for tasks
+- [ ] Cache diagnostics
+  - [ ] List of files that were used to create hash
+  - [ ] Diff to show what affected cache
+- [ ] Clean up only once before any of the tasks run (?)
+  - [ ] Might have to restore all of the other outputs
+  - [ ] Maybe make it manual?
+    - [ ] Otherwise need to hash contents of output
+- [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
+- [ ] Fix race condition in task runner
+  - [ ] Semaphore not working as expected
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
-- [ ] REFACTOR: Task runner
 - [ ] REFACTOR: Refactor logger
   - [ ] to interfaces
   - [x] Cleaner API
@@ -23,7 +34,7 @@
   - [x] Validate external dependencies
   - [x] Validate dep cycles
   - [x] Duplicate WS
-- [ ] Multi-spinner
+  - [ ] Validate task cycles
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
@@ -58,7 +69,6 @@
 - [ ] Website
   - [ ] Documentation
 - [ ] https://github.com/adrg/xdg
-- [ ] https://github.com/deckarep/golang-set
 - [ ] https://github.com/google/chrometracing
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore
@@ -68,6 +78,10 @@
 
 ## DONE
 
+- [x] Investigate rebuild cache miss
+- [x] REFACTOR: Task runner
+- [x] https://github.com/deckarep/golang-set
+- [x] https://github.com/pyr-sh/dag
 - [x] Pretty print duration
 - [x] Detect scope from `cwd`
 - [x] Scoped runs – `evo run build pkg-a`

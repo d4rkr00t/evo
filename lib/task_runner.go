@@ -157,9 +157,11 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 	tasks_graph.Walk(func(vx dag.Vertex) error {
 		var task_id = fmt.Sprint(vx)
 
-		mu.RLock()
+		mu.Lock()
 		var task = (*tasks)[task_id]
-		mu.RUnlock()
+		task.status = TASK_STATUS_RUNNING
+		(*tasks)[task_id] = task
+		mu.Unlock()
 
 		if err := sem.Acquire(cc, 1); err != nil {
 			panic(fmt.Sprintf("Failed to acquire semaphore: %v", err))

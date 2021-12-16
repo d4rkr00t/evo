@@ -56,7 +56,6 @@ func (t Task) Cache(cc *cache.Cache, ws *Workspace, ws_hash string) {
 		var ignores = cache.CacheDirIgnores{
 			"node_modules": true,
 		}
-		println("cache", t.GetCacheKey(ws_hash))
 		cc.CacheOutputs(t.GetCacheKey(ws_hash), ws.Path, t.Outputs, ignores)
 	} else {
 		cc.CacheData(t.GetCacheKey(ws_hash), "")
