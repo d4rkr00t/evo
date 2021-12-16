@@ -5,7 +5,6 @@
   - [ ] Workspace cache should only depend on the cache of the outputs of its dependencies
 - [ ] Support yarn
 - [ ] Support npm
-- [ ] Add random colors for tasks
 - [ ] Watchman integration and persistent graph
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
@@ -15,7 +14,7 @@
   - [ ] Maybe make it manual?
     - [ ] Otherwise need to hash contents of output
 - [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
-- [ ] Fix race condition in task runner
+- [ ] Fix race condition in task runner (?) – didn't see happening anymore
   - [ ] Semaphore not working as expected
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
@@ -27,7 +26,6 @@
 - [ ] Improve unknown dependency error message
 - [ ] SANDBOXING !!!
 - [ ] Rules
-  - [ ] check cycles
   - [ ] check that command exist
   - [ ] check all required fields
     - [ ] provide schema (?)
@@ -73,13 +71,14 @@
 - [ ] https://github.com/adrg/xdg
 - [ ] https://github.com/google/chrometracing
 - [ ] https://github.com/karrick/godirwalk
-- [ ] https://github.com/sabhiram/go-gitignore
-- [ ] https://github.com/zenthangplus/goccm
+- [ ] https://github.com/sabhiram/go-gitignore (?)
 
 ---
 
 ## DONE
 
+- [x] Add random colors for badges
+- [x] https://github.com/zenthangplus/goccm
 - [x] Limit concurrency setting
 - [x] Investigate rebuild cache miss
 - [x] REFACTOR: Task runner

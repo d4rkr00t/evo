@@ -15,6 +15,7 @@ type Task struct {
 	ws_name   string
 	task_name string
 	status    int
+	color     string
 	Deps      []string
 	Run       task_run
 	Outputs   []string
@@ -29,10 +30,20 @@ const (
 	TASK_STATUS_FAILURE = iota
 )
 
+var task_badge_colors = []string{
+	"cyan",
+	"green",
+	"magenta",
+	"red",
+	"yellow",
+	"blue",
+}
+
 func NewTask(ws_name string, task_name string, deps []string, outputs []string, run task_run) Task {
 	return Task{
 		ws_name:   ws_name,
 		task_name: task_name,
+		color:     task_badge_colors[StrToNum(task_name)%len(task_badge_colors)],
 		status:    TASK_STATUS_PENDING,
 		Deps:      deps,
 		Run:       run,

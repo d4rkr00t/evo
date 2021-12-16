@@ -53,9 +53,10 @@ func (l Logger) CreateGroup() LoggerGroup {
 //
 
 type LoggerGroup struct {
-	logger    *Logger
-	condition func() bool
-	badge     string
+	logger     *Logger
+	condition  func() bool
+	badge      string
+	badgeColor string
 }
 
 func (lg LoggerGroup) Verbose() LoggerGroup {
@@ -68,6 +69,29 @@ func (lg LoggerGroup) Verbose() LoggerGroup {
 func (lg LoggerGroup) Badge(badge string) LoggerGroup {
 	lg.badge = badge
 	return lg
+}
+
+func (lg LoggerGroup) BadgeColor(color string) LoggerGroup {
+	lg.badgeColor = color
+	return lg
+}
+
+func (lg LoggerGroup) __color_badge__(color_name string, color_fn func(string, ...interface{}) string) string {
+	switch color_name {
+	case "red":
+		return color.RedString(lg.badge)
+	case "cyan":
+		return color.CyanString(lg.badge)
+	case "green":
+		return color.GreenString(lg.badge)
+	case "magenta":
+		return color.MagentaString(lg.badge)
+	case "yellow":
+		return color.YellowString(lg.badge)
+	case "blue":
+		return color.BlueString(lg.badge)
+	}
+	return color_fn(lg.badge)
 }
 
 func (lg *LoggerGroup) __reset__() {
@@ -112,21 +136,21 @@ func (lg LoggerGroup) Log(msg ...string) {
 
 func (lg LoggerGroup) Info(msg ...string) {
 	if len(lg.badge) > 0 {
-		lg.badge = color.BlueString(lg.badge)
+		lg.badge = lg.__color_badge__(lg.badgeColor, color.BlueString)
 	}
 	lg.Log(msg...)
 }
 
 func (lg LoggerGroup) Success(msg ...string) {
 	if len(lg.badge) > 0 {
-		lg.badge = color.GreenString(lg.badge)
+		lg.badge = lg.__color_badge__(lg.badgeColor, color.GreenString)
 	}
 	lg.Log(msg...)
 }
 
 func (lg LoggerGroup) Warn(msg ...string) {
 	if len(lg.badge) > 0 {
-		lg.badge = color.CyanString(lg.badge)
+		lg.badge = lg.__color_badge__(lg.badgeColor, color.CyanString)
 	}
 	if len(msg) > 0 {
 		msg[0] = color.CyanString(msg[0])
@@ -136,7 +160,7 @@ func (lg LoggerGroup) Warn(msg ...string) {
 
 func (lg LoggerGroup) Error(msg ...string) {
 	if len(lg.badge) > 0 {
-		lg.badge = color.RedString(lg.badge)
+		lg.badge = lg.__color_badge__(lg.badgeColor, color.RedString)
 	}
 	lg.Log(msg...)
 }

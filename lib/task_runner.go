@@ -79,43 +79,43 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 		for _, dep := range t.Deps {
 			if (*tasks)[dep].status == TASK_STATUS_FAILURE {
 				var msg = fmt.Sprintf("cannot continue, dependency \"%s\" has failed", color.CyanString((*tasks)[dep].task_name))
-				lg.Badge(task_name).Error("error → ", msg)
+				lg.Badge(task_name).BadgeColor(t.color).Error("error → ", msg)
 				return "", errors.New(msg)
 			}
 		}
 
 		var run = func() (string, error) {
 			var cmd = NewCmd(task_name, ws.Path, rule.Cmd, func(msg string) {
-				lg.Badge(task_name).Info("→ " + msg)
+				lg.Badge(task_name).BadgeColor(t.color).Info(color.HiBlackString("← ") + msg)
 			}, func(msg string) {
-				lg.Badge(task_name).Error("→ ", msg)
+				lg.Badge(task_name).BadgeColor(t.color).Error(color.RedString("← "), msg)
 			})
 			return cmd.Run()
 		}
 
 		if !t.Invalidate(&ctx.cache, ws.hash) {
-			lg.Badge(task_name).Success("cache hit:", color.HiBlackString(ws.hash))
+			lg.Badge(task_name).BadgeColor(t.color).Success(color.GreenString("cache hit:"), color.HiBlackString(ws.hash))
 			var out = t.GetLogCache(&ctx.cache, ws.hash)
 			if len(out) > 0 {
-				lg.Badge(task_name).Info("→ replaying output...")
+				lg.Badge(task_name).BadgeColor(t.color).Info("replaying output...")
 				for _, line := range strings.Split(out, "\n") {
-					lg.Badge(task_name).Info("→ " + line)
+					lg.Badge(task_name).BadgeColor(t.color).Info(color.HiBlackString("← "), line)
 				}
 			}
 			if t.HasOutputs() {
 				t.CleanOutputs(ws.Path)
-				lg.Badge(task_name).Info("restoring outputs from cache...")
+				lg.Badge(task_name).BadgeColor(t.color).Info("restoring outputs from cache...")
 				ctx.cache.RestoreOutputs(t.GetCacheKey(ws.hash), ws.Path, rule.Outputs)
 			}
 			t.CacheState(&ctx.cache, ws.hash)
 		} else {
-			lg.Badge(task_name).Warn("cache miss:", color.HiBlackString(ws.hash))
-			lg.Badge(task_name).Info("cleaning outputs...")
+			lg.Badge(task_name).BadgeColor(t.color).Info(color.YellowString("cache miss:"), color.HiBlackString(ws.hash))
+			lg.Badge(task_name).BadgeColor(t.color).Verbose().Info("cleaning outputs...")
 			t.CleanOutputs(ws.Path)
-			lg.Badge(task_name).Info("running → ", color.HiBlackString(rule.Cmd))
+			lg.Badge(task_name).BadgeColor(t.color).Info("running → ", color.HiBlackString(rule.Cmd))
 			var out, err = run()
 			if err != nil {
-				lg.Badge(task_name).Error("error → ", err.Error())
+				lg.Badge(task_name).BadgeColor(t.color).Error(color.RedString("error → "), err.Error())
 				return out, err
 			}
 
@@ -180,7 +180,7 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 		mu.Lock()
 		if err == nil {
 			mesure_mu.Lock()
-			lg.Badge(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
+			lg.Badge(task_id).BadgeColor(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
 			mesure_mu.Unlock()
 			task.status = TASK_STATUS_SUCCESS
 		} else {
@@ -213,7 +213,7 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 		lg.Log("Errors:")
 		lg.Log()
 		for _, task_result := range task_errors {
-			lg.Badge(task_result.task_id).Error(task_result.err.Error(), task_result.out)
+			lg.Badge(task_result.task_id).BadgeColor((*tasks)[task_result.task_id].color).Error(task_result.err.Error(), task_result.out)
 		}
 
 		return errors.New("")
