@@ -5,7 +5,7 @@
   - [ ] Workspace cache should only depend on the cache of the outputs of its dependencies
 - [ ] Support yarn
 - [ ] Support npm
-- [ ] Support custom package manager
+- [ ] Support custom package manager (?)
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
@@ -29,12 +29,6 @@
   - [ ] check that command exist
   - [ ] check all required fields
     - [ ] provide schema (?)
-- [ ] Validations
-  - [ ] Warn on extra outputs (?)
-  - [x] Validate external dependencies
-  - [x] Validate dep cycles
-  - [x] Duplicate WS
-  - [ ] Validate task cycles
 - [ ] Different info
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
@@ -77,6 +71,11 @@
 
 ## DONE
 
+- [x] Validations
+  - [x] Validate external dependencies
+  - [x] Validate dep cycles
+  - [x] Duplicate WS
+  - [x] Validate task cycles
 - [x] https://github.com/google/chrometracing
 - [x] Fix race condition in task runner
 - [x] Add random colors for badges

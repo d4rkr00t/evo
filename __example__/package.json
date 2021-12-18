@@ -23,7 +23,8 @@
           "dist"
         ],
         "deps": [
-          "@build"
+          "@build",
+          "test"
         ]
       },
       "test": {
