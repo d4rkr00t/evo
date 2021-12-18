@@ -68,10 +68,11 @@ func install_dependencies_step(ctx *Context) (bool, error) {
 		var install_lg = ctx.logger.CreateGroup()
 		install_lg.Start("Installing dependencies...")
 
-		var err = InstallNodeDeps(ctx.root, &install_lg)
+		var pkg_mngr = DetectPackageManager(ctx.root)
+		var err = InstallNodeDeps(ctx.root, pkg_mngr, &install_lg)
 
 		if err != nil {
-			install_lg.Badge("pnpm").Error(err.Error())
+			install_lg.Badge(pkg_mngr).Error(err.Error())
 			install_lg.End(ctx.stats.StopMeasure("install"))
 			return false, err
 		}

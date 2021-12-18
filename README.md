@@ -3,14 +3,14 @@
 - [ ] Cache Improvements
   - [ ] Tasks cache should not depend on other tasks in the workspace
   - [ ] Workspace cache should only depend on the cache of the outputs of its dependencies
-- [ ] Support yarn
-- [ ] Support npm
 - [ ] Support custom package manager (?)
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
 - [ ] Watchman integration and persistent graph
 - [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
+- [ ] More sophisticated logic around package managers
+  - [ ] include lock files into cache hash
 - [ ] Clean up only once before any of the tasks run (?)
   - [ ] Might have to restore all of the other outputs
   - [ ] Maybe make it manual?
@@ -71,6 +71,8 @@
 
 ## DONE
 
+- [x] Support yarn
+- [x] Support npm
 - [x] Validations
   - [x] Validate external dependencies
   - [x] Validate dep cycles

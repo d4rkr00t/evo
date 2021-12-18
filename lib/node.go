@@ -17,13 +17,22 @@ func GetNodeModulesBinPath(p string) string {
 	return path.Join(GetNodeModulesPath(p), ".bin")
 }
 
-func InstallNodeDeps(root string, lg *LoggerGroup) error {
-	// var cmd = NewCmd("pnpm install", root, "pnpm install", func(msg string) {
-	// 	lg.Badge("pnpm").Info(msg)
-	// }, func(msg string) {
-	// 	lg.Badge("pnpm").Error(msg)
-	// })
-	// var _, err = cmd.Run()
-	// return err
-	return nil
+func InstallNodeDeps(root string, pkg_mgr string, lg *LoggerGroup) error {
+	var cmd = NewCmd(pkg_mgr+" install", root, pkg_mgr+" install", func(msg string) {
+		lg.Badge(pkg_mgr).Info(msg)
+	}, func(msg string) {
+		lg.Badge(pkg_mgr).Error(msg)
+	})
+	var _, err = cmd.Run()
+	return err
+}
+
+func DetectPackageManager(root string) string {
+	if fileutils.Exist(path.Join(root, "yarn.lock")) {
+		return "yarn"
+	}
+	if fileutils.Exist(path.Join(root, "pnpm-lock.yaml")) {
+		return "pnpm"
+	}
+	return "npm"
 }

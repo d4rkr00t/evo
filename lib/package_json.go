@@ -39,7 +39,7 @@ func (p PackageJson) Invalidate(cc *cache.Cache) bool {
 }
 
 func (p PackageJson) GetStateKey() string {
-	return fmt.Sprintf("%s-packagejson", p.Name)
+	return fmt.Sprintf("%s-packagejson", ClearTaskName(p.Name))
 }
 
 func (p PackageJson) GetHash() string {
@@ -47,5 +47,6 @@ func (p PackageJson) GetHash() string {
 }
 
 func (p PackageJson) CacheState(c *cache.Cache) {
+	println(p.GetStateKey(), p.GetHash())
 	c.CacheData(p.GetStateKey(), p.GetHash())
 }
