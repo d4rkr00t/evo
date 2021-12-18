@@ -5,17 +5,17 @@
   - [ ] Workspace cache should only depend on the cache of the outputs of its dependencies
 - [ ] Support yarn
 - [ ] Support npm
-- [ ] Watchman integration and persistent graph
+- [ ] Support custom package manager
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
+- [ ] Watchman integration and persistent graph
+- [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
 - [ ] Clean up only once before any of the tasks run (?)
   - [ ] Might have to restore all of the other outputs
   - [ ] Maybe make it manual?
     - [ ] Otherwise need to hash contents of output
-- [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
-- [ ] Fix race condition in task runner (?) – didn't see happening anymore
-  - [ ] Semaphore not working as expected
+- [ ] REFACTOR: Workspaces map to use the DAG library
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
@@ -68,8 +68,8 @@
 - [ ] Use semver comparison for dependencies (?)
 - [ ] Website
   - [ ] Documentation
+- [ ] REFACTOR: Go Generics
 - [ ] https://github.com/adrg/xdg
-- [ ] https://github.com/google/chrometracing
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
 
@@ -77,6 +77,8 @@
 
 ## DONE
 
+- [x] https://github.com/google/chrometracing
+- [x] Fix race condition in task runner
 - [x] Add random colors for badges
 - [x] https://github.com/zenthangplus/goccm
 - [x] Limit concurrency setting

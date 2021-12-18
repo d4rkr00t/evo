@@ -24,6 +24,7 @@ var RunCmd = &cobra.Command{
 		var cwd, cwd_err = cmd.Flags().GetString("cwd")
 		var scope, _ = cmd.Flags().GetStringSlice("scope")
 		var concurrency, _ = cmd.Flags().GetInt("concurrency")
+		var tracing_output, _ = cmd.Flags().GetString("tracing")
 
 		var os_cwd, _ = os.Getwd()
 		if cwd_err != nil {
@@ -36,9 +37,15 @@ var RunCmd = &cobra.Command{
 		var root_pkg_json, err = lib.FindRootPackageJson(cwd)
 		var logger = lib.NewLogger(verbose)
 		var root_path = path.Dir(root_pkg_json.Path)
+		var tracing = lib.NewTracing()
 
 		if len(scope) == 0 {
 			scope = DetectScopeFromCWD(root_path, cwd)
+		}
+
+		if tracing_output != "" {
+			tracing.SetOut(tracing_output)
+			tracing.Enable()
 		}
 
 		if err == nil {
@@ -51,6 +58,7 @@ var RunCmd = &cobra.Command{
 				root_pkg_json,
 				cache.NewCache(root_path),
 				logger,
+				tracing,
 				lib.NewStats(),
 				root_pkg_json.GetConfig(),
 			)

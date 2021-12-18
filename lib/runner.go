@@ -10,6 +10,7 @@ import (
 
 func Run(ctx Context) error {
 	ctx.stats.StartMeasure("total", MEASURE_KIND_STAGE)
+	defer ctx.tracing.Write(&ctx.logger, ctx.cwd)
 	defer print_total_time(&ctx)
 
 	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
@@ -61,6 +62,7 @@ func print_total_time(ctx *Context) {
 }
 
 func install_dependencies_step(ctx *Context) (bool, error) {
+	defer ctx.tracing.Event("install dependencies").Done()
 	if ctx.root_pkg_json.Invalidate(&ctx.cache) || !IsNodeModulesExist(ctx.root) {
 		ctx.stats.StartMeasure("install", MEASURE_KIND_STAGE)
 		var install_lg = ctx.logger.CreateGroup()
@@ -82,6 +84,7 @@ func install_dependencies_step(ctx *Context) (bool, error) {
 }
 
 func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
+	defer ctx.tracing.Event("invalidate workspaces").Done()
 	ctx.stats.StartMeasure("invalidate", MEASURE_KIND_STAGE)
 	var invalidate_lg = ctx.logger.CreateGroup()
 	invalidate_lg.Start("Invalidating workspaces...")
@@ -135,6 +138,7 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 }
 
 func linking_step(ctx *Context, wm *WorkspacesMap) (bool, error) {
+	defer ctx.tracing.Event("linking workspaces").Done()
 	ctx.stats.StartMeasure("linking", MEASURE_KIND_STAGE)
 	var linking_lg = ctx.logger.CreateGroup()
 	linking_lg.Start("Linking workspaces...")
@@ -149,12 +153,14 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 
 	run_lg.Start(fmt.Sprintf("Running targets → %s", color.CyanString(strings.Join(ctx.target, ", "))))
 
+	var trace = ctx.tracing.Event("create tasks from workspaces")
 	var tasks_graph, tasks = CreateTasksFromWorkspaces(
 		ctx.target,
 		workspaces,
 		&ctx.config,
 		&run_lg,
 	)
+	trace.Done()
 	var err error = nil
 
 	if len(tasks) > 0 {

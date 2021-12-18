@@ -34,6 +34,7 @@ var ShowRulesCmd = &cobra.Command{
 		var root_pkg_json, err = lib.FindRootPackageJson(cwd)
 		var root_path = path.Dir(root_pkg_json.Path)
 		var logger = lib.NewLogger(verbose)
+		var tracing = lib.NewTracing()
 
 		if err == nil {
 			var ctx = lib.NewContext(
@@ -45,6 +46,7 @@ var ShowRulesCmd = &cobra.Command{
 				root_pkg_json,
 				cache.NewCache(root_path),
 				logger,
+				tracing,
 				lib.NewStats(),
 				root_pkg_json.GetConfig(),
 			)

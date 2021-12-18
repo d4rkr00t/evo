@@ -15,6 +15,7 @@ func Test_BuildSimple(t *testing.T) {
 
 	var root_pkg_json, _ = lib.FindRootPackageJson(tmp_dir)
 	var logger = lib.NewLogger(false)
+	var tracing = lib.NewTracing()
 	var ctx = lib.NewContext(
 		tmp_dir,
 		tmp_dir,
@@ -24,6 +25,7 @@ func Test_BuildSimple(t *testing.T) {
 		root_pkg_json,
 		cache.NewCache(tmp_dir),
 		logger,
+		tracing,
 		lib.NewStats(),
 		root_pkg_json.GetConfig(),
 	)
@@ -40,6 +42,7 @@ func Test_BuildSimpleUnknownTarget(t *testing.T) {
 
 	var root_pkg_json, _ = lib.FindRootPackageJson(tmp_dir)
 	var logger = lib.NewLogger(false)
+	var tracing = lib.NewTracing()
 	var ctx = lib.NewContext(
 		tmp_dir,
 		tmp_dir,
@@ -49,6 +52,7 @@ func Test_BuildSimpleUnknownTarget(t *testing.T) {
 		root_pkg_json,
 		cache.NewCache(tmp_dir),
 		logger,
+		tracing,
 		lib.NewStats(),
 		root_pkg_json.GetConfig(),
 	)
@@ -63,6 +67,7 @@ func Test_BuildSimpleOverrides(t *testing.T) {
 
 	var root_pkg_json, _ = lib.FindRootPackageJson(tmp_dir)
 	var logger = lib.NewLogger(false)
+	var tracing = lib.NewTracing()
 	var ctx = lib.NewContext(
 		tmp_dir,
 		tmp_dir,
@@ -72,6 +77,7 @@ func Test_BuildSimpleOverrides(t *testing.T) {
 		root_pkg_json,
 		cache.NewCache(tmp_dir),
 		logger,
+		tracing,
 		lib.NewStats(),
 		root_pkg_json.GetConfig(),
 	)

@@ -8,6 +8,7 @@ require (
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fatih/color v1.12.0
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
+	github.com/google/chrometracing v0.0.0-20210820115312-9b2483a9dc7d
 	github.com/ionrock/procs v0.0.0-20180102005558-f53ef5630f1a
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-shellwords v1.0.12

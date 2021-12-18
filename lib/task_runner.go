@@ -171,7 +171,9 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 		ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
 		mesure_mu.Unlock()
 
+		var trace = ctx.tracing.Event(task_id)
 		var out, err = task.Run(ctx, &task)
+		trace.Done()
 
 		mesure_mu.Lock()
 		ctx.stats.StopMeasure(task_id)
@@ -196,16 +198,19 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 	lg.Verbose().Log()
 	lg.Verbose().Badge("start").Info("   Updating states of workspaces...")
 	ctx.stats.StartMeasure("wsstate", MEASURE_KIND_STAGE)
+	var trace = ctx.tracing.Event("updating states of workspaces")
+
 	for ws_name := range wm.updated {
 		var ws = wm.workspaces[ws_name]
 		ws.CacheState(&ctx.cache, ws.hash)
 	}
-	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("wsstate").String())
 
+	trace.Done()
+	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("wsstate").String())
 	ctx.stats.StopMeasure("runtasks")
 
 	if !lg.logger.verbose {
-		fmt.Println()
+		lg.Log()
 	}
 
 	if len(task_errors) > 0 {
