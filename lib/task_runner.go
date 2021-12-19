@@ -49,6 +49,7 @@ func CreateTasksFromWorkspaces(targets []string,
 						if has_rule {
 							create_tasks(dep, dep_name)
 							var dep_task_name = GetTaskName(dep, dep_name)
+							deps = append(deps, dep_task_name)
 							graph.Connect(dag.BasicEdge(task_name, dep_task_name))
 						}
 					}
@@ -56,6 +57,7 @@ func CreateTasksFromWorkspaces(targets []string,
 			} else {
 				create_tasks(dep, ws_name)
 				var dep_task_name = GetTaskName(dep, ws_name)
+				deps = append(deps, dep_task_name)
 				graph.Connect(dag.BasicEdge(task_name, dep_task_name))
 			}
 		}
@@ -73,8 +75,9 @@ func CreateTasksFromWorkspaces(targets []string,
 }
 
 func create_executable_task(ws_name string, task_name string, deps []string, rule Rule, wm *WorkspacesMap, ws *Workspace, tasks *map[string]Task, lg *LoggerGroup) Task {
-	return NewTask(ws_name, task_name, deps, rule.Outputs, func(ctx *Context, t *Task) (string, error) {
+	return NewTask(ws_name, task_name, rule.String(), deps, rule.Outputs, func(ctx *Context, t *Task) (string, error) {
 		var ws = wm.workspaces[ws.Name]
+		var ws_partial_hash = ws.GetHashForTask()
 
 		for _, dep := range t.Deps {
 			if (*tasks)[dep].status == TASK_STATUS_FAILURE {
@@ -93,9 +96,9 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 			return cmd.Run()
 		}
 
-		if !t.Invalidate(&ctx.cache, ws.hash) {
+		if !t.Invalidate(&ctx.cache, tasks, ws_partial_hash) {
 			lg.Badge(task_name).BadgeColor(t.color).Success(color.GreenString("cache hit:"), color.HiBlackString(ws.hash))
-			var out = t.GetLogCache(&ctx.cache, ws.hash)
+			var out = t.GetLogCache(&ctx.cache, tasks, ws_partial_hash)
 			if len(out) > 0 {
 				lg.Badge(task_name).BadgeColor(t.color).Info("replaying output...")
 				for _, line := range strings.Split(out, "\n") {
@@ -105,7 +108,8 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 			if t.HasOutputs() {
 				t.CleanOutputs(ws.Path)
 				lg.Badge(task_name).BadgeColor(t.color).Info("restoring outputs from cache...")
-				ctx.cache.RestoreOutputs(t.GetCacheKey(ws.hash), ws.Path, rule.Outputs)
+				ctx.cache.RestoreOutputs(t.GetCacheKey(tasks, ws_partial_hash), ws.Path, rule.Outputs)
+				t.UpdateOutputsHash(ws.Path)
 			}
 			t.CacheState(&ctx.cache, ws.hash)
 		} else {
@@ -124,9 +128,10 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 				if err != nil {
 					return out, err
 				}
-				t.Cache(&ctx.cache, &ws, ws.hash)
+				t.UpdateOutputsHash(ws.Path)
+				t.Cache(&ctx.cache, &ws, tasks, ws_partial_hash)
 			}
-			t.CacheLog(&ctx.cache, ws.hash, out)
+			t.CacheLog(&ctx.cache, tasks, ws_partial_hash, out)
 			t.CacheState(&ctx.cache, ws.hash)
 		}
 
@@ -158,7 +163,7 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 
 		mu.Lock()
 		var task = (*tasks)[task_id]
-		task.status = TASK_STATUS_RUNNING
+		task.UpdateStatus(TASK_STATUS_RUNNING)
 		(*tasks)[task_id] = task
 		mu.Unlock()
 
@@ -184,11 +189,12 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 			mesure_mu.Lock()
 			lg.Badge(task_id).BadgeColor(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
 			mesure_mu.Unlock()
-			task.status = TASK_STATUS_SUCCESS
+			task.UpdateStatus(TASK_STATUS_SUCCESS)
 		} else {
-			task.status = TASK_STATUS_FAILURE
+			task.UpdateStatus(TASK_STATUS_FAILURE)
 			task_errors = append(task_errors, TaskResult{task_id, err, out})
 		}
+
 		(*tasks)[task_id] = task
 		mu.Unlock()
 

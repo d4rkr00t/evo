@@ -1,8 +1,5 @@
 ## TODO
 
-- [ ] Cache Improvements
-  - [ ] Tasks cache should not depend on other tasks in the workspace
-  - [ ] Workspace cache should only depend on the cache of the outputs of its dependencies
 - [ ] Support custom package manager (?)
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
@@ -71,6 +68,9 @@
 
 ## DONE
 
+- [x] Cache Improvements
+  - [x] Tasks cache should only depend on the cache of the outputs of its dependencies
+  - [x] Tasks cache should not depend on other tasks in the workspace
 - [x] Support yarn
 - [x] Support npm
 - [x] Validations

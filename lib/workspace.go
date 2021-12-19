@@ -12,18 +12,19 @@ import (
 )
 
 type Workspace struct {
-	Name      string
-	Path      string
-	RelPath   string
-	Deps      map[string]string
-	Excludes  []string
-	Outputs   []string
-	Rules     map[string]Rule
-	FilesHash string
-	RulesHash string
-	PkgJson   PackageJson
-	cache     *cache.Cache
-	hash      string
+	Name        string
+	Path        string
+	RelPath     string
+	Deps        map[string]string
+	Excludes    []string
+	Outputs     []string
+	Rules       map[string]Rule
+	FilesHash   string
+	RulesHash   string
+	ExtDepsHash string
+	PkgJson     PackageJson
+	cache       *cache.Cache
+	hash        string
 }
 
 func NewWorkspace(root_path string, ws_path string, excludes []string, cc *cache.Cache, rules map[string]Rule) Workspace {
@@ -73,15 +74,26 @@ func (w Workspace) GetRule(name string) (Rule, bool) {
 	return rule, ok
 }
 
+func (w *Workspace) GetHashForTask() string {
+	return HashStringList([]string{
+		w.ExtDepsHash,
+		w.FilesHash,
+	})
+}
+
 func (w *Workspace) Rehash(workspaces *WorkspacesMap) string {
 	var depshash = w.get_deps_hash(workspaces)
-	var h = sha1.New()
-	io.WriteString(h, depshash+":"+w.FilesHash+":"+w.RulesHash)
-	w.hash = hex.EncodeToString(h.Sum(nil))
+	w.ExtDepsHash = w.get_ext_deps_hash(workspaces)
+	w.hash = HashStringList([]string{
+		depshash,
+		w.ExtDepsHash,
+		w.FilesHash,
+		w.RulesHash,
+	})
 	return w.hash
 }
 
-func (w Workspace) GetStateKey() string {
+func (w *Workspace) GetStateKey() string {
 	return ClearTaskName(w.Name)
 }
 
@@ -100,24 +112,29 @@ func (w Workspace) get_files() []string {
 }
 
 func (w Workspace) get_deps_hash(wm *WorkspacesMap) string {
-	var h = sha1.New()
+	var deps_list = []string{}
+
+	for dep_name := range w.Deps {
+		if ws, ok := wm.workspaces[dep_name]; ok {
+			deps_list = append(deps_list, dep_name+":"+ws.hash)
+		}
+	}
+
+	sort.Strings(deps_list)
+	return HashStringList(deps_list)
+}
+
+func (w Workspace) get_ext_deps_hash(wm *WorkspacesMap) string {
 	var deps_list = []string{}
 
 	for dep_name, dep_version := range w.Deps {
-		if ws, ok := wm.workspaces[dep_name]; ok {
-			deps_list = append(deps_list, dep_name+":"+ws.hash)
-		} else {
+		if _, ok := wm.workspaces[dep_name]; !ok {
 			deps_list = append(deps_list, dep_name+":"+dep_version)
 		}
 	}
 
 	sort.Strings(deps_list)
-
-	for _, dep := range deps_list {
-		io.WriteString(h, dep)
-	}
-
-	return hex.EncodeToString(h.Sum(nil))
+	return HashStringList(deps_list)
 }
 
 func get_rules_hash(rules map[string]Rule) string {

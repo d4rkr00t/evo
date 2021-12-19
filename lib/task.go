@@ -1,24 +1,29 @@
 package lib
 
 import (
+	"crypto/sha1"
 	"evo/main/lib/cache"
 	"evo/main/lib/fileutils"
 	"fmt"
+	"io"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/fatih/color"
 )
 
 type Task struct {
-	ws_name   string
-	task_name string
-	status    int
-	color     string
-	Deps      []string
-	Run       task_run
-	Outputs   []string
+	ws_name     string
+	task_name   string
+	status      int
+	color       string
+	Deps        []string
+	Run         task_run
+	Outputs     []string
+	OutputsHash string
+	RuleHash    string
 }
 
 type task_run = func(ctx *Context, t *Task) (string, error)
@@ -39,7 +44,7 @@ var task_badge_colors = []string{
 	"blue",
 }
 
-func NewTask(ws_name string, task_name string, deps []string, outputs []string, run task_run) Task {
+func NewTask(ws_name string, task_name string, rule string, deps []string, outputs []string, run task_run) Task {
 	return Task{
 		ws_name:   ws_name,
 		task_name: task_name,
@@ -48,56 +53,104 @@ func NewTask(ws_name string, task_name string, deps []string, outputs []string, 
 		Deps:      deps,
 		Run:       run,
 		Outputs:   outputs,
+		RuleHash:  HashStringList([]string{rule}),
 	}
 }
 
-func (t Task) GetCacheKey(ws_hash string) string {
-	return ClearTaskName(t.task_name) + ":" + ws_hash
+func (t *Task) UpdateStatus(status int) {
+	t.status = status
 }
 
-func (t Task) Invalidate(cc *cache.Cache, ws_hash string) bool {
+func (t *Task) GetCacheKey(tasks *map[string]Task, ws_hash string) string {
+	var deps = t.Deps
+	sort.Strings(deps)
+
+	var list = []string{}
+
+	for _, dep := range deps {
+		list = append(list, (*tasks)[dep].OutputsHash)
+	}
+
+	var h = sha1.New()
+
+	for _, dep := range deps {
+		io.WriteString(h, (*tasks)[dep].OutputsHash)
+	}
+
+	var hash = HashStringList([]string{
+		ws_hash,
+		t.RuleHash,
+		HashStringList(list),
+	})
+
+	return ClearTaskName(t.task_name) + ":" + hash
+}
+
+func (t *Task) Invalidate(cc *cache.Cache, tasks *map[string]Task, ws_hash string) bool {
 	if len(t.Outputs) > 0 {
-		return !cc.Has(t.GetCacheKey(ws_hash))
+		return !cc.Has(t.GetCacheKey(tasks, ws_hash))
 	}
-	return !cc.Has(t.GetCacheKey(ws_hash) + ":log")
+	return !cc.Has(t.GetCacheKey(tasks, ws_hash) + ":log")
 }
 
-func (t Task) Cache(cc *cache.Cache, ws *Workspace, ws_hash string) {
+func (t *Task) Cache(cc *cache.Cache, ws *Workspace, tasks *map[string]Task, ws_hash string) {
 	if len(t.Outputs) > 0 {
 		var ignores = cache.CacheDirIgnores{
 			"node_modules": true,
 		}
-		cc.CacheOutputs(t.GetCacheKey(ws_hash), ws.Path, t.Outputs, ignores)
+		cc.CacheOutputs(t.GetCacheKey(tasks, ws_hash), ws.Path, t.Outputs, ignores)
 	} else {
-		cc.CacheData(t.GetCacheKey(ws_hash), "")
+		cc.CacheData(t.GetCacheKey(tasks, ws_hash), "")
 	}
 }
 
-func (t Task) GetStateKey() string {
+func (t *Task) GetStateKey() string {
 	return ClearTaskName(t.task_name)
 }
 
-func (t Task) CacheState(c *cache.Cache, ws_hash string) {
+func (t *Task) CacheState(c *cache.Cache, ws_hash string) {
 	c.CacheData(t.GetStateKey(), ws_hash)
 }
 
-func (t Task) CacheLog(c *cache.Cache, ws_hash string, log string) {
-	c.CacheData(t.GetCacheKey(ws_hash)+":log", log)
+func (t *Task) CacheLog(c *cache.Cache, tasks *map[string]Task, ws_hash string, log string) {
+	c.CacheData(t.GetCacheKey(tasks, ws_hash)+":log", log)
 }
 
-func (t Task) GetCacheState(c *cache.Cache) string {
+func (t *Task) GetCacheState(c *cache.Cache) string {
 	return c.ReadData(t.GetStateKey())
 }
 
-func (t Task) GetLogCache(c *cache.Cache, ws_hash string) string {
-	return c.ReadData(t.GetCacheKey(ws_hash) + ":log")
+func (t *Task) GetLogCache(c *cache.Cache, tasks *map[string]Task, ws_hash string) string {
+	return c.ReadData(t.GetCacheKey(tasks, ws_hash) + ":log")
 }
 
-func (t Task) HasOutputs() bool {
+func (t *Task) UpdateOutputsHash(ws_path string) {
+	t.OutputsHash = t.GetOutputsHash(ws_path)
+}
+
+func (t *Task) HasOutputs() bool {
 	return len(t.Outputs) > 0
 }
 
-func (t Task) ValidateOutputs(ws_path string) error {
+func (t *Task) GetOutputsHash(ws_path string) string {
+	if !t.HasOutputs() {
+		fmt.Printf("Doesn't have outputs %s\n", t.task_name)
+		return ""
+	}
+
+	var globs = []string{}
+	for _, out := range t.Outputs {
+		globs = append(globs, path.Join(out, "**", "*"))
+		globs = append(globs, out)
+	}
+
+	var files []string = fileutils.GlobFiles(ws_path, &globs, &[]string{})
+	sort.Strings(files)
+
+	return fileutils.GetFileListHash(files)
+}
+
+func (t *Task) ValidateOutputs(ws_path string) error {
 	var missing = []string{}
 
 	for _, out := range t.Outputs {
@@ -113,13 +166,13 @@ func (t Task) ValidateOutputs(ws_path string) error {
 	return nil
 }
 
-func (t Task) CleanOutputs(ws_path string) {
+func (t *Task) CleanOutputs(ws_path string) {
 	for _, out := range t.Outputs {
 		os.RemoveAll(path.Join(ws_path, out))
 	}
 }
 
-func (t Task) String() string {
+func (t *Task) String() string {
 	return fmt.Sprintf("%s:%s", t.ws_name, t.task_name)
 }
 
