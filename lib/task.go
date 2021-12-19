@@ -134,7 +134,6 @@ func (t *Task) HasOutputs() bool {
 
 func (t *Task) GetOutputsHash(ws_path string) string {
 	if !t.HasOutputs() {
-		fmt.Printf("Doesn't have outputs %s\n", t.task_name)
 		return ""
 	}
 

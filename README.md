@@ -4,6 +4,7 @@
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
+- [ ] Support: task deps: ["file:somefilepath"]
 - [ ] Watchman integration and persistent graph
 - [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
 - [ ] More sophisticated logic around package managers
