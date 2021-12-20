@@ -1,19 +1,33 @@
 ## TODO
 
+For Release
+
+- [ ] REFACTOR: Workspaces map to use the DAG library
+- [ ] More commands
+  - [ ] `evo clear-cache <package>`
+  - [ ] `evo clear-output <package>` – clears all outputs from packages
+- [ ] `--force` to force run a command, ignoring cache
+- [ ] Website
+  - [ ] Documentation
+- [ ] Tests
+  - [ ] TBD
+
+---------------
+
+After Release
+
 - [ ] Support custom package manager (?)
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
 - [ ] Support: task deps: ["file:somefilepath"]
 - [ ] Watchman integration and persistent graph
-- [ ] Fix that – Didn't produce outputs still caches and doesn't fail next time
 - [ ] More sophisticated logic around package managers
   - [ ] include lock files into cache hash
 - [ ] Clean up only once before any of the tasks run (?)
   - [ ] Might have to restore all of the other outputs
   - [ ] Maybe make it manual?
     - [ ] Otherwise need to hash contents of output
-- [ ] REFACTOR: Workspaces map to use the DAG library
 - [ ] REFACTOR: create tasks from workspaces
   - [ ] REFACTOR: Generic create task from a rule
 - [ ] REFACTOR: Refactor cache to interfaces
@@ -38,8 +52,6 @@
   - [x] `evo show-scope <package>` – show what packages are in scope
   - [ ] `evo add dep@ver` to add a dependency
   - [ ] `evo remove dep` to remove a dependency
-  - [ ] `evo clear-cache <package>`
-  - [ ] `evo clear-output <package>` – clears all outputs from packages
   - [ ] `evo import`
     - [ ] makes sure that all dependencies are on expected versions
     - [ ] makes sure that all dependencies are lifted to the top level package.json
@@ -56,10 +68,7 @@
   - [ ] Let yarn/pnpm/npm manage dependencies for workspaces, drop custom linking logic
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
-- [ ] `--force` to force run a command, ignoring cache (?)
 - [ ] Use semver comparison for dependencies (?)
-- [ ] Website
-  - [ ] Documentation
 - [ ] REFACTOR: Go Generics
 - [ ] https://github.com/adrg/xdg
 - [ ] https://github.com/karrick/godirwalk
@@ -69,6 +78,7 @@
 
 ## DONE
 
+- [x] Fix that – Didn't produce outputs still caches and doesn't fail next time
 - [x] Cache Improvements
   - [x] Tasks cache should only depend on the cache of the outputs of its dependencies
   - [x] Tasks cache should not depend on other tasks in the workspace

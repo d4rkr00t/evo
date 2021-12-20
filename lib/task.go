@@ -61,7 +61,7 @@ func (t *Task) UpdateStatus(status int) {
 	t.status = status
 }
 
-func (t *Task) GetCacheKey(tasks *map[string]Task, ws_hash string) string {
+func (t Task) GetCacheKey(tasks *map[string]Task, ws_hash string) string {
 	var deps = t.Deps
 	sort.Strings(deps)
 
