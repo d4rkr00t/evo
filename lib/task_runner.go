@@ -24,7 +24,7 @@ func CreateTasksFromWorkspaces(targets []string,
 	var create_tasks func(target string, ws_name string)
 	create_tasks = func(target string, ws_name string) {
 		var task_name = GetTaskName(target, ws_name)
-		var ws = wm.workspaces[ws_name]
+		var ws, _ = wm.Load(ws_name)
 		var rule, has_rule = ws.GetRule(target)
 
 		if visited.Contains(task_name) {
@@ -44,8 +44,9 @@ func CreateTasksFromWorkspaces(targets []string,
 			if dep[0] == '@' {
 				dep = dep[1:]
 				for dep_name := range ws.Deps {
-					if _, ok := wm.updated[dep_name]; ok {
-						var _, has_rule = wm.workspaces[dep_name].GetRule(dep)
+					if wm.updated.Contains(dep_name) {
+						var dep_ws, _ = wm.Load(dep_name)
+						var _, has_rule = dep_ws.GetRule(dep)
 						if has_rule {
 							create_tasks(dep, dep_name)
 							var dep_task_name = GetTaskName(dep, dep_name)
@@ -65,18 +66,19 @@ func CreateTasksFromWorkspaces(targets []string,
 		tasks[task_name] = create_executable_task(ws_name, task_name, deps, rule, wm, &ws, &tasks, lg)
 	}
 
-	for ws_name := range wm.updated {
+	wm.updated.Each(func(ws_name interface{}) bool {
 		for _, target := range targets {
-			create_tasks(target, ws_name)
+			create_tasks(target, ws_name.(string))
 		}
-	}
+		return false
+	})
 
 	return graph, tasks
 }
 
 func create_executable_task(ws_name string, task_name string, deps []string, rule Rule, wm *WorkspacesMap, ws *Workspace, tasks *map[string]Task, lg *LoggerGroup) Task {
 	return NewTask(ws_name, task_name, rule.String(), deps, rule.Outputs, func(ctx *Context, t *Task) (string, error) {
-		var ws = wm.workspaces[ws.Name]
+		var ws, _ = wm.Load(ws.Name)
 		var ws_partial_hash = ws.GetHashForTask()
 
 		for _, dep := range t.Deps {
@@ -206,10 +208,11 @@ func RunTasks(ctx *Context, tasks_graph *dag.AcyclicGraph, tasks *map[string]Tas
 	ctx.stats.StartMeasure("wsstate", MEASURE_KIND_STAGE)
 	var trace = ctx.tracing.Event("updating states of workspaces")
 
-	for ws_name := range wm.updated {
-		var ws = wm.workspaces[ws_name]
+	wm.updated.Each(func(ws_name interface{}) bool {
+		var ws, _ = wm.Load(ws_name.(string))
 		ws.CacheState(&ctx.cache, ws.hash)
-	}
+		return false
+	})
 
 	trace.Done()
 	lg.Verbose().Badge("done").Info("    in", ctx.stats.StopMeasure("wsstate").String())

@@ -115,7 +115,7 @@ func (w Workspace) get_deps_hash(wm *WorkspacesMap) string {
 	var deps_list = []string{}
 
 	for dep_name := range w.Deps {
-		if ws, ok := wm.workspaces[dep_name]; ok {
+		if ws, ok := wm.Load(dep_name); ok {
 			deps_list = append(deps_list, dep_name+":"+ws.hash)
 		}
 	}
@@ -128,7 +128,7 @@ func (w Workspace) get_ext_deps_hash(wm *WorkspacesMap) string {
 	var deps_list = []string{}
 
 	for dep_name, dep_version := range w.Deps {
-		if _, ok := wm.workspaces[dep_name]; !ok {
+		if _, ok := wm.Load(dep_name); ok {
 			deps_list = append(deps_list, dep_name+":"+dep_version)
 		}
 	}

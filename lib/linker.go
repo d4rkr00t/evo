@@ -4,24 +4,38 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 	"strings"
+
+	"github.com/zenthangplus/goccm"
 )
 
 func LinkWorkspaces(root string, wm *WorkspacesMap) {
-	for ws_name := range wm.updated {
-		var ws = wm.workspaces[ws_name]
-		var node_modules = GetNodeModulesPath(ws.Path)
+	var ccm = goccm.New(runtime.NumCPU())
 
-		os.RemoveAll(node_modules)
+	wm.updated.Each(func(i interface{}) bool {
+		var ws_name = i.(string)
+		ccm.Wait()
+		go func(ws_name string) {
+			defer ccm.Done()
+			var ws, _ = wm.Load(ws_name)
+			var node_modules = GetNodeModulesPath(ws.Path)
 
-		for dep := range ws.Deps {
-			if dep_ws, ok := wm.workspaces[dep]; ok {
-				link_local_ws(&ws, &dep_ws)
-			} else {
-				link_external(root, &ws, dep)
+			os.RemoveAll(node_modules)
+
+			for dep := range ws.Deps {
+				if dep_ws, ok := wm.Load(dep); ok {
+					link_local_ws(&ws, &dep_ws)
+				} else {
+					link_external(root, &ws, dep)
+				}
 			}
-		}
-	}
+
+		}(ws_name)
+		return false
+	})
+
+	ccm.WaitAllDone()
 }
 
 func link_local_ws(ws *Workspace, dep_ws *Workspace) {

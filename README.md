@@ -2,15 +2,25 @@
 
 For Release
 
-- [ ] REFACTOR: Workspaces map to use the DAG library
+- [ ] Tasks Map similar to Workspace Map
+  - [ ] Use sync.Map
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] `--force` to force run a command, ignoring cache
-- [ ] Website
-  - [ ] Documentation
+- [ ] Improve CLI Output
+  - [ ] Show how many tasks were run and how many restored from cache/ignored
+- [ ] Fix all issues highlighted by `--race` flag
+- [ ] Watch mode
+- [ ] Custom Hash Input for e.g. environment, etc...
+- [ ] Remote cache (MVP)
+- [ ] CI
+  - [ ] Publishing to NPM
+  - [ ] Test in PRs
 - [ ] Tests
   - [ ] TBD
+- [ ] Website
+  - [ ] Documentation
 
 ---------------
 
@@ -57,8 +67,6 @@ After Release
     - [ ] makes sure that all dependencies are lifted to the top level package.json
 - [ ] Put overrides to file system
 - [ ] Use .gitignore in addition to include/exclude in evo config
-- [ ] Remote cache
-- [ ] Watch mode
 - [ ] FileSystem
   - [ ] Cache file check-sums
   - [ ] Update file check sums only when modified time is after previous update
@@ -78,6 +86,7 @@ After Release
 
 ## DONE
 
+- [x] REFACTOR: Workspaces map to use the DAG library
 - [x] Fix that – Didn't produce outputs still caches and doesn't fail next time
 - [x] Cache Improvements
   - [x] Tasks cache should only depend on the cache of the outputs of its dependencies

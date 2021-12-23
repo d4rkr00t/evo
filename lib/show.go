@@ -20,14 +20,14 @@ func ShowHash(ctx Context, ws_name string) error {
 		return err
 	}
 
-	var ws, ok = wm.workspaces[ws_name]
+	var ws, ok = wm.Load(ws_name)
 
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
 		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
 	}
 
-	wm.RehashAll()
+	wm.RehashAll(&ctx)
 	ws.Rehash(&wm)
 
 	var lg = ctx.logger.CreateGroup()
@@ -74,7 +74,7 @@ func ShowRules(ctx Context, ws_name string) error {
 		return err
 	}
 
-	var ws, ok = wm.workspaces[ws_name]
+	var ws, ok = wm.Load(ws_name)
 	if !ok {
 		ctx.logger.Log("  Package", ws_name, "not found!")
 		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
@@ -112,15 +112,17 @@ func ShowAffected(ctx Context, target []string) error {
 		return err
 	}
 
-	wm.RehashAll()
-	wm.Invalidate(target)
+	wm.RehashAll(&ctx)
+	wm.Invalidate(&ctx)
 
 	var lg = ctx.logger.CreateGroup()
 	lg.Start("Affected packages:")
 
-	for ws_name := range wm.updated {
-		lg.Badge(ws_name).Info(wm.workspaces[ws_name].hash)
-	}
+	wm.updated.Each(func(key interface{}) bool {
+		var ws, _ = wm.Load(key.(string))
+		lg.Badge(ws.Name).Info(ws.hash)
+		return false
+	})
 
 	lg.End(ctx.stats.StopMeasure("show-affected"))
 
@@ -144,9 +146,11 @@ func ShowScope(ctx Context, target string) error {
 	var lg = ctx.logger.CreateGroup()
 	lg.Start("Packages in scope:")
 
-	for ws_name := range wm.workspaces {
+	wm.workspaces.Range(func(key, value interface{}) bool {
+		var ws_name = key.(string)
 		lg.Log("–", ws_name)
-	}
+		return true
+	})
 
 	lg.End(ctx.stats.StopMeasure("show-scope"))
 

@@ -108,23 +108,23 @@ func invalidate_workspaces_step(ctx *Context) (bool, WorkspacesMap, error) {
 		return false, wm, err
 	}
 
-	if err := ValidateDepsGraph(&wm.dep_graph); err != nil {
+	if err := wm.Validate(); err != nil {
 		invalidate_lg.Badge("error").Error(err.Error())
 		invalidate_lg.End(ctx.stats.StopMeasure("invalidate"))
 		return false, wm, err
 	}
 
-	wm.Invalidate(ctx.target)
+	wm.Invalidate(ctx)
 
-	if len(wm.updated) > 0 {
+	if wm.updated.Cardinality() > 0 {
 		var scoped_badge = ""
 		if len(ctx.scope) > 0 {
 			scoped_badge = "[scoped]"
 		}
 		invalidate_lg.Badge("affected").Info(
-			color.CyanString(fmt.Sprint((len(wm.updated)))),
+			color.CyanString(fmt.Sprint(wm.updated.Cardinality())),
 			"of",
-			color.CyanString(fmt.Sprint((len(wm.workspaces)))),
+			color.CyanString(fmt.Sprint(wm.length)),
 			"workspaces",
 			scoped_badge,
 		)

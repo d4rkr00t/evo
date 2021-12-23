@@ -11,9 +11,10 @@ import (
 func ValidateExternalDeps(wm *WorkspacesMap, root_pkg_json PackageJson) error {
 	var err = []string{}
 
-	for _, ws := range wm.workspaces {
+	wm.workspaces.Range(func(key, value interface{}) bool {
+		var ws = value.(Workspace)
 		for dep_name, dep_ver := range ws.Deps {
-			if _, ok := wm.workspaces[dep_name]; ok {
+			if _, ok := wm.Load(dep_name); ok {
 				continue
 			}
 
@@ -38,20 +39,11 @@ func ValidateExternalDeps(wm *WorkspacesMap, root_pkg_json PackageJson) error {
 				)
 			}
 		}
-	}
+		return true
+	})
 
 	if len(err) > 0 {
 		return errors.New(strings.Join(err, "\n"))
-	}
-
-	return nil
-}
-
-func ValidateDepsGraph(dg *DepGraph) error {
-	var cycles, path = dg.HasCycles()
-
-	if cycles {
-		return fmt.Errorf("cycle in the dependecy graph [ %s ]", path)
 	}
 
 	return nil
