@@ -10,6 +10,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/fatih/color"
 )
@@ -61,20 +62,24 @@ func (t *Task) UpdateStatus(status int) {
 	t.status = status
 }
 
-func (t Task) GetCacheKey(tasks *map[string]Task, ws_hash string) string {
+func (t Task) GetCacheKey(tasks *sync.Map, ws_hash string) string {
 	var deps = t.Deps
 	sort.Strings(deps)
 
 	var list = []string{}
 
 	for _, dep := range deps {
-		list = append(list, (*tasks)[dep].OutputsHash)
+		var _sub_task, _ = tasks.Load(dep)
+		var sub_task = _sub_task.(Task)
+		list = append(list, sub_task.OutputsHash)
 	}
 
 	var h = sha1.New()
 
 	for _, dep := range deps {
-		io.WriteString(h, (*tasks)[dep].OutputsHash)
+		var _sub_task, _ = tasks.Load(dep)
+		var sub_task = _sub_task.(Task)
+		io.WriteString(h, sub_task.OutputsHash)
 	}
 
 	var hash = HashStringList([]string{
@@ -86,14 +91,14 @@ func (t Task) GetCacheKey(tasks *map[string]Task, ws_hash string) string {
 	return ClearTaskName(t.task_name) + ":" + hash
 }
 
-func (t *Task) Invalidate(cc *cache.Cache, tasks *map[string]Task, ws_hash string) bool {
+func (t *Task) Invalidate(cc *cache.Cache, tasks *sync.Map, ws_hash string) bool {
 	if len(t.Outputs) > 0 {
 		return !cc.Has(t.GetCacheKey(tasks, ws_hash))
 	}
 	return !cc.Has(t.GetCacheKey(tasks, ws_hash) + ":log")
 }
 
-func (t *Task) Cache(cc *cache.Cache, ws *Workspace, tasks *map[string]Task, ws_hash string) {
+func (t *Task) Cache(cc *cache.Cache, ws *Workspace, tasks *sync.Map, ws_hash string) {
 	if len(t.Outputs) > 0 {
 		var ignores = cache.CacheDirIgnores{
 			"node_modules": true,
@@ -112,7 +117,7 @@ func (t *Task) CacheState(c *cache.Cache, ws_hash string) {
 	c.CacheData(t.GetStateKey(), ws_hash)
 }
 
-func (t *Task) CacheLog(c *cache.Cache, tasks *map[string]Task, ws_hash string, log string) {
+func (t *Task) CacheLog(c *cache.Cache, tasks *sync.Map, ws_hash string, log string) {
 	c.CacheData(t.GetCacheKey(tasks, ws_hash)+":log", log)
 }
 
@@ -120,7 +125,7 @@ func (t *Task) GetCacheState(c *cache.Cache) string {
 	return c.ReadData(t.GetStateKey())
 }
 
-func (t *Task) GetLogCache(c *cache.Cache, tasks *map[string]Task, ws_hash string) string {
+func (t *Task) GetLogCache(c *cache.Cache, tasks *sync.Map, ws_hash string) string {
 	return c.ReadData(t.GetCacheKey(tasks, ws_hash) + ":log")
 }
 

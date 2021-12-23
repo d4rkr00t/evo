@@ -2,21 +2,23 @@
 
 For Release
 
-- [ ] Tasks Map similar to Workspace Map
-  - [ ] Use sync.Map
+- [ ] Use sync.Map for stats
+- [ ] Add cpu profiler support
+- [ ] Split code in packages
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] `--force` to force run a command, ignoring cache
+- [ ] Fix all issues highlighted by `--race` flag
 - [ ] Improve CLI Output
   - [ ] Show how many tasks were run and how many restored from cache/ignored
-- [ ] Fix all issues highlighted by `--race` flag
 - [ ] Watch mode
 - [ ] Custom Hash Input for e.g. environment, etc...
 - [ ] Remote cache (MVP)
 - [ ] CI
   - [ ] Publishing to NPM
   - [ ] Test in PRs
+  - [ ] Use evo to manage evo
 - [ ] Tests
   - [ ] TBD
 - [ ] Website
@@ -86,6 +88,8 @@ After Release
 
 ## DONE
 
+- [x] Tasks Map similar to Workspace Map
+  - [x] Use sync.Map
 - [x] REFACTOR: Workspaces map to use the DAG library
 - [x] Fix that – Didn't produce outputs still caches and doesn't fail next time
 - [x] Cache Improvements

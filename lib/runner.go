@@ -155,39 +155,25 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 	run_lg.Start(fmt.Sprintf("Running targets → %s", color.CyanString(strings.Join(ctx.target, ", "))))
 
 	var trace = ctx.tracing.Event("create tasks from workspaces")
-	var tasks_graph, tasks = CreateTasksFromWorkspaces(
+	var task_map = NewTaskMap(
 		ctx.target,
 		workspaces,
 		&ctx.config,
 		&run_lg,
 	)
 
-	var cycles = tasks_graph.Cycles()
+	var task_map_err = task_map.Validate()
 
-	if len(cycles) > 0 {
-		run_lg.Error(color.RedString("detected cycles in the task graph:"))
-		for _, cycle := range cycles {
-			var path = ""
-			for _, item := range cycle {
-				if len(path) > 0 {
-					path += " → "
-				}
-				path = path + fmt.Sprintf("%s", item)
-			}
-			path += fmt.Sprintf(" → %s", cycle[0])
-
-			run_lg.Error("–", path)
-		}
-		run_lg.End(ctx.stats.StopMeasure("run"))
-		return false, fmt.Errorf("cycle in the tasks graph")
+	if task_map_err != nil {
+		return false, task_map_err
 	}
 
 	trace.Done()
 	var err error = nil
 
-	if len(tasks) > 0 {
+	if task_map.length > 0 {
 		run_lg.Verbose().Log("Executing tasks...")
-		err = RunTasks(ctx, &tasks_graph, &tasks, workspaces, &run_lg)
+		err = RunTasks(ctx, &task_map, workspaces, &run_lg)
 	} else {
 		run_lg.Warn("No tasks found, skipping...")
 	}
