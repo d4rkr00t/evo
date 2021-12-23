@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/fatih/color"
 	"golang.org/x/sync/semaphore"
@@ -17,7 +16,6 @@ type TaskResult struct {
 }
 
 func RunTasks(ctx *Context, task_map *TasksMap, wm *WorkspacesMap, lg *LoggerGroup) error {
-	var mesure_mu sync.Mutex
 	var task_errors = []TaskResult{}
 	var sem = semaphore.NewWeighted(int64(ctx.concurrency))
 	var cc = context.TODO()
@@ -38,22 +36,15 @@ func RunTasks(ctx *Context, task_map *TasksMap, wm *WorkspacesMap, lg *LoggerGro
 		}
 		defer sem.Release(1)
 
-		mesure_mu.Lock()
 		ctx.stats.StartMeasure(task_id, MEASURE_KIND_TASK)
-		mesure_mu.Unlock()
 
 		var trace = ctx.tracing.Event(task_id)
 		var out, err = task.Run(ctx, &task)
 		trace.Done()
-
-		mesure_mu.Lock()
 		ctx.stats.StopMeasure(task_id)
-		mesure_mu.Unlock()
 
 		if err == nil {
-			mesure_mu.Lock()
 			lg.Badge(task_id).BadgeColor(task_id).Success("done in " + color.HiBlackString(ctx.stats.GetMeasure(task_id).duration.String()))
-			mesure_mu.Unlock()
 			task.UpdateStatus(TASK_STATUS_SUCCESS)
 		} else {
 			task.UpdateStatus(TASK_STATUS_FAILURE)

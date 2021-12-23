@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"sync"
 	"time"
 )
 
@@ -17,31 +18,29 @@ type StatsMeasure struct {
 }
 
 type Stats struct {
-	finished []*StatsMeasure
-	measures map[string]StatsMeasure
+	measures sync.Map
 }
 
 func NewStats() Stats {
+	var measures sync.Map
 	return Stats{
-		finished: []*StatsMeasure{},
-		measures: map[string]StatsMeasure{},
+		measures,
 	}
 }
 
 func (s *Stats) StartMeasure(name string, kind int) {
-	s.measures[name] = StatsMeasure{
+	s.measures.Store(name, StatsMeasure{
 		name:  name,
 		kind:  kind,
 		start: time.Now(),
-	}
+	})
 }
 
 func (s *Stats) StopMeasure(name string) time.Duration {
-	if m, ok := s.measures[name]; ok {
+	if _m, ok := s.measures.Load(name); ok {
+		var m = _m.(StatsMeasure)
 		m.duration = time.Since(m.start)
-		s.measures[name] = m
-		s.finished = append(s.finished, &m)
-
+		s.measures.Store(name, m)
 		return m.duration.Truncate(time.Millisecond)
 	}
 
@@ -49,17 +48,24 @@ func (s *Stats) StopMeasure(name string) time.Duration {
 }
 
 func (s Stats) GetMeasure(name string) StatsMeasure {
-	return s.measures[name]
+	var m, ok = s.measures.Load(name)
+	if ok {
+		return m.(StatsMeasure)
+	}
+	var nil_measure StatsMeasure
+	return nil_measure
 }
 
 func (s Stats) GetTasksSumDuration() time.Duration {
 	var res time.Duration = 0
 
-	for _, m := range s.measures {
+	s.measures.Range(func(key, value interface{}) bool {
+		var m = value.(StatsMeasure)
 		if m.kind == MEASURE_KIND_TASK {
 			res += m.duration
 		}
-	}
+		return true
+	})
 
 	return res
 }
