@@ -2,8 +2,11 @@
 
 For Release
 
-- [ ] Use sync.Map for stats
-- [ ] Add cpu profiler support
+- [ ] CI
+  - [ ] Publishing to NPM
+  - [ ] Test in PRs
+  - [ ] Use evo to manage evo
+- [ ] Add package manager setting to evo config
 - [ ] Split code in packages
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
@@ -15,10 +18,6 @@ For Release
 - [ ] Watch mode
 - [ ] Custom Hash Input for e.g. environment, etc...
 - [ ] Remote cache (MVP)
-- [ ] CI
-  - [ ] Publishing to NPM
-  - [ ] Test in PRs
-  - [ ] Use evo to manage evo
 - [ ] Tests
   - [ ] TBD
 - [ ] Website
@@ -29,6 +28,7 @@ For Release
 After Release
 
 - [ ] Support custom package manager (?)
+- [ ] Add .env support
 - [ ] Cache diagnostics
   - [ ] List of files that were used to create hash
   - [ ] Diff to show what affected cache
@@ -88,6 +88,7 @@ After Release
 
 ## DONE
 
+- [x] Use sync.Map for stats
 - [x] Tasks Map similar to Workspace Map
   - [x] Use sync.Map
 - [x] REFACTOR: Workspaces map to use the DAG library

@@ -1,0 +1,32 @@
+{
+  "name": "evo-monorepo",
+  "private": true,
+  "evo": {
+    "workspaces": [
+      "packages/*"
+    ],
+    "excludes": [
+      "**/node_modules",
+      "*.md",
+      "package.json",
+      "vendor"
+    ],
+    "rules": {
+      "build": {
+        "cmd": "go build main.go",
+        "outputs": [
+          "main"
+        ]
+      },
+      "test": {
+        "cmd": "go test ./lib -v",
+        "outputs": []
+      },
+      "release": {
+        "cmd": "goreleaser release"
+      }
+    }
+  },
+  "dependencies": {
+  }
+}

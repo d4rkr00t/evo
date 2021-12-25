@@ -1,7 +1,7 @@
 .cache
-main
-package-lock.json
 node_modules
 __example__/packages/opaline/*/dist
 cov.html
-lib/__testfs__
+packages/core/lib/__testfs__
+packages/core/dist
+packages/core/main
