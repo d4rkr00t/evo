@@ -1,4 +1,5 @@
 {
-  "name": "@evo/core",
+  "name": "@evobuild/core",
+  "version": "0.2.0",
   "private": true
 }
