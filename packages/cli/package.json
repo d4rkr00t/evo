@@ -1,6 +1,6 @@
 {
   "name": "@evobuild/cli",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Build tool",
   "bin": {
     "evo": "./bin/evo"
