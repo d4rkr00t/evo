@@ -2,13 +2,10 @@
 
 For Release
 
-- [ ] CI
-  - [ ] Publishing to NPM
-  - [ ] Test in PRs
-  - [ ] Use evo to manage evo
 - [ ] Add --version command
 - [ ] Add package manager setting to evo config
 - [ ] Split code in packages
+- [ ] Split cache between state and artifacts
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
@@ -89,6 +86,10 @@ After Release
 
 ## DONE
 
+- [x] CI
+  - [x] Publishing to NPM
+  - [x] Test in PRs
+  - [x] Use evo to manage evo
 - [x] Use sync.Map for stats
 - [x] Tasks Map similar to Workspace Map
   - [x] Use sync.Map

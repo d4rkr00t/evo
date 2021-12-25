@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17.1'
+      - uses: actions/setup-node@v1
+        with:
+            node-version: '14.15.4'
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6.23.6
+
+      - run: pnpm install
+      - run: pnpm run setup
+      - run: ./node_modules/.bin/evo run build
+
+      - name: Create Release Pull Request or Publish to npm
+        uses: changesets/action@master
+        with:
+          # this expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: yarn ci:release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
