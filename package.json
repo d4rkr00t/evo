@@ -1,6 +1,9 @@
 {
   "name": "evo-monorepo",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "evo": {
     "workspaces": [
       "packages/*"
@@ -12,13 +15,27 @@
     ],
     "overrides": {
       "packages/cli": {
-        "excludes": ["vendor"],
+        "excludes": [
+          "vendor",
+          "main"
+        ],
         "rules": {
           "build": {
-            "cmd": "go build main.go",
-            "outputs": [
-              "main"
-            ]
+            "cmd": "echo 'BUILDING...'",
+            "outputs": [],
+            "deps": ["build:mac:amd64", "build:mac:arm64", "build:linux:amd64"]
+          },
+          "build:mac:amd64": {
+            "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o 'dist/evo_darwin_amd64/evo' main.go",
+            "outputs": ["dist/evo_darwin_amd64"]
+          },
+          "build:mac:arm64": {
+            "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o 'dist/evo_darwin_arm64/evo' main.go",
+            "outputs": ["dist/evo_darwin_arm64"]
+          },
+          "build:linux:amd64": {
+            "cmd": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o 'dist/evo_linux_amd64/evo' main.go",
+            "outputs": ["dist/evo_linux_amd64"]
           },
           "test": {
             "cmd": "go test ./lib -v",
@@ -26,22 +43,23 @@
           },
           "test:cov:produce": {
             "cmd": "go test ./lib -coverprofile cov.html",
-            "outputs": ["cov.html"]
+            "outputs": [
+              "cov.html"
+            ]
           },
           "test:cov": {
             "cmd": "go tool cover -html=cov.html",
             "outputs": [],
-            "deps": ["test:cov:produce"]
-          },
-          "release": {
-            "cmd": "goreleaser release",
-            "outputs": ["dist"]
+            "deps": [
+              "test:cov:produce"
+            ]
           }
         }
       }
     }
   },
   "dependencies": {
+    "@changesets/cli": "^2.19.0",
     "mkdirp": "^1.0.4"
   },
   "scripts": {
