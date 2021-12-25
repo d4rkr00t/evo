@@ -6,6 +6,7 @@ For Release
   - [ ] Publishing to NPM
   - [ ] Test in PRs
   - [ ] Use evo to manage evo
+- [ ] Add --version command
 - [ ] Add package manager setting to evo config
 - [ ] Split code in packages
 - [ ] More commands

@@ -11,7 +11,7 @@
       "package.json"
     ],
     "overrides": {
-      "packages/core": {
+      "packages/cli": {
         "excludes": ["vendor"],
         "rules": {
           "build": {
@@ -25,7 +25,8 @@
             "outputs": []
           },
           "release": {
-            "cmd": "goreleaser release"
+            "cmd": "goreleaser release",
+            "outputs": ["dist"]
           }
         }
       }
@@ -33,5 +34,8 @@
   },
   "dependencies": {
     "mkdirp": "^1.0.4"
+  },
+  "scripts": {
+    "setup": "cd packages/cli && go build main.go && cd ../.. && ln -sf ../../packages/cli/main ./node_modules/.bin/evo"
   }
 }
