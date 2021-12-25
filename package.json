@@ -24,6 +24,15 @@
             "cmd": "go test ./lib -v",
             "outputs": []
           },
+          "test:cov:produce": {
+            "cmd": "go test ./lib -coverprofile cov.html",
+            "outputs": ["cov.html"]
+          },
+          "test:cov": {
+            "cmd": "go tool cover -html=cov.html",
+            "outputs": [],
+            "deps": ["test:cov:produce"]
+          },
           "release": {
             "cmd": "goreleaser release",
             "outputs": ["dist"]
