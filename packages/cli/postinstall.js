@@ -101,7 +101,7 @@ function parsePackageJson() {
         return;
     }
 
-    var packageJson = JSON.parse(fs.readFileSync(packageJsonPath));
+    var packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
     var error = validateConfiguration(packageJson);
     if (error && error.length > 0) {
         console.error("Invalid package.json: " + error);

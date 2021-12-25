@@ -8,25 +8,30 @@
     "excludes": [
       "**/node_modules",
       "*.md",
-      "package.json",
-      "vendor"
+      "package.json"
     ],
-    "rules": {
-      "build": {
-        "cmd": "go build main.go",
-        "outputs": [
-          "main"
-        ]
-      },
-      "test": {
-        "cmd": "go test ./lib -v",
-        "outputs": []
-      },
-      "release": {
-        "cmd": "goreleaser release"
+    "overrides": {
+      "packages/core": {
+        "excludes": ["vendor"],
+        "rules": {
+          "build": {
+            "cmd": "go build main.go",
+            "outputs": [
+              "main"
+            ]
+          },
+          "test": {
+            "cmd": "go test ./lib -v",
+            "outputs": []
+          },
+          "release": {
+            "cmd": "goreleaser release"
+          }
+        }
       }
     }
   },
   "dependencies": {
+    "mkdirp": "^1.0.4"
   }
 }
