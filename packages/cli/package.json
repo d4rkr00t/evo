@@ -1,7 +1,10 @@
 {
   "name": "@evobuild/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Build tool",
+  "bin": {
+    "evo": "./bin/evo"
+  },
   "goBinary": {
     "name": "evo",
     "path": "./bin"
@@ -12,5 +15,9 @@
   },
   "dependencies": {
     "mkdirp": "^1.0.4"
-  }
+  },
+  "files": [
+    "postinstall.js",
+    "dist"
+  ]
 }
