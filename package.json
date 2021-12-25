@@ -20,6 +20,11 @@
           "main"
         ],
         "rules": {
+          "ci": {
+            "cmd": "echo 'CI'",
+            "outputs": [],
+            "deps": ["test", "build"]
+          },
           "build": {
             "cmd": "echo 'BUILDING...'",
             "outputs": [],
