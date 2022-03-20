@@ -17,10 +17,17 @@ jobs:
       - uses: actions/setup-node@v1
         with:
             node-version: '14.15.4'
+      - name: Cache evo
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-evo
+        with:
+          path: ./.cache
+          key: ${{ runner.os }}-build
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: 6.23.6
       - run: pnpm install
       - run: pnpm run setup
-      - run: ./node_modules/.bin/evo run ci
+      - run: ./node_modules/.bin/evo run ci --since origin/main
 
