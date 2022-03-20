@@ -22,6 +22,7 @@
           "vendor",
           "main",
           "dist",
+          "*.html",
           "lib/__testfs__"
         ],
         "rules": {
@@ -51,9 +52,19 @@
             "deps": ["build:version"]
           },
           "build:dev": {
+            "cmd": "echo 'BUILDING...'",
+            "outputs": [],
+            "deps": ["build:version", "build:dev:dist", "build:dev:cpy"]
+          },
+          "build:dev:dist": {
             "cmd": "CGO_ENABLED=0 go build -o 'dist/dev/evo' main.go",
             "outputs": ["dist/dev"],
             "deps": ["build:version"]
+          },
+          "build:dev:cpy": {
+            "cmd": "cpy dist/dev/evo ./bin --flat",
+            "outputs": [],
+            "deps": ["build:dev:dist"]
           },
           "build:version": {
             "cmd": "node version.js",
@@ -82,10 +93,14 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.19.0",
-    "mkdirp": "^1.0.4"
+    "mkdirp": "^1.0.4",
+    "cpy-cli": "^4.1.0",
+    "nodemon": "^2.0.15"
   },
   "scripts": {
-    "setup": "cd packages/cli && go build main.go && cd ../.. && ln -sf ../../packages/cli/main ./node_modules/.bin/evo",
+    "dev": "nodemon --exec 'evo run build:dev' --watch packages/cli -e go,json,mod --ignore lib/version.go",
+    "setup": "cd packages/cli && go build main.go && cpy ./main ./bin --flat --rename=evo && npm link --ignore-scripts",
+    "ci:setup": "cd packages/cli && go build main.go && cpy ./main ../../node_modules/.bin --flat --rename=evo",
     "ci:release": "changeset publish",
     "ci:version": "changeset version"
   }

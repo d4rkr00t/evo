@@ -4,6 +4,7 @@ For Release
 
 - [ ] Local dev loop
 - [ ] CI Publishing
+- [ ] Support empty commands
 - [ ] Add package manager setting to evo config
 - [ ] Refactor
   - [ ] Split code in packages

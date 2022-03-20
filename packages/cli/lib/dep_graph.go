@@ -11,7 +11,6 @@ func NewDAGFromWorkspaces(workspaces *sync.Map) dag.AcyclicGraph {
 
 	workspaces.Range(func(_ interface{}, value interface{}) bool {
 		var ws = value.(Workspace)
-
 		graph.Add(ws.Name)
 
 		for name := range ws.Deps {
