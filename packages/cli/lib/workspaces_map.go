@@ -76,12 +76,7 @@ func (wm *WorkspacesMap) Invalidate(ctx *Context) {
 					continue
 				}
 				var state_key = ClearTaskName(GetTaskName(target, ws.Name))
-				if wm.cache.ReadData(state_key) != ws.hash {
-					mu.Lock()
-					wm.updated.Add(ws.Name)
-					mu.Unlock()
-					break
-				} else {
+				if len(ctx.changed_files) > 0 {
 					for _, file := range ctx.changed_files {
 						if strings.HasPrefix(file, ws.RelPath) {
 							mu.Lock()
@@ -90,8 +85,12 @@ func (wm *WorkspacesMap) Invalidate(ctx *Context) {
 							break
 						}
 					}
+				} else if wm.cache.ReadData(state_key) != ws.hash {
+					mu.Lock()
+					wm.updated.Add(ws.Name)
+					mu.Unlock()
+					break
 				}
-
 			}
 			wg.Done()
 		}(ws.Name, ws)
