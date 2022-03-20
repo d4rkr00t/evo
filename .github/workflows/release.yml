@@ -27,7 +27,7 @@ jobs:
           version: 6.23.6
 
       - run: pnpm install
-      - run: pnpm run setup
+      - run: pnpm run ci:setup
       - run: pnpm run ci:version
       - run: ./node_modules/.bin/evo run build
 
