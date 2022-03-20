@@ -32,7 +32,7 @@
           },
           "build": {
             "cmd": "echo 'BUILDING...'",
-            "outputs": ["dist"],
+            "outputs": [],
             "deps": ["build:mac:amd64", "build:mac:arm64", "build:linux:amd64"]
           },
           "build:mac:amd64": {
@@ -57,7 +57,7 @@
           },
           "build:version": {
             "cmd": "node version.js",
-            "outputs": []
+            "outputs": ["lib/version.go"]
           },
           "test": {
             "cmd": "go test ./lib -v",
