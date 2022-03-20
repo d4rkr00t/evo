@@ -13,8 +13,7 @@
     ],
     "excludes": [
       "**/node_modules",
-      "*.md",
-      "package.json"
+      "*.md"
     ],
     "overrides": {
       "packages/cli": {

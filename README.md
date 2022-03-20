@@ -2,7 +2,6 @@
 
 For Release
 
-- [ ] Local dev loop
 - [ ] CI Publishing
 - [ ] Support empty commands
 - [ ] Add package manager setting to evo config
@@ -186,3 +185,4 @@ After Release
   - [x] Store all affected WS
 - [x] Replace task runner output with a spinner
 - [x] Accumulate errors and print them at the end
+- [x] Local dev loop
