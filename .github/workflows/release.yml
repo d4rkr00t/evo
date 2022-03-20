@@ -26,6 +26,14 @@ jobs:
         with:
           version: 6.23.6
 
+      - name: Cache evo
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-evo
+        with:
+          path: ./.cache
+          key: ${{ runner.os }}-build
+
       - run: pnpm install
       - run: pnpm run ci:setup
       - run: ./node_modules/.bin/evo run ci --since $(git describe --tags --abbrev=0) --verbose

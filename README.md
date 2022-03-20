@@ -2,7 +2,6 @@
 
 For Release
 
-- [ ] CI Publishing
 - [ ] Support empty commands
 - [ ] Add package manager setting to evo config
 - [ ] Refactor
@@ -90,6 +89,7 @@ After Release
 
 ## DONE
 
+- [x] CI Publishing
 - [x] Add --since flag for CI
 - [x] Add --version command
 - [x] CI
