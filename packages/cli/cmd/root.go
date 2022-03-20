@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"evo/main/lib"
 	"fmt"
 	"os"
 	"runtime"
@@ -13,6 +14,16 @@ var rootCmd = &cobra.Command{
 	Short:             "Build orchestration tool.",
 	Long:              `A fresh take on monorepo tooling.`,
 	CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
+	Run: func(cmd *cobra.Command, args []string) {
+		var version_flag, _ = cmd.Flags().GetBool("version")
+		if version_flag {
+			fmt.Println(lib.Version)
+		} else {
+			root := cmd.Root()
+			root.SetArgs([]string{"--help"})
+			root.Execute()
+		}
+	},
 }
 
 func Execute() {
@@ -31,6 +42,7 @@ func Execute() {
 	rootCmd.AddCommand(ShowRulesCmd)
 	rootCmd.AddCommand(ShowAffectedCmd)
 	rootCmd.AddCommand(ShowScopeCmd)
+	rootCmd.PersistentFlags().BoolP("version", "", false, "Version")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 
 	if err := rootCmd.Execute(); err != nil {

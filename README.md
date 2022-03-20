@@ -2,7 +2,8 @@
 
 For Release
 
-- [ ] Add --version command
+- [ ] Add --since flag for CI
+- [ ] Add --CI flag
 - [ ] Add package manager setting to evo config
 - [ ] Split code in packages
 - [ ] Split cache between state and artifacts
@@ -86,6 +87,7 @@ After Release
 
 ## DONE
 
+- [x] Add --version command
 - [x] CI
   - [x] Publishing to NPM
   - [x] Test in PRs

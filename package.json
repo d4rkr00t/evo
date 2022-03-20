@@ -8,7 +8,8 @@
   },
   "evo": {
     "workspaces": [
-      "packages/*"
+      "packages/*",
+      "build/*"
     ],
     "excludes": [
       "**/node_modules",
@@ -35,15 +36,27 @@
           },
           "build:mac:amd64": {
             "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o 'dist/evo_darwin_amd64/evo' main.go",
-            "outputs": ["dist/evo_darwin_amd64"]
+            "outputs": ["dist/evo_darwin_amd64"],
+            "deps": ["build:version"]
           },
           "build:mac:arm64": {
             "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o 'dist/evo_darwin_arm64/evo' main.go",
-            "outputs": ["dist/evo_darwin_arm64"]
+            "outputs": ["dist/evo_darwin_arm64"],
+            "deps": ["build:version"]
           },
           "build:linux:amd64": {
             "cmd": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o 'dist/evo_linux_amd64/evo' main.go",
-            "outputs": ["dist/evo_linux_amd64"]
+            "outputs": ["dist/evo_linux_amd64"],
+            "deps": ["build:version"]
+          },
+          "build:dev": {
+            "cmd": "CGO_ENABLED=0 go build -o 'dist/dev/evo' main.go",
+
+            "deps": ["build:version"]
+          },
+          "build:version": {
+            "cmd": "node version.js",
+            "outputs": []
           },
           "test": {
             "cmd": "go test ./lib -v",
@@ -72,6 +85,7 @@
   },
   "scripts": {
     "setup": "cd packages/cli && go build main.go && cd ../.. && ln -sf ../../packages/cli/main ./node_modules/.bin/evo",
-    "ci:release": "changeset publish"
+    "ci:release": "changeset publish",
+    "ci:version": "changeset version"
   }
 }
