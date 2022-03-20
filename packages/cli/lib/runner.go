@@ -21,6 +21,7 @@ func Run(ctx Context) error {
 		ctx.logger.LogWithBadge("scope", "  "+color.YellowString(strings.Join(ctx.scope, ", ")))
 	}
 	ctx.logger.LogWithBadge("targets", color.CyanString(strings.Join(ctx.target, ", ")))
+	ctx.logger.LogWithBadgeVerbose("changed files", fmt.Sprintf("[%d]", len(ctx.changed_files)), strings.Join(ctx.changed_files, ", "))
 
 	should_continue, err := install_dependencies_step(&ctx)
 	if !should_continue {

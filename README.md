@@ -2,6 +2,8 @@
 
 For Release
 
+- [ ] Local dev loop
+- [ ] CI Publishing
 - [ ] Add package manager setting to evo config
 - [ ] Refactor
   - [ ] Split code in packages
