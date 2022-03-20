@@ -23,8 +23,6 @@ func RunTasks(ctx *Context, task_map *TasksMap, wm *WorkspacesMap, lg *LoggerGro
 	ctx.stats.StartMeasure("runtasks", MEASURE_KIND_STAGE)
 	lg.Badge("tasks").Info(fmt.Sprint(task_map.length))
 	lg.Log()
-	lg.Log("Running tasks...")
-	lg.Log()
 
 	task_map.Walk(func(task_id string) error {
 		var task, _ = task_map.Load(task_id)
