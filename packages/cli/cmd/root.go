@@ -30,6 +30,7 @@ func Execute() {
 	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified target packages")
 	RunCmd.PersistentFlags().Int("concurrency", runtime.NumCPU(), "Number of concurrently running tasks, defaults to a number of CPUs")
 	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
+	RunCmd.PersistentFlags().String("since", "", "Use git diff to determine which packages have changed since a merge-base")
 	RunCmd.PersistentFlags().String("tracing", "", "Output tracing data")
 	RunCmd.PersistentFlags().Lookup("tracing").NoOptDefVal = "evo-tracing-output.trace"
 

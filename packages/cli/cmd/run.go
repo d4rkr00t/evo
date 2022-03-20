@@ -23,6 +23,7 @@ var RunCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwd_err = cmd.Flags().GetString("cwd")
 		var scope, _ = cmd.Flags().GetStringSlice("scope")
+		var since, _ = cmd.Flags().GetString("since")
 		var concurrency, _ = cmd.Flags().GetInt("concurrency")
 		var tracing_output, _ = cmd.Flags().GetString("tracing")
 
@@ -48,12 +49,19 @@ var RunCmd = &cobra.Command{
 			tracing.Enable()
 		}
 
+		var changed_files = []string{}
+
+		if len(since) > 0 {
+			changed_files = lib.GetChangedSince(root_path, since)
+		}
+
 		if err == nil {
 			var ctx = lib.NewContext(
 				root_path,
 				cwd,
 				args,
 				scope,
+				changed_files,
 				concurrency,
 				root_pkg_json,
 				cache.NewCache(root_path),

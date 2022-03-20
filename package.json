@@ -21,6 +21,7 @@
         "excludes": [
           "vendor",
           "main",
+          "dist",
           "lib/__testfs__"
         ],
         "rules": {
@@ -31,7 +32,7 @@
           },
           "build": {
             "cmd": "echo 'BUILDING...'",
-            "outputs": [],
+            "outputs": ["dist"],
             "deps": ["build:mac:amd64", "build:mac:arm64", "build:linux:amd64"]
           },
           "build:mac:amd64": {
@@ -51,7 +52,7 @@
           },
           "build:dev": {
             "cmd": "CGO_ENABLED=0 go build -o 'dist/dev/evo' main.go",
-
+            "outputs": ["dist/dev"],
             "deps": ["build:version"]
           },
           "build:version": {

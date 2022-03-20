@@ -41,6 +41,7 @@ var ShowScopeCmd = &cobra.Command{
 				root_path,
 				cwd,
 				[]string{},
+				[]string{},
 				args,
 				1,
 				root_pkg_json,

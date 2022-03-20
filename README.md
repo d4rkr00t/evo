@@ -2,10 +2,11 @@
 
 For Release
 
-- [ ] Add --since flag for CI
-- [ ] Add --CI flag
 - [ ] Add package manager setting to evo config
-- [ ] Split code in packages
+- [ ] Refactor
+  - [ ] Split code in packages
+  - [ ] Try DoD
+  - [ ] Generics -> Go 1.8
 - [ ] Split cache between state and artifacts
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
@@ -87,6 +88,7 @@ After Release
 
 ## DONE
 
+- [x] Add --since flag for CI
 - [x] Add --version command
 - [x] CI
   - [x] Publishing to NPM

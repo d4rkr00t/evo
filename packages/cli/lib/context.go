@@ -19,6 +19,7 @@ type Context struct {
 	config        Config
 	tracing       Tracing
 	scope         []string
+	changed_files []string
 }
 
 func NewContext(
@@ -26,6 +27,7 @@ func NewContext(
 	cwd string,
 	target []string,
 	scope []string,
+	changed_files []string,
 	concurrency int,
 	root_pkg_json PackageJson,
 	cache cache.Cache,
@@ -36,7 +38,7 @@ func NewContext(
 ) Context {
 	return Context{
 		root, cwd, target, concurrency, root_pkg_json,
-		cache, logger, stats, config, tracing, scope,
+		cache, logger, stats, config, tracing, scope, changed_files,
 	}
 }
 

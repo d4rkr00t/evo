@@ -82,6 +82,15 @@ func (wm *WorkspacesMap) Invalidate(ctx *Context) {
 					mu.Unlock()
 					break
 				}
+
+				for _, file := range ctx.changed_files {
+					if strings.HasPrefix(file, ws.RelPath) {
+						mu.Lock()
+						wm.updated.Add(ws.Name)
+						mu.Unlock()
+						break
+					}
+				}
 			}
 			wg.Done()
 		}(ws.Name, ws)
