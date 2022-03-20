@@ -173,7 +173,6 @@ func run_step(ctx *Context, workspaces *WorkspacesMap) (bool, error) {
 	var err error = nil
 
 	if task_map.length > 0 {
-		run_lg.Verbose().Log("Executing tasks...")
 		err = RunTasks(ctx, &task_map, workspaces, &run_lg)
 	} else {
 		run_lg.Warn("No tasks found, skipping...")

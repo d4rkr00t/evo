@@ -9,8 +9,16 @@ func GetChangedSince(root string, since string) []string {
 	var changed, _ = getChangedFilesSince(root, since)
 	var untracked_changed, _ = getUntrackedChangedFiles(root)
 	var result = []string{}
-	result = append(result, changed...)
-	result = append(result, untracked_changed...)
+	for _, line := range changed {
+		if len(line) > 0 {
+			result = append(result, line)
+		}
+	}
+	for _, line := range untracked_changed {
+		if len(line) > 0 {
+			result = append(result, line)
+		}
+	}
 	return result
 }
 
