@@ -28,8 +28,7 @@ jobs:
 
       - run: pnpm install
       - run: pnpm run ci:setup
-      - run: pnpm run ci:version
-      - run: ./node_modules/.bin/evo run build
+      - run: ./node_modules/.bin/evo run ci --since $(git describe --tags --abbrev=0) --verbose
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@master

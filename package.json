@@ -100,7 +100,6 @@
     "dev": "nodemon --exec 'evo run build:dev' --watch packages/cli -e go,json,mod --ignore lib/version.go",
     "setup": "cd packages/cli && go build main.go && cpy ./main ./bin --flat --rename=evo && npm link --ignore-scripts",
     "ci:setup": "cd packages/cli && go build main.go && cpy ./main ../../node_modules/.bin --flat --rename=evo",
-    "ci:release": "changeset publish",
-    "ci:version": "changeset version"
+    "ci:release": "changeset publish"
   }
 }
