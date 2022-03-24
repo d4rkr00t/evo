@@ -81,7 +81,6 @@ func ShowRules(ctx Context, ws_name string) error {
 	}
 
 	ctx.logger.Log()
-	ctx.logger.Log("  All rules for a package:")
 
 	for rule_name, rule := range ws.Rules {
 		var lg = ctx.logger.CreateGroup()
