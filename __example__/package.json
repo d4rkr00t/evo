@@ -32,6 +32,8 @@
         "deps": [
           "@build"
         ]
+      },
+      "empty": {
       }
     },
     "overrides": {

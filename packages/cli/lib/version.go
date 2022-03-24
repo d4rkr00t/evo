@@ -1,3 +1,3 @@
 package lib
 
-var Version string = "0.2.3"
+var Version string = "0.4.0"

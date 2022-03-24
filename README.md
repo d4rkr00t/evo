@@ -2,8 +2,8 @@
 
 For Release
 
-- [ ] Support empty commands
 - [ ] Add package manager setting to evo config
+- [ ] evo run to show a list of available commands
 - [ ] Refactor
   - [ ] Split code in packages
   - [ ] Try DoD
@@ -89,6 +89,7 @@ After Release
 
 ## DONE
 
+- [x] Support empty commands
 - [x] CI Publishing
 - [x] Add --since flag for CI
 - [x] Add --version command

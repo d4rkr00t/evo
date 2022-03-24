@@ -24,6 +24,10 @@ func NewCmd(name string, dir string, cmd string, stdout func(msg string), stderr
 }
 
 func (c Cmd) Run() (string, error) {
+	if len(c.cmd) == 0 {
+		return "", nil
+	}
+
 	var envs, args, _ = shellwords.ParseWithEnvs(c.cmd)
 	var cmd = procs.NewProcess(strings.Join(args, " "))
 	var out = []string{}

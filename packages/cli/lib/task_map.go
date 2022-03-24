@@ -182,7 +182,13 @@ func create_executable_task(ws_name string, task_name string, deps []string, rul
 			lg.Badge(task_name).BadgeColor(t.color).Info(color.YellowString("cache miss:"), color.HiBlackString(ws.hash))
 			lg.Badge(task_name).BadgeColor(t.color).Verbose().Info("cleaning outputs...")
 			t.CleanOutputs(ws.Path)
-			lg.Badge(task_name).BadgeColor(t.color).Info("running → ", color.HiBlackString(rule.Cmd))
+
+			var cmd_title = rule.Cmd
+			if len(cmd_title) == 0 {
+				cmd_title = "..."
+			}
+			lg.Badge(task_name).BadgeColor(t.color).Info("running → ", color.HiBlackString(cmd_title))
+
 			var out, err = run()
 			if err != nil {
 				lg.Badge(task_name).BadgeColor(t.color).Error(color.RedString("error → "), err.Error())
