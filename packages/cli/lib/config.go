@@ -70,3 +70,12 @@ func (c Config) GetExcludes(ws_path string) []string {
 
 	return excludes
 }
+
+func (c Config) GetRulesNames() []string {
+	var rules = []string{}
+	for name := range c.Rules {
+		rules = append(rules, name)
+	}
+	sort.Strings(rules)
+	return rules
+}

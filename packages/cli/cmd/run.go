@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"errors"
 	"evo/main/lib"
 	"evo/main/lib/cache"
+	"fmt"
 	"os"
 	"path"
 
@@ -14,12 +14,6 @@ var RunCmd = &cobra.Command{
 	Use:   "run <command>",
 	Short: "Run a project's commmand",
 	Long:  "Run a project's command",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("target name is required")
-		}
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwd_err = cmd.Flags().GetString("cwd")
 		var scope, _ = cmd.Flags().GetStringSlice("scope")
@@ -47,6 +41,17 @@ var RunCmd = &cobra.Command{
 		if tracing_output != "" {
 			tracing.SetOut(tracing_output)
 			tracing.Enable()
+		}
+
+		if len(args) < 1 {
+			logger.Log("Usage: evo run <target>")
+			var lg = logger.CreateGroup()
+			lg.Start("Available targets:")
+			for _, name := range root_pkg_json.GetConfig().GetRulesNames() {
+				lg.Log(fmt.Sprintf("– %s", name))
+			}
+			lg.EndPlain()
+			return
 		}
 
 		var changed_files = []string{}

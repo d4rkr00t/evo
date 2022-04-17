@@ -2,16 +2,25 @@
 
 For Release
 
-- [ ] Add package manager setting to evo config
-- [ ] evo run to show a list of available commands
 - [ ] Refactor
   - [ ] Split code in packages
   - [ ] Try DoD
   - [ ] Generics -> Go 1.8
+  - [ ] REFACTOR: create tasks from workspaces
+  - [ ] REFACTOR: Generic create task from a rule
+  - [ ] REFACTOR: Refactor cache to interfaces
+  - [ ] REFACTOR: Refactor logger
+    - [ ] to interfaces
+    - [x] Cleaner API
+    - [ ] Add debug level to the logger
+- [ ] Extract evo config to a separate file to avoid cache misses for package managers
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
   - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
+  - [ ] Cache diagnostics
+    - [ ] List of files that were used to create hash
+    - [ ] Diff to show what affected cache
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
@@ -29,11 +38,8 @@ For Release
 
 After Release
 
-- [ ] Support custom package manager (?)
 - [ ] Add .env support
-- [ ] Cache diagnostics
-  - [ ] List of files that were used to create hash
-  - [ ] Diff to show what affected cache
+- [ ] Support custom package manager (?)
 - [ ] Support: task deps: ["file:somefilepath"]
 - [ ] Watchman integration and persistent graph
 - [ ] More sophisticated logic around package managers
@@ -42,13 +48,6 @@ After Release
   - [ ] Might have to restore all of the other outputs
   - [ ] Maybe make it manual?
     - [ ] Otherwise need to hash contents of output
-- [ ] REFACTOR: create tasks from workspaces
-  - [ ] REFACTOR: Generic create task from a rule
-- [ ] REFACTOR: Refactor cache to interfaces
-- [ ] REFACTOR: Refactor logger
-  - [ ] to interfaces
-  - [x] Cleaner API
-  - [ ] Add debug level to the logger
 - [ ] Improve unknown dependency error message
 - [ ] SANDBOXING !!!
 - [ ] Rules
@@ -81,7 +80,6 @@ After Release
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] Use semver comparison for dependencies (?)
-- [ ] REFACTOR: Go Generics
 - [ ] https://github.com/adrg/xdg
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
@@ -90,6 +88,7 @@ After Release
 
 ## DONE
 
+- [x] evo run to show a list of available commands
 - [x] Support empty commands
 - [x] CI Publishing
 - [x] Add --since flag for CI
