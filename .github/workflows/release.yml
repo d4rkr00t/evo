@@ -32,6 +32,7 @@ jobs:
           cache-name: cache-evo
         with:
           path: ./.cache
+          key: ${{ runner.os }}-build
 
       - run: pnpm install
       - run: pnpm run ci:setup

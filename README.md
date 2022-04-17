@@ -8,7 +8,10 @@ For Release
   - [ ] Split code in packages
   - [ ] Try DoD
   - [ ] Generics -> Go 1.8
-- [ ] Split cache between state and artifacts
+- [ ] Cache improvements
+  - [ ] Custom Hash Input for e.g. environment, etc...
+  - [ ] Remote cache (MVP)
+  - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
 - [ ] More commands
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
@@ -17,8 +20,6 @@ For Release
 - [ ] Improve CLI Output
   - [ ] Show how many tasks were run and how many restored from cache/ignored
 - [ ] Watch mode
-- [ ] Custom Hash Input for e.g. environment, etc...
-- [ ] Remote cache (MVP)
 - [ ] Tests
   - [ ] TBD
 - [ ] Website
