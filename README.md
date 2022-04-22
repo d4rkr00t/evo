@@ -2,17 +2,6 @@
 
 For Release
 
-- [ ] Refactor
-  - [ ] Split code in packages
-  - [ ] Try DoD
-  - [ ] Generics -> Go 1.8
-  - [ ] REFACTOR: create tasks from workspaces
-  - [ ] REFACTOR: Generic create task from a rule
-  - [ ] REFACTOR: Refactor cache to interfaces
-  - [ ] REFACTOR: Refactor logger
-    - [ ] to interfaces
-    - [x] Cleaner API
-    - [ ] Add debug level to the logger
 - [ ] Extract evo config to a separate file to avoid cache misses for package managers
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
@@ -33,6 +22,18 @@ For Release
   - [ ] TBD
 - [ ] Website
   - [ ] Documentation
+- [ ] Refactor
+  - [x] Upgrade Go
+  - [ ] Split code in packages
+  - [ ] Try DoD
+  - [ ] Generics -> Go 1.8
+  - [ ] REFACTOR: create tasks from workspaces
+  - [ ] REFACTOR: Generic create task from a rule
+  - [ ] REFACTOR: Refactor cache to interfaces
+  - [ ] REFACTOR: Refactor logger
+    - [ ] to generics/interfaces
+    - [x] Cleaner API
+    - [ ] Add debug level to the logger
 
 ---------------
 
