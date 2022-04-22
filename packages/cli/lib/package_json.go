@@ -12,7 +12,6 @@ type PackageJson struct {
 	Path            string
 	Name            string
 	Version         string
-	Evo             Config
 	Dependencies    map[string]string
 	DevDependencies map[string]string
 	Bin             map[string]string
@@ -27,10 +26,6 @@ func NewPackageJson(package_json_path string) (PackageJson, error) {
 	json.Unmarshal(dat, &p)
 	p.Path = package_json_path
 	return p, nil
-}
-
-func (p PackageJson) GetConfig() Config {
-	return p.Evo
 }
 
 func (p PackageJson) Invalidate(cc *cache.Cache) bool {

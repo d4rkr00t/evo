@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"path"
 	"sort"
 	"strings"
@@ -14,11 +16,25 @@ type ConfigOverride struct {
 }
 
 type Config struct {
+	Path       string
 	Workspaces []string
 	Commands   map[string]string
 	Rules      map[string]Rule
 	Excludes   []string
 	Overrides  map[string]ConfigOverride
+}
+
+const CONFIG_FILE_NAME = ".evo.json"
+
+func NewConfig(config_path string) (Config, error) {
+	var cfg Config
+	var dat, err = ioutil.ReadFile(config_path)
+	if err != nil {
+		return cfg, err
+	}
+	json.Unmarshal(dat, &cfg)
+	cfg.Path = config_path
+	return cfg, nil
 }
 
 func (c Config) GetAllRulesForWS(root_path string, ws_path string) map[string]Rule {

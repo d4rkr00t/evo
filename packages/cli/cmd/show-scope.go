@@ -31,8 +31,8 @@ var ShowScopeCmd = &cobra.Command{
 		}
 
 		var verbose, _ = cmd.Flags().GetBool("verbose")
-		var root_pkg_json, err = lib.FindRootPackageJson(cwd)
-		var root_path = path.Dir(root_pkg_json.Path)
+		var root_pkg_json, root_config, err = lib.FindProject(cwd)
+		var root_path = path.Dir(root_config.Path)
 		var logger = lib.NewLogger(verbose)
 		var tracing = lib.NewTracing()
 
@@ -49,10 +49,10 @@ var ShowScopeCmd = &cobra.Command{
 				logger,
 				tracing,
 				lib.NewStats(),
-				root_pkg_json.GetConfig(),
+				root_config,
 			)
 
-			err = lib.ShowScope(ctx, args[0])
+			err = lib.ShowScope(&ctx, args[0])
 		} else {
 			logger.Log("Error: Not in evo project!")
 		}

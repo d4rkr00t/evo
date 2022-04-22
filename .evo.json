@@ -1,0 +1,95 @@
+{
+  "workspaces": [
+    "packages/*",
+    "build/*"
+  ],
+  "excludes": [
+    "**/node_modules",
+    "*.md"
+  ],
+  "rules": {
+    "ci": {
+      "cmd": "echo 'CI'",
+      "outputs": [],
+      "deps": ["test", "build"]
+    },
+    "build": {
+      "cmd": "echo 'BUILDING...'",
+      "outputs": [],
+      "deps": []
+    },
+    "test": {
+      "cmd": "echo 'TESTING...'",
+      "outputs": []
+    }
+  },
+  "overrides": {
+    "packages/cli": {
+      "excludes": [
+        "vendor",
+        "main",
+        "dist",
+        "*.html",
+        "lib/__testfs__"
+      ],
+      "rules": {
+        "build": {
+          "cmd": "echo 'BUILDING...'",
+          "outputs": [],
+          "deps": ["build:mac:amd64", "build:mac:arm64", "build:linux:amd64"]
+        },
+        "build:mac:amd64": {
+          "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o 'dist/evo_darwin_amd64/evo' main.go",
+          "outputs": ["dist/evo_darwin_amd64"],
+          "deps": ["build:version"]
+        },
+        "build:mac:arm64": {
+          "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o 'dist/evo_darwin_arm64/evo' main.go",
+          "outputs": ["dist/evo_darwin_arm64"],
+          "deps": ["build:version"]
+        },
+        "build:linux:amd64": {
+          "cmd": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o 'dist/evo_linux_amd64/evo' main.go",
+          "outputs": ["dist/evo_linux_amd64"],
+          "deps": ["build:version"]
+        },
+        "build:dev": {
+          "cmd": "echo 'BUILDING...'",
+          "outputs": [],
+          "deps": ["build:dev:dist", "build:dev:cpy"]
+        },
+        "build:dev:dist": {
+          "cmd": "CGO_ENABLED=0 go build -o 'dist/dev/evo' main.go",
+          "outputs": ["dist/dev"],
+          "deps": []
+        },
+        "build:dev:cpy": {
+          "cmd": "cpy dist/dev/evo ./bin --flat",
+          "outputs": [],
+          "deps": ["build:dev:dist"]
+        },
+        "build:version": {
+          "cmd": "node version.js",
+          "outputs": ["lib/version.go"]
+        },
+        "test": {
+          "cmd": "go test ./lib -v",
+          "outputs": []
+        },
+        "test:cov:produce": {
+          "cmd": "go test ./lib -coverprofile cov.html",
+          "outputs": [
+            "cov.html"
+          ]
+        },
+        "test:cov": {
+          "cmd": "go tool cover -html=cov.html",
+          "outputs": [],
+          "deps": [
+            "test:cov:produce"
+          ]
+        }
+      }
+    }
+  }
+}

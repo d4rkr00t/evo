@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func ShowHash(ctx Context, ws_name string) error {
+func ShowHash(ctx *Context, ws_name string) error {
 	ctx.stats.StartMeasure("show-hash", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
@@ -27,7 +27,7 @@ func ShowHash(ctx Context, ws_name string) error {
 		return errors.New(fmt.Sprint("  Package", ws_name, "not found!"))
 	}
 
-	wm.RehashAll(&ctx)
+	wm.RehashAll(ctx)
 	ws.Rehash(&wm)
 
 	var lg = ctx.logger.CreateGroup()
@@ -62,7 +62,7 @@ func ShowHash(ctx Context, ws_name string) error {
 	return nil
 }
 
-func ShowRules(ctx Context, ws_name string) error {
+func ShowRules(ctx *Context, ws_name string) error {
 	ctx.stats.StartMeasure("show-rules", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
@@ -99,7 +99,7 @@ func ShowRules(ctx Context, ws_name string) error {
 	return nil
 }
 
-func ShowAffected(ctx Context, target []string) error {
+func ShowAffected(ctx *Context, target []string) error {
 	ctx.stats.StartMeasure("show-affected", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)
@@ -111,8 +111,8 @@ func ShowAffected(ctx Context, target []string) error {
 		return err
 	}
 
-	wm.RehashAll(&ctx)
-	wm.Invalidate(&ctx)
+	wm.RehashAll(ctx)
+	wm.Invalidate(ctx)
 
 	var lg = ctx.logger.CreateGroup()
 	lg.Start("Affected packages:")
@@ -128,7 +128,7 @@ func ShowAffected(ctx Context, target []string) error {
 	return nil
 }
 
-func ShowScope(ctx Context, target string) error {
+func ShowScope(ctx *Context, target string) error {
 	ctx.stats.StartMeasure("show-scope", MEASURE_KIND_STAGE)
 	ctx.logger.Log()
 	ctx.logger.LogWithBadge("cwd", "   "+ctx.cwd)

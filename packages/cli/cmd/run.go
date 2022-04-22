@@ -29,9 +29,9 @@ var RunCmd = &cobra.Command{
 		}
 
 		var verbose, _ = cmd.Flags().GetBool("verbose")
-		var root_pkg_json, err = lib.FindRootPackageJson(cwd)
+		var root_pkg_json, root_config, err = lib.FindProject(cwd)
 		var logger = lib.NewLogger(verbose)
-		var root_path = path.Dir(root_pkg_json.Path)
+		var root_path = path.Dir(root_config.Path)
 		var tracing = lib.NewTracing()
 
 		if len(scope) == 0 {
@@ -47,7 +47,7 @@ var RunCmd = &cobra.Command{
 			logger.Log("Usage: evo run <target>")
 			var lg = logger.CreateGroup()
 			lg.Start("Available targets:")
-			for _, name := range root_pkg_json.GetConfig().GetRulesNames() {
+			for _, name := range root_config.GetRulesNames() {
 				lg.Log(fmt.Sprintf("– %s", name))
 			}
 			lg.EndPlain()
@@ -73,10 +73,10 @@ var RunCmd = &cobra.Command{
 				logger,
 				tracing,
 				lib.NewStats(),
-				root_pkg_json.GetConfig(),
+				root_config,
 			)
 
-			err = lib.Run(ctx)
+			err = lib.Run(&ctx)
 		} else {
 			logger.Log("Error: Not in evo project!")
 		}

@@ -1,0 +1,20 @@
+{
+  "workspaces": [
+    "packages/*"
+  ],
+  "excludes": [
+    "node_modules",
+    "package.json"
+  ],
+  "rules": {
+    "build": {
+      "cmd": "cp index.js dist.js",
+      "outputs": [
+        "dist.js"
+      ],
+      "deps": [
+        "@build"
+      ]
+    }
+  }
+}

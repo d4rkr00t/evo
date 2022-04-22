@@ -2,7 +2,7 @@
 
 For Release
 
-- [ ] Extract evo config to a separate file to avoid cache misses for package managers
+- [ ] Stop swallowing errors at cmd execution time
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -89,6 +89,7 @@ After Release
 
 ## DONE
 
+- [x] Extract evo config to a separate file to avoid cache misses for package managers
 - [x] evo run to show a list of available commands
 - [x] Support empty commands
 - [x] CI Publishing

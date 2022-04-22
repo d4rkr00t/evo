@@ -13,7 +13,7 @@ func Test_BuildSimple(t *testing.T) {
 	var tmp_dir = RestoreFixture("simple")
 	defer CleanFixture(tmp_dir)
 
-	var root_pkg_json, _ = lib.FindRootPackageJson(tmp_dir)
+	var root_pkg_json, root_config, _ = lib.FindProject(tmp_dir)
 	var logger = lib.NewLogger(false)
 	var tracing = lib.NewTracing()
 	var ctx = lib.NewContext(
@@ -28,9 +28,9 @@ func Test_BuildSimple(t *testing.T) {
 		logger,
 		tracing,
 		lib.NewStats(),
-		root_pkg_json.GetConfig(),
+		root_config,
 	)
-	var err = lib.Run(ctx)
+	var err = lib.Run(&ctx)
 
 	assert.NoError(t, err)
 	assert.FileExists(t, path.Join(tmp_dir, "packages", "pkg-a", "dist.js"))
@@ -41,7 +41,7 @@ func Test_BuildSimpleUnknownTarget(t *testing.T) {
 	var tmp_dir = RestoreFixture("simple")
 	defer CleanFixture(tmp_dir)
 
-	var root_pkg_json, _ = lib.FindRootPackageJson(tmp_dir)
+	var root_pkg_json, root_config, _ = lib.FindProject(tmp_dir)
 	var logger = lib.NewLogger(false)
 	var tracing = lib.NewTracing()
 	var ctx = lib.NewContext(
@@ -56,9 +56,9 @@ func Test_BuildSimpleUnknownTarget(t *testing.T) {
 		logger,
 		tracing,
 		lib.NewStats(),
-		root_pkg_json.GetConfig(),
+		root_config,
 	)
-	var err = lib.Run(ctx)
+	var err = lib.Run(&ctx)
 
 	assert.NoError(t, err)
 }
@@ -67,7 +67,7 @@ func Test_BuildSimpleOverrides(t *testing.T) {
 	var tmp_dir = RestoreFixture("simple-overrides")
 	defer CleanFixture(tmp_dir)
 
-	var root_pkg_json, _ = lib.FindRootPackageJson(tmp_dir)
+	var root_pkg_json, root_config, _ = lib.FindProject(tmp_dir)
 	var logger = lib.NewLogger(false)
 	var tracing = lib.NewTracing()
 	var ctx = lib.NewContext(
@@ -82,9 +82,9 @@ func Test_BuildSimpleOverrides(t *testing.T) {
 		logger,
 		tracing,
 		lib.NewStats(),
-		root_pkg_json.GetConfig(),
+		root_config,
 	)
-	var err = lib.Run(ctx)
+	var err = lib.Run(&ctx)
 
 	assert.NoError(t, err)
 	assert.FileExists(t, path.Join(tmp_dir, "packages", "pkg-a", "dist.js"))

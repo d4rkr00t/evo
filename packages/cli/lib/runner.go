@@ -8,10 +8,10 @@ import (
 	"github.com/fatih/color"
 )
 
-func Run(ctx Context) error {
+func Run(ctx *Context) error {
 	ctx.stats.StartMeasure("total", MEASURE_KIND_STAGE)
 	defer ctx.tracing.Write(&ctx.logger, ctx.cwd)
-	defer print_total_time(&ctx)
+	defer print_total_time(ctx)
 
 	os.Setenv("PATH", GetNodeModulesBinPath(ctx.root)+":"+os.ExpandEnv("$PATH"))
 	os.Setenv("ROOT", ctx.root)
@@ -23,22 +23,22 @@ func Run(ctx Context) error {
 	ctx.logger.LogWithBadge("targets", color.CyanString(strings.Join(ctx.target, ", ")))
 	ctx.logger.LogWithBadgeVerbose("changed files", fmt.Sprintf("[%d]", len(ctx.changed_files)), strings.Join(ctx.changed_files, ", "))
 
-	should_continue, err := install_dependencies_step(&ctx)
+	should_continue, err := install_dependencies_step(ctx)
 	if !should_continue {
 		return err
 	}
 
-	should_continue, wm, err := invalidate_workspaces_step(&ctx)
+	should_continue, wm, err := invalidate_workspaces_step(ctx)
 	if !should_continue {
 		return err
 	}
 
-	should_continue, err = linking_step(&ctx, &wm)
+	should_continue, err = linking_step(ctx, &wm)
 	if !should_continue {
 		return err
 	}
 
-	_, err = run_step(&ctx, &wm)
+	_, err = run_step(ctx, &wm)
 
 	return err
 }
