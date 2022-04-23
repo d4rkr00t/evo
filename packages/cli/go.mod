@@ -9,6 +9,7 @@ require (
 	github.com/google/chrometracing v0.0.0-20210820115312-9b2483a9dc7d
 	github.com/ionrock/procs v0.0.0-20180102005558-f53ef5630f1a
 	github.com/mattn/go-shellwords v1.0.12
+	github.com/orcaman/concurrent-map v1.0.0
 	github.com/otiai10/copy v1.7.0
 	github.com/pyr-sh/dag v1.0.0
 	github.com/spf13/cobra v1.4.0

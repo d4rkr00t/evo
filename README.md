@@ -13,6 +13,7 @@ For Release
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] `--force` to force run a command, ignoring cache
 - [ ] Fix all issues highlighted by `--race` flag
+- [ ] Fix linking peer dependencies (?)
 - [ ] Improve CLI Output
   - [ ] Show how many tasks were run and how many restored from cache/ignored
 - [ ] Watch mode
@@ -69,8 +70,6 @@ For Release
   - [ ] Update file check sums only when modified time is after previous update
   - [ ] Watch file changes during task run
     - [ ] Update FileSystem cache only when a file changes
-- [ ] Explore not managing dependencies for workspaces
-  - [ ] Let yarn/pnpm/npm manage dependencies for workspaces, drop custom linking logic
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] Use semver comparison for dependencies (?)

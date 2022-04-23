@@ -42,6 +42,9 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-shellwords v1.0.12
 ## explicit; go 1.13
 github.com/mattn/go-shellwords
+# github.com/orcaman/concurrent-map v1.0.0
+## explicit
+github.com/orcaman/concurrent-map
 # github.com/otiai10/copy v1.7.0
 ## explicit; go 1.14
 github.com/otiai10/copy
