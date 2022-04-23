@@ -2,7 +2,6 @@
 
 For Release
 
-- [ ] Stop swallowing errors at cmd execution time
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -10,7 +9,6 @@ For Release
   - [ ] Cache diagnostics
     - [ ] List of files that were used to create hash
     - [ ] Diff to show what affected cache
-- [ ] More commands
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] `--force` to force run a command, ignoring cache
@@ -34,14 +32,9 @@ For Release
     - [ ] to generics/interfaces
     - [x] Cleaner API
     - [ ] Add debug level to the logger
-
----------------
-
-After Release
-
 - [ ] Add .env support
 - [ ] Support custom package manager (?)
-- [ ] Support: task deps: ["file:somefilepath"]
+- [ ] Support task deps: ["file:somefilepath"]
 - [ ] Watchman integration and persistent graph
 - [ ] More sophisticated logic around package managers
   - [ ] include lock files into cache hash
@@ -89,6 +82,7 @@ After Release
 
 ## DONE
 
+- [x] Stop swallowing errors at cmd execution time
 - [x] Extract evo config to a separate file to avoid cache misses for package managers
 - [x] evo run to show a list of available commands
 - [x] Support empty commands

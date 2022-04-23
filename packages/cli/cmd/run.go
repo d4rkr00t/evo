@@ -77,11 +77,10 @@ var RunCmd = &cobra.Command{
 			)
 
 			err = lib.Run(&ctx)
-		} else {
-			logger.Log("Error: Not in evo project!")
 		}
 
 		if err != nil {
+			logger.Log(fmt.Sprintf("%s", err))
 			os.Exit(1)
 		}
 	},

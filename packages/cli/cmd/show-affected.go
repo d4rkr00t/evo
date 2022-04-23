@@ -4,6 +4,7 @@ import (
 	"errors"
 	"evo/main/lib"
 	"evo/main/lib/cache"
+	"fmt"
 	"os"
 	"path"
 
@@ -52,11 +53,10 @@ var ShowAffectedCmd = &cobra.Command{
 			)
 
 			err = lib.ShowAffected(&ctx, args)
-		} else {
-			logger.Log("Error: Not in evo project!")
 		}
 
 		if err != nil {
+			logger.Log(fmt.Sprintf("%s", err))
 			os.Exit(1)
 		}
 	},
