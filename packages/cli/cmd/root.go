@@ -38,11 +38,14 @@ func Execute() {
 
 	ShowRulesCmd.PersistentFlags().String("cwd", "", "Override CWD")
 
+	ListCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope list to a specified target package")
+
 	rootCmd.AddCommand(RunCmd)
 	rootCmd.AddCommand(ShowHashCmd)
 	rootCmd.AddCommand(ShowRulesCmd)
 	rootCmd.AddCommand(ShowAffectedCmd)
 	rootCmd.AddCommand(ShowScopeCmd)
+	rootCmd.AddCommand(ListCmd)
 	rootCmd.PersistentFlags().BoolP("version", "", false, "Version")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 

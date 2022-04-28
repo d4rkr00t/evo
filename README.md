@@ -1,7 +1,7 @@
 ## TODO
 
 For Release
-
+- [ ] Fix error reporting
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -11,11 +11,11 @@ For Release
     - [ ] Diff to show what affected cache
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
-- [ ] `--force` to force run a command, ignoring cache
 - [ ] Fix all issues highlighted by `--race` flag
 - [ ] Fix linking peer dependencies (?)
 - [ ] Improve CLI Output
   - [ ] Show how many tasks were run and how many restored from cache/ignored
+  - [ ] Add error codes to all errors
 - [ ] Watch mode
 - [ ] Tests
   - [ ] TBD
