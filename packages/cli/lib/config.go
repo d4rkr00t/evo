@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -73,11 +74,12 @@ func (c Config) GetAllRulesForWS(root_path string, ws_path string) map[string]Ru
 	return rules
 }
 
-func (c Config) GetExcludes(ws_path string) []string {
+func (c Config) GetExcludes(root_path string, ws_path string) []string {
 	var excludes = c.Excludes
+	var rel_path, _ = filepath.Rel(root_path, ws_path)
 
 	for group_name, group := range c.Overrides {
-		if val, _ := doublestar.Match(group_name, ws_path); val {
+		if val, _ := doublestar.Match(group_name, rel_path); val {
 			if len(group.Excludes) > 0 {
 				excludes = group.Excludes
 			}

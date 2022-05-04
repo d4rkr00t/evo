@@ -182,7 +182,7 @@ func get_workspaces(root_path string, conf *Config, cc *cache.Cache) (sync.Map, 
 			ccm.Wait()
 			go func(ws_path string) {
 				defer ccm.Done()
-				var excludes = conf.GetExcludes(ws_path)
+				var excludes = conf.GetExcludes(root_path, ws_path)
 				var rules = conf.GetAllRulesForWS(root_path, ws_path)
 				var ws = NewWorkspace(root_path, ws_path, excludes, cc, rules)
 				if val, ok := workspaces.Load(ws.Name); ok {
