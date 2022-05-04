@@ -35,7 +35,7 @@ type (
 		allDoneCh chan bool
 
 		// The close flag allows we know when we can close the manager
-		closed bool
+		closed atomic.Value
 
 		// The running count allows we know the number of goroutines are running
 		runningCount int32
@@ -75,7 +75,7 @@ func (c *concurrencyManager) controller() {
 
 		// When the closed flag is set,
 		// we need to close the manager if it doesn't have any running goroutine
-		if c.closed == true && c.runningCount == 0 {
+		if c.closed.Load() == true && atomic.LoadInt32(&c.runningCount) == 0 {
 			break
 		}
 	}
@@ -106,7 +106,7 @@ func (c *concurrencyManager) Done() {
 
 // Close the manager manually
 func (c *concurrencyManager) Close() {
-	c.closed = true
+	c.closed.Store(true)
 }
 
 // Wait for all goroutines are done

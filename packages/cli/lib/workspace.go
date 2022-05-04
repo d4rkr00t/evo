@@ -48,7 +48,7 @@ func NewWorkspace(root_path string, ws_path string, excludes []string, cc *cache
 		outputs = append(outputs, rule.Outputs...)
 	}
 
-	excludes = append(excludes, outputs...)
+	excludes = append(append([]string{}, excludes...), outputs...)
 
 	var files []string = fileutils.GlobFiles(ws_path, &[]string{}, &excludes)
 	sort.Strings(files)

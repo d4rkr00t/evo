@@ -11,7 +11,6 @@ For Release
     - [ ] Diff to show what affected cache
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
-- [ ] Fix all issues highlighted by `--race` flag
 - [ ] Fix linking peer dependencies (?)
 - [ ] Improve CLI Output
   - [ ] Show how many tasks were run and how many restored from cache/ignored
@@ -81,6 +80,7 @@ For Release
 
 ## DONE
 
+- [x] Fix all issues highlighted by `--race` flag
 - [x] Stop swallowing errors at cmd execution time
 - [x] Extract evo config to a separate file to avoid cache misses for package managers
 - [x] evo run to show a list of available commands

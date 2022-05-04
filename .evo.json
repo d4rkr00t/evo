@@ -59,7 +59,7 @@
           "deps": ["build:dev:dist", "build:dev:cpy"]
         },
         "build:dev:dist": {
-          "cmd": "CGO_ENABLED=0 go build -o 'dist/dev/evo' main.go",
+          "cmd": "CGO_ENABLED=1 go build -race -o 'dist/dev/evo' main.go",
           "outputs": ["dist/dev"],
           "deps": []
         },
@@ -73,7 +73,7 @@
           "outputs": ["lib/version.go"]
         },
         "test": {
-          "cmd": "go test ./lib -v",
+          "cmd": "go test ./lib -v -race",
           "outputs": []
         },
         "test:cov:produce": {

@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/zenthangplus/goccm"
+	"evo/main/lib/goccm"
 )
 
 func LinkWorkspaces(root string, wm *WorkspacesMap) {
@@ -17,7 +17,6 @@ func LinkWorkspaces(root string, wm *WorkspacesMap) {
 		var ws_name = i.(string)
 		ccm.Wait()
 		go func(ws_name string) {
-			defer ccm.Done()
 			var ws, _ = wm.Load(ws_name)
 			var node_modules = GetNodeModulesPath(ws.Path)
 
@@ -31,6 +30,7 @@ func LinkWorkspaces(root string, wm *WorkspacesMap) {
 				}
 			}
 
+			ccm.Done()
 		}(ws_name)
 		return false
 	})

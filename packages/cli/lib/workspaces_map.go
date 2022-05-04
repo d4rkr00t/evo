@@ -11,9 +11,10 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"evo/main/lib/goccm"
+
 	mapset "github.com/deckarep/golang-set"
 	"github.com/pyr-sh/dag"
-	"github.com/zenthangplus/goccm"
 	"golang.org/x/sync/semaphore"
 )
 
