@@ -48,7 +48,7 @@ func print_total_time(ctx *Context) {
 	var task_parallel_time = ctx.stats.GetMeasure("runtasks").duration
 	var task_seq_time = ctx.stats.GetTasksSumDuration()
 	var diff = task_seq_time - task_parallel_time
-	ctx.logger.LogWithBadgeVerbose(
+	ctx.logger.LogWithBadge(
 		"Tasks time",
 		color.HiBlackString(
 			"%s %s | %s %s |",
