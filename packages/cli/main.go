@@ -1,7 +1,7 @@
 package main
 
 import (
-	"evo/main/cmd"
+	"evo/cmd"
 )
 
 func main() {

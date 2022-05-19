@@ -1,0 +1,15 @@
+{
+  "workspaces": [
+    "nested/**"
+  ],
+  "excludes": [
+    "**/node_modules"
+  ],
+  "overrides": {
+    "nested": {
+      "excludes": [
+        "*.html"
+      ]
+    }
+  }
+}

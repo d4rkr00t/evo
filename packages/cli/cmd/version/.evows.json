@@ -1,0 +1,17 @@
+{
+  "name": "@evobuild/cli__version",
+  "targets": {
+    "build": {
+      "cmd": "node ../../version.js",
+      "outputs": ["version.go"]
+    },
+    "build:dev": {
+      "cmd": "@noop",
+      "outputs": []
+    },
+    "test": {
+      "cmd": "@noop",
+      "outputs": []
+    }
+  }
+}

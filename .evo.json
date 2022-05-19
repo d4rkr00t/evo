@@ -1,13 +1,17 @@
 {
   "workspaces": [
-    "packages/*",
+    "packages/cli",
+    "packages/cli/cmd/version",
     "build/*"
   ],
   "excludes": [
     "**/node_modules",
     "*.md"
   ],
-  "rules": {
+  "commands": {
+    "@noop": "echo 'NOOP'"
+  },
+  "targets": {
     "ci": {
       "cmd": "echo 'CI'",
       "outputs": [],
@@ -30,9 +34,9 @@
         "main",
         "dist",
         "*.html",
-        "lib/__testfs__"
+        "cmd/version"
       ],
-      "rules": {
+      "targets": {
         "build": {
           "cmd": "echo 'BUILDING...'",
           "outputs": [],
@@ -41,17 +45,17 @@
         "build:mac:amd64": {
           "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o 'dist/evo_darwin_amd64/evo' main.go",
           "outputs": ["dist/evo_darwin_amd64"],
-          "deps": ["build:version"]
+          "deps": ["@build"]
         },
         "build:mac:arm64": {
           "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o 'dist/evo_darwin_arm64/evo' main.go",
           "outputs": ["dist/evo_darwin_arm64"],
-          "deps": ["build:version"]
+          "deps": ["@build"]
         },
         "build:linux:amd64": {
           "cmd": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o 'dist/evo_linux_amd64/evo' main.go",
           "outputs": ["dist/evo_linux_amd64"],
-          "deps": ["build:version"]
+          "deps": ["@build"]
         },
         "build:dev": {
           "cmd": "echo 'BUILDING...'",
@@ -61,23 +65,19 @@
         "build:dev:dist": {
           "cmd": "CGO_ENABLED=1 go build -race -o 'dist/dev/evo' main.go",
           "outputs": ["dist/dev"],
-          "deps": []
+          "deps": ["@build"]
         },
         "build:dev:cpy": {
           "cmd": "cpy dist/dev/evo ./bin --flat",
           "outputs": [],
-          "deps": ["build:dev:dist"]
-        },
-        "build:version": {
-          "cmd": "node version.js",
-          "outputs": ["lib/version.go"]
+          "deps": ["build:dev:dist", "@build"]
         },
         "test": {
-          "cmd": "go test ./lib -v -race",
+          "cmd": "go test ./... -v -race",
           "outputs": []
         },
         "test:cov:produce": {
-          "cmd": "go test ./lib -coverprofile cov.html",
+          "cmd": "go test ./... -coverpkg=./internal/... -coverprofile cov.html",
           "outputs": [
             "cov.html"
           ]

@@ -5,6 +5,7 @@ import { prompt } from "./utils/console";
 export interface NestedPrintableOutput extends Array<PrintableOutput> {}
 export type PrintableOutput = string | Array<string | NestedPrintableOutput>;
 
+// Comment
 export type Task<Ctx = any, Params = any> = {
   title: string | ((ctx: Ctx, taskParams: Params) => string);
   abort?: (

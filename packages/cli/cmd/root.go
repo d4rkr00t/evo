@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"evo/main/lib"
 	"fmt"
 	"os"
 	"runtime"
+
+	"evo/cmd/version"
 
 	"github.com/spf13/cobra"
 )
@@ -17,7 +18,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var version_flag, _ = cmd.Flags().GetBool("version")
 		if version_flag {
-			fmt.Println(lib.Version)
+			fmt.Println(version.Version)
 		} else {
 			root := cmd.Root()
 			root.SetArgs([]string{"--help"})
@@ -27,27 +28,24 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified target packages")
-	RunCmd.PersistentFlags().Int("concurrency", runtime.NumCPU(), "Number of concurrently running tasks, defaults to a number of CPUs")
+	rootCmd.PersistentFlags().BoolP("version", "", false, "Version")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
+	rootCmd.PersistentFlags().BoolP("debug", "", false, "Debug output")
+
+	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified packages")
+	RunCmd.PersistentFlags().Int("concurrency", runtime.NumCPU()-1, "Number of concurrently running tasks, defaults to a number of CPUs")
 	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
-	RunCmd.PersistentFlags().String("since", "", "Use git diff to determine which packages have changed since a merge-base")
+	RunCmd.PersistentFlags().String("since", "", "Use git diff to determine what workspaces have changed since a merge-base")
 	RunCmd.PersistentFlags().String("tracing", "", "Output tracing data")
 	RunCmd.PersistentFlags().Lookup("tracing").NoOptDefVal = "evo-tracing-output.trace"
 
 	ShowHashCmd.PersistentFlags().String("cwd", "", "Override CWD")
 
-	ShowRulesCmd.PersistentFlags().String("cwd", "", "Override CWD")
-
-	ListCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope list to a specified target package")
-
 	rootCmd.AddCommand(RunCmd)
 	rootCmd.AddCommand(ShowHashCmd)
-	rootCmd.AddCommand(ShowRulesCmd)
+	rootCmd.AddCommand(ShowTargetsCmd)
+	rootCmd.AddCommand(ShowScopesCmd)
 	rootCmd.AddCommand(ShowAffectedCmd)
-	rootCmd.AddCommand(ShowScopeCmd)
-	rootCmd.AddCommand(ListCmd)
-	rootCmd.PersistentFlags().BoolP("version", "", false, "Version")
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

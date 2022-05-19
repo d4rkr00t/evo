@@ -1,0 +1,7 @@
+{
+  "name": "pkg-a",
+  "dependencies": {
+    "pkg-b": "@ws",
+    "typescript": "^4.1.1"
+  }
+}
