@@ -1,0 +1,12 @@
+{
+  "name": "simple",
+  "excludes": ["*.md"],
+  "targets": {
+    "build": {
+      "cmd": "touch 2.txt",
+      "deps": [],
+      "outputs": ["2.txt"],
+      "cacheOutout": true
+    }
+  }
+}

@@ -1,7 +1,9 @@
 .cache
+.evo_cache
 node_modules
 __example__/packages/opaline/*/dist
 cov.html
 packages/cli/dist
 packages/cli/main
 packages/cli/bin
+evo-tracing-output.trace

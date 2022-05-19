@@ -9,15 +9,15 @@
     "name": "evo",
     "path": "./bin"
   },
+  "files": [
+    "postinstall.js",
+    "dist"
+  ],
   "scripts": {
     "postinstall": "node postinstall.js install",
     "preuninstall": "node postinstall.js uninstall"
   },
-  "dependencies": {
-    "mkdirp": "^1.0.4"
-  },
-  "files": [
-    "postinstall.js",
-    "dist"
-  ]
+  "devDependencies": {
+    "@evobuild/cli__version": "*"
+  }
 }

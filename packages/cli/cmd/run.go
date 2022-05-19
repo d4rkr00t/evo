@@ -2,81 +2,97 @@ package cmd
 
 import (
 	"errors"
-	"evo/main/lib"
-	"evo/main/lib/cache"
 	"fmt"
 	"os"
 	"path"
+
+	"evo/cmd/cmdutils"
+	"evo/internal/cache"
+	"evo/internal/context"
+	"evo/internal/integrations/git"
+	"evo/internal/logger"
+	"evo/internal/project"
+	"evo/internal/runner"
+	"evo/internal/stats"
+	"evo/internal/tracer"
 
 	"github.com/spf13/cobra"
 )
 
 var RunCmd = &cobra.Command{
-	Use:   "run <command>",
-	Short: "Run a project's commmand",
-	Long:  "Run a project's command",
+	Use:   "run <target>",
+	Short: "Run a project's target",
+	Long:  "Run a project's target",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("target name is required. Run evo list to list available targets.\n")
+			return errors.New("target name is required")
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var cwd, cwd_err = cmd.Flags().GetString("cwd")
-		var scope, _ = cmd.Flags().GetStringSlice("scope")
+		var cwd, cwdErr = cmd.Flags().GetString("cwd")
 		var since, _ = cmd.Flags().GetString("since")
+		var scope, _ = cmd.Flags().GetStringSlice("scope")
 		var concurrency, _ = cmd.Flags().GetInt("concurrency")
-		var tracing_output, _ = cmd.Flags().GetString("tracing")
+		var verbose, _ = cmd.Flags().GetBool("verbose")
+		var debug, _ = cmd.Flags().GetBool("debug")
+		var tracingOutput, _ = cmd.Flags().GetString("tracing")
+		var targets = args
+		var logger = logger.NewLogger(verbose, debug)
+		var tracer = tracer.New()
 
-		var os_cwd, _ = os.Getwd()
-		if cwd_err != nil {
-			cwd = os_cwd
+		var osCwd, _ = os.Getwd()
+		if cwdErr != nil {
+			cwd = osCwd
 		} else {
-			cwd = path.Join(os_cwd, cwd)
+			cwd = path.Join(osCwd, cwd)
 		}
 
-		var verbose, _ = cmd.Flags().GetBool("verbose")
-		var root_pkg_json, root_config, err = lib.FindProject(cwd)
-		var logger = lib.NewLogger(verbose)
-		var root_path = path.Dir(root_config.Path)
-		var tracing = lib.NewTracing()
+		var projectConfigPath, projectConfigErr = project.FindProjectConfig(cwd)
+		var rootPath = path.Dir(projectConfigPath)
+
+		if projectConfigErr != nil {
+			fmt.Println(projectConfigErr.Error())
+			logger.Log(fmt.Sprintf("%s", projectConfigErr))
+			os.Exit(1)
+		}
+
+		if tracingOutput != "" {
+			tracer.SetOut(tracingOutput)
+			tracer.Enable()
+		}
 
 		if len(scope) == 0 {
-			scope = DetectScopeFromCWD(root_path, cwd)
+			scope = cmdutils.DetectScopeFromCWD(rootPath, cwd)
 		}
 
-		if tracing_output != "" {
-			tracing.SetOut(tracing_output)
-			tracing.Enable()
-		}
+		var cache = cache.New(rootPath, cache.DefaultCacheLocation)
+		cache.Setup()
 
-		var changed_files = []string{}
-
+		var changedFiles = []string{}
 		if len(since) > 0 {
-			changed_files = lib.GetChangedSince(root_path, since)
+			changedFiles = git.GetChangedSince(rootPath, since)
 		}
 
-		if err == nil {
-			var ctx = lib.NewContext(
-				root_path,
-				cwd,
-				args,
-				scope,
-				changed_files,
-				concurrency,
-				root_pkg_json,
-				cache.NewCache(root_path),
-				logger,
-				tracing,
-				lib.NewStats(),
-				root_config,
-			)
-
-			err = lib.Run(&ctx)
+		var ctx = context.Context{
+			Root:              rootPath,
+			Cwd:               cwd,
+			ProjectConfigPath: projectConfigPath,
+			Targets:           targets,
+			Concurrency:       concurrency,
+			ChangedFiles:      changedFiles,
+			ChangedOnly:       len(since) > 0,
+			Logger:            logger,
+			Stats:             stats.New(),
+			Tracer:            tracer,
+			Cache:             cache,
+			Scope:             scope,
 		}
 
-		if err != nil {
-			logger.Log(fmt.Sprintf("%s", err))
+		var runErr = runner.Run(&ctx)
+
+		if runErr != nil {
+			logger.Log(runErr.Error())
 			os.Exit(1)
 		}
 	},

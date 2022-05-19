@@ -1,14 +1,12 @@
 ## TODO
 
 For Release
+- [ ] Re-design CLI output
 - [ ] Fix error reporting
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
   - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
-  - [ ] Cache diagnostics
-    - [ ] List of files that were used to create hash
-    - [ ] Diff to show what affected cache
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] Fix linking peer dependencies (?)
@@ -80,6 +78,9 @@ For Release
 
 ## DONE
 
+- [x] Cache diagnostics
+  - [x] List of files that were used to create hash
+  - [x] Diff to show what affected cache
 - [x] Fix all issues highlighted by `--race` flag
 - [x] Stop swallowing errors at cmd execution time
 - [x] Extract evo config to a separate file to avoid cache misses for package managers

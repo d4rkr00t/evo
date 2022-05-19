@@ -1,6 +1,6 @@
 export default function a() {
-  console.log(22);
-  b(15);
+  console.log(25);
+  b(16);
 }
 
 function b(n: number) {
