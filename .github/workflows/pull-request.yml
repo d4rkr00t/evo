@@ -22,7 +22,7 @@ jobs:
         env:
           cache-name: cache-evo
         with:
-          path: ./.cache
+          path: ./.evo_cache
           key: ${{ runner.os }}-build
       - uses: pnpm/action-setup@v2.0.1
         with:

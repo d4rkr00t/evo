@@ -31,7 +31,7 @@ jobs:
         env:
           cache-name: cache-evo
         with:
-          path: ./.cache
+          path: ./.evo_cache
           key: ${{ runner.os }}-build
 
       - run: pnpm install
