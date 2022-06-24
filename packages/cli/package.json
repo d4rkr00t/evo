@@ -17,6 +17,9 @@
     "postinstall": "node postinstall.js install",
     "preuninstall": "node postinstall.js uninstall"
   },
+  "dependencies": {
+    "mkdirp": "^1.0.4"
+  },
   "devDependencies": {
     "@evobuild/cli__version": "*"
   }
