@@ -4,7 +4,7 @@ import (
 	"errors"
 	"evo/internal/clicmd"
 	"evo/internal/context"
-	"evo/internal/logger"
+	"evo/internal/stats"
 	"evo/internal/task_graph"
 	"evo/internal/workspace"
 	"fmt"
@@ -14,71 +14,66 @@ import (
 	"github.com/fatih/color"
 )
 
-func RunTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_graph.Task, ws *workspace.Workspace, lg *logger.LoggerGroup, taskOutputMutex *sync.Mutex) (string, error) {
+func RunTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_graph.Task, ws *workspace.Workspace, taskOutputMutex *sync.Mutex) (string, error) {
+	ctx.Stats.Start(task.Name(), stats.MeasureKindTask)
 	var depsErr = checkStatusesOfTaskDependencies(taskGraph, task)
-	var lgCloned = lg.Clone()
 
 	task.UpdateStatus(task_graph.TaskStatsuRunning)
 	taskGraph.Store(task)
+	ctx.Reporter.UpdateFromTaskGraph(taskGraph)
 
 	if depsErr != nil {
-		lgCloned.Badge(task.Name()).Error(color.HiBlackString("← ") + depsErr.Error())
 		failTask(ctx, taskGraph, task, "", depsErr)
 		return "", depsErr
 	}
 
 	if !task.Invalidate(&ctx.Cache) {
-		lgCloned.Badge(task.Name()).BadgeColor(task.Color).Success(color.GreenString("cache hit:"), color.HiBlackString(task.WsHash))
+		task.RestoredFromCache = task_graph.TaskCacheHit
 
 		if task.HasOutputs() {
 			if task.ShouldRestoreOutputs(&ctx.Cache) {
+				task.RestoredFromCache = task_graph.TaskCacheHitCopy
 				task.CleanOutputs()
 				task.RestoreOutputs(&ctx.Cache)
-				lgCloned.Badge(task.Name()).BadgeColor(task.Color).Debug().Log("outputs don't match, restoring...")
 			} else {
-				lgCloned.Badge(task.Name()).BadgeColor(task.Color).Debug().Log("outputs match, skip restoring...")
+				task.RestoredFromCache = task_graph.TaskCacheHitSkip
 			}
 		}
 
 		var taskExitCode, taskOutLogs, taskErrorLogs, taskCacheError = task.GetStatusAndLogs(&ctx.Cache)
+		var err error
+		if taskExitCode == "0" {
+			succeedTask(ctx, taskGraph, task, taskOutLogs)
+		} else {
+			err = errors.New(taskErrorLogs)
+			failTask(ctx, taskGraph, task, taskOutLogs, err)
+		}
+
 		if taskCacheError == nil {
 			if len(taskOutLogs) > 0 {
-				taskOutputMutex.Lock()
-				lgCloned.Badge(task.Name()).BadgeColor(task.Color).Log("replaying output...")
-				for _, line := range strings.Split(taskOutLogs, "\n") {
-					if taskExitCode == "0" {
-						lgCloned.Badge(task.Name()).BadgeColor(task.Color).Log(color.HiBlackString("← "), line)
-					} else {
-						lgCloned.Badge(task.Name()).BadgeColor(task.Color).Error(color.HiBlackString("← "), line)
-					}
+				ctx.Reporter.StreamLog(task, color.YellowString("replaying output…"))
+				if taskExitCode == "0" {
+					ctx.Reporter.StreamLog(task, strings.Split(taskOutLogs, "\n")...)
+				} else {
+					ctx.Reporter.StreamError(task, strings.Split(taskOutLogs, "\n")...)
 				}
-				taskOutputMutex.Unlock()
 			}
 		}
 
-		if taskExitCode == "0" {
-			succeedTask(ctx, taskGraph, task, taskOutLogs)
-			return taskOutLogs, nil
-		} else {
-			var err = errors.New(taskErrorLogs)
-			failTask(ctx, taskGraph, task, taskOutLogs, err)
-			return taskOutLogs, err
-		}
+		return taskOutLogs, err
 	}
 
 	task.CleanOutputs()
-
-	lgCloned.Badge(task.Name()).BadgeColor(task.Color).Log("running →", color.HiBlackString(task.Target.Cmd))
 
 	var cmd = clicmd.NewCmd(
 		task.Name(),
 		ws.Path,
 		task.Target.Cmd,
 		func(msg string) {
-			lg.Clone().Badge(task.Name()).BadgeColor(task.Color).Log(color.HiBlackString("← ") + msg)
+			ctx.Reporter.StreamLog(task, strings.Split(msg, "\n")...)
 		},
 		func(msg string) {
-			lg.Clone().Badge(task.Name()).Error(color.HiBlackString("← ") + msg)
+			ctx.Reporter.StreamError(task, strings.Split(msg, "\n")...)
 		},
 	)
 
@@ -99,13 +94,26 @@ func RunTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_g
 
 func succeedTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_graph.Task, out string) {
 	task.UpdateStatus(task_graph.TaskStatsuSuccess)
+	task.Duration = ctx.Stats.Stop(task.Name())
+	task.Output = out
 	taskGraph.Store(task)
+
+	ctx.Reporter.SuccessTask(task)
+	ctx.Reporter.UpdateFromTaskGraph(taskGraph)
+
 	task.Cache(&ctx.Cache, out, "")
 }
 
 func failTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_graph.Task, out string, err error) {
 	task.UpdateStatus(task_graph.TaskStatsuFailure)
+	task.Duration = ctx.Stats.Stop(task.Name())
+	task.Output = out
+	task.Error = err
 	taskGraph.Store(task)
+
+	ctx.Reporter.FailTask(task)
+	ctx.Reporter.UpdateFromTaskGraph(taskGraph)
+
 	task.Cache(&ctx.Cache, out, err.Error())
 }
 

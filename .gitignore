@@ -7,3 +7,4 @@ packages/cli/dist
 packages/cli/main
 packages/cli/bin
 evo-tracing-output.trace
+.userdir.list

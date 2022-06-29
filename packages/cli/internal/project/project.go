@@ -185,7 +185,7 @@ func (p *Project) GetAffectedWorkspaces(ctx *context.Context, targetsNames []str
 	p.Walk(func(ws *workspace.Workspace) error {
 		for _, targetName := range targetsNames {
 			if target, ok := ws.Targets[targetName]; ok {
-				var task = task_graph.NewTask(ws, targetName, &target)
+				var task = task_graph.NewTask(ws, targetName, &target, false)
 				if task.Invalidate(&ctx.Cache) {
 					mx.Lock()
 					affectedWorkspaces = append(affectedWorkspaces, ws.Name)

@@ -1,5 +1,6 @@
 {
   "workspaces": [
+    "packages/experiments",
     "packages/cli",
     "packages/cli/cmd/version",
     "build/*"

@@ -12,20 +12,26 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/otiai10/copy"
 )
 
 type Task struct {
-	WsName     string
-	WsHash     string
-	WsPath     string
-	TargetName string
-	Target     *target.Target
-	Status     int
-	Deps       []string
-	Color      string
+	TopLevel          bool
+	WsName            string
+	WsHash            string
+	WsPath            string
+	TargetName        string
+	Target            *target.Target
+	Status            int
+	Deps              []string
+	Color             string
+	RestoredFromCache int
+	Duration          time.Duration
+	Output            string
+	Error             error
 }
 
 const (
@@ -50,15 +56,24 @@ const (
 	TaskOutputsHashPostfix = "__outputs__hash"
 )
 
-func NewTask(ws *workspace.Workspace, targetName string, target *target.Target) Task {
+const (
+	TaskCacheMiss    = iota
+	TaskCacheHit     = iota
+	TaskCacheHitCopy = iota
+	TaskCacheHitSkip = iota
+)
+
+func NewTask(ws *workspace.Workspace, targetName string, target *target.Target, topLevel bool) Task {
 	return Task{
-		WsName:     ws.Name,
-		WsHash:     ws.Hash,
-		WsPath:     ws.Path,
-		TargetName: targetName,
-		Target:     target,
-		Status:     TaskStatsuPending,
-		Color:      taskBadgeColors[hash_utils.StrToNum(GetTaskName(ws.Name, targetName))%len(taskBadgeColors)],
+		TopLevel:          topLevel,
+		WsName:            ws.Name,
+		WsHash:            ws.Hash,
+		WsPath:            ws.Path,
+		TargetName:        targetName,
+		Target:            target,
+		Status:            TaskStatsuPending,
+		Color:             taskBadgeColors[hash_utils.StrToNum(GetTaskName(ws.Name, targetName))%len(taskBadgeColors)],
+		RestoredFromCache: TaskCacheMiss,
 	}
 }
 

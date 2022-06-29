@@ -65,6 +65,7 @@ test("getMetaFromJSDoc should support aliases", (t) => {
   });
   t.is(meta.options.name.alias, "n");
   t.is(meta.options.age.alias, "a");
+  // 1
 });
 
 test("getCommandJSDoc should support module.exports", (t) => {

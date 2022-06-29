@@ -29,6 +29,10 @@ func (l *Logger) reset() {
 	l.badge = ""
 }
 
+func (l Logger) Clone() *Logger {
+	return &l
+}
+
 func (l *Logger) Verbose() *Logger {
 	l.condition = func() bool {
 		return l.verbose || l.debug
@@ -58,7 +62,7 @@ func (l *Logger) Log(msg ...string) {
 
 	for _, line := range strings.Split(processed_msg, "\n") {
 		if len(l.badge) > 0 {
-			fmt.Printf("%s %s: %s\n", color.CyanString("╺"), color.HiBlackString(strings.ToLower(l.badge)), line)
+			fmt.Printf("%s %s: %s\n", color.YellowString("▸"), color.HiBlackString(strings.ToLower(l.badge)), line)
 		} else {
 			fmt.Println(line)
 		}
@@ -116,22 +120,8 @@ func (lg *LoggerGroup) BadgeColor(color string) *LoggerGroup {
 	return lg
 }
 
-func (lg *LoggerGroup) __color_badge__(color_name string) string {
-	switch color_name {
-	case "red":
-		return color.RedString(lg.badge)
-	case "cyan":
-		return color.CyanString(lg.badge)
-	case "green":
-		return color.GreenString(lg.badge)
-	case "magenta":
-		return color.MagentaString(lg.badge)
-	case "yellow":
-		return color.YellowString(lg.badge)
-	case "blue":
-		return color.BlueString(lg.badge)
-	}
-	return lg.badge
+func (lg *LoggerGroup) __color_badge__(colorName string) string {
+	return ColorMessage(colorName, lg.badge)
 }
 
 func (lg *LoggerGroup) __reset__() {
@@ -262,4 +252,22 @@ func (lg *LoggerGroup) EndPlainEmpty() {
 		return
 	}
 	fmt.Printf("%s ●\n", color.HiBlackString(strings.ToLower("└")))
+}
+
+func ColorMessage(colorName string, msg string) string {
+	switch colorName {
+	case "red":
+		return color.RedString(msg)
+	case "cyan":
+		return color.CyanString(msg)
+	case "green":
+		return color.GreenString(msg)
+	case "magenta":
+		return color.MagentaString(msg)
+	case "yellow":
+		return color.YellowString(msg)
+	case "blue":
+		return color.BlueString(msg)
+	}
+	return msg
 }
