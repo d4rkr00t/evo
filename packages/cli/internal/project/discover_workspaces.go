@@ -11,6 +11,7 @@ import (
 
 func DiscoverWorkspaces(rootPath string, workspacesGlobsList []string) sync.Map {
 	var workspacesConfigsMap sync.Map
+	// TODO: use concurency settings
 	var ccm = goccm.New(runtime.NumCPU())
 
 	for _, wc := range workspacesGlobsList {

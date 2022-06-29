@@ -3,6 +3,7 @@ package runner
 import (
 	"evo/internal/context"
 	"evo/internal/integrations/npm"
+	"evo/internal/reporter"
 	"evo/internal/scheduler/basic"
 	"evo/internal/stats"
 	"fmt"
@@ -15,18 +16,18 @@ import (
 func Run(ctx *context.Context) error {
 	ctx.Stats.Start("total", stats.MeasureKindStage)
 	defer ctx.Tracer.Write(&ctx.Logger, ctx.Root)
-	defer printTotalTime(ctx)
 
 	// TODO: Get rid of this
 	os.Setenv("PATH", npm.GetNodeModulesBinPath(ctx.Root)+":"+os.ExpandEnv("$PATH"))
 	os.Setenv("ROOT", ctx.Root)
 
-	ctx.Logger.Badge("root").Log("  ", ctx.Root)
+	ctx.Logger.Badge("root").Log(ctx.Root)
 	if len(ctx.Scope) > 0 {
-		ctx.Logger.Badge("scope").Log("  " + color.YellowString(strings.Join(ctx.Scope, ", ")))
+		ctx.Logger.Badge("scope").Log(color.YellowString(strings.Join(ctx.Scope, ", ")))
 	}
-	ctx.Logger.Badge("targets").Log(color.CyanString(strings.Join(ctx.Targets, ", ")))
-	ctx.Logger.Badge("changed files:").Debug().Log(fmt.Sprintf("[%d]", len(ctx.ChangedFiles)), strings.Join(ctx.ChangedFiles, ", "))
+	if len(ctx.ChangedFiles) > 0 {
+		ctx.Logger.Badge("changed files:").Debug().Log(fmt.Sprintf("[%d]", len(ctx.ChangedFiles)), strings.Join(ctx.ChangedFiles, ", "))
+	}
 
 	if ctx.ChangedOnly && len(ctx.ChangedFiles) == 0 {
 		ctx.Logger.Log("Nothing changed. Skipping...")
@@ -54,7 +55,15 @@ func Run(ctx *context.Context) error {
 	}
 
 	if len(scope) > 0 {
+		err = ValidateScopes(&proj, &scope)
+		if err != nil {
+			return err
+		}
+
 		proj.ReduceToScope(scope)
+		if ctx.Reporter.Output == reporter.ReporterOutputOnlyErrors {
+			ctx.Reporter.SetOutput(reporter.ReporterOutputStreamTopLevel)
+		}
 	}
 
 	BuildDependencyGraph(ctx, &proj)
@@ -76,28 +85,13 @@ func Run(ctx *context.Context) error {
 	LinkNpmDependencies(ctx, &proj)
 
 	err = basic.RunTaskGraph(ctx, &proj, &taskGraph)
+	ctx.Stats.Stop("total")
+
 	if err != nil {
+		ctx.Reporter.FailRun(ctx.Stats.Get("total").Duration, &taskGraph)
 		return err
 	}
 
+	ctx.Reporter.SuccessRun(&ctx.Stats, &taskGraph)
 	return nil
-}
-
-func printTotalTime(ctx *context.Context) {
-	var taskParallelTime = ctx.Stats.Get("runtasks").Duration
-	var taskSeqTime = ctx.Stats.GetTasksSumDuration()
-	var diff = taskSeqTime - taskParallelTime
-
-	ctx.Logger.Log()
-	ctx.Logger.Badge("Tasks time").Log(
-		color.HiBlackString(
-			"%s %s | %s %s |",
-			"seq time:",
-			taskSeqTime.String(),
-			"concurent time:",
-			taskParallelTime.String(),
-		),
-		color.GreenString(diff.String()+" saved"),
-	)
-	ctx.Logger.Badge("Total time").Log(color.GreenString(ctx.Stats.Stop("total").String()))
 }

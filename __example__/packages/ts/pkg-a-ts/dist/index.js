@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function a() {
-    console.log(25);
+    console.log(34);
     b(16);
 }
 exports.default = a;

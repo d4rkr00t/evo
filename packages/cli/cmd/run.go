@@ -12,6 +12,7 @@ import (
 	"evo/internal/integrations/git"
 	"evo/internal/logger"
 	"evo/internal/project"
+	"evo/internal/reporter"
 	"evo/internal/runner"
 	"evo/internal/stats"
 	"evo/internal/tracer"
@@ -37,9 +38,21 @@ var RunCmd = &cobra.Command{
 		var verbose, _ = cmd.Flags().GetBool("verbose")
 		var debug, _ = cmd.Flags().GetBool("debug")
 		var tracingOutput, _ = cmd.Flags().GetString("tracing")
+		var isCI, _ = cmd.Flags().GetBool("ci")
 		var targets = args
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()
+		var rr = reporter.New(logger)
+
+		if !isCI {
+			rr.EnableSpinner()
+		}
+
+		if isCI {
+			rr.SetOutput(reporter.ReporterOutputCombine)
+		} else if verbose || debug {
+			rr.SetOutput(reporter.ReporterOutputStreamAll)
+		}
 
 		var osCwd, _ = os.Getwd()
 		if cwdErr != nil {
@@ -83,6 +96,7 @@ var RunCmd = &cobra.Command{
 			ChangedFiles:      changedFiles,
 			ChangedOnly:       len(since) > 0,
 			Logger:            logger,
+			Reporter:          &rr,
 			Stats:             stats.New(),
 			Tracer:            tracer,
 			Cache:             cache,
@@ -92,6 +106,7 @@ var RunCmd = &cobra.Command{
 		var runErr = runner.Run(&ctx)
 
 		if runErr != nil {
+			logger.Log()
 			logger.Log(runErr.Error())
 			os.Exit(1)
 		}

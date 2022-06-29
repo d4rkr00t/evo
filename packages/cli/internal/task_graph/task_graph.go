@@ -14,20 +14,26 @@ import (
 type TasksMap = sync.Map
 
 type TaskGraph struct {
-	graph    dag.AcyclicGraph
-	tasksMap TasksMap
+	graph          dag.AcyclicGraph
+	tasksMap       TasksMap
+	TasksNamesList []string
 }
 
 func New() TaskGraph {
 	return TaskGraph{
-		graph:    dag.AcyclicGraph{},
-		tasksMap: sync.Map{},
+		graph:          dag.AcyclicGraph{},
+		tasksMap:       sync.Map{},
+		TasksNamesList: []string{},
 	}
 }
 
 func (tg *TaskGraph) Add(task *Task) {
 	tg.graph.Add(task.Name())
-	tg.Store(task)
+
+	if _, ok := tg.tasksMap.Load(task.Name()); !ok {
+		tg.TasksNamesList = append(tg.TasksNamesList, task.Name())
+		tg.Store(task)
+	}
 }
 
 func (tg *TaskGraph) Connect(from string, to string) {
