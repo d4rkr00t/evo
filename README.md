@@ -1,8 +1,6 @@
 ## TODO
 
 For Release
-- [ ] Re-design CLI output
-- [ ] Fix error reporting
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -10,9 +8,6 @@ For Release
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] Fix linking peer dependencies (?)
-- [ ] Improve CLI Output
-  - [ ] Show how many tasks were run and how many restored from cache/ignored
-  - [ ] Add error codes to all errors
 - [ ] Watch mode
 - [ ] Tests
   - [ ] TBD
@@ -20,11 +15,11 @@ For Release
   - [ ] Documentation
 - [ ] Refactor
   - [x] Upgrade Go
-  - [ ] Split code in packages
+  - [x] Split code in packages
   - [ ] Try DoD
   - [ ] Generics -> Go 1.8
-  - [ ] REFACTOR: create tasks from workspaces
-  - [ ] REFACTOR: Generic create task from a rule
+  - [x] REFACTOR: create tasks from workspaces
+  - [x] REFACTOR: Generic create task from a rule
   - [ ] REFACTOR: Refactor cache to interfaces
   - [ ] REFACTOR: Refactor logger
     - [ ] to generics/interfaces
@@ -32,17 +27,13 @@ For Release
     - [ ] Add debug level to the logger
 - [ ] Add .env support
 - [ ] Support custom package manager (?)
-- [ ] Support task deps: ["file:somefilepath"]
+- [ ] Support file deps: ["file:somefilepath"]
+- [ ] Support target deps: ["package:sometarget"]
 - [ ] Watchman integration and persistent graph
 - [ ] More sophisticated logic around package managers
   - [ ] include lock files into cache hash
-- [ ] Clean up only once before any of the tasks run (?)
-  - [ ] Might have to restore all of the other outputs
-  - [ ] Maybe make it manual?
-    - [ ] Otherwise need to hash contents of output
-- [ ] Improve unknown dependency error message
 - [ ] SANDBOXING !!!
-- [ ] Rules
+- [ ] Targets
   - [ ] check that command exist
   - [ ] check all required fields
     - [ ] provide schema (?)
@@ -50,17 +41,11 @@ For Release
   - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
   - [ ] Why a package is affected – `evo why pkg-a`
-- [ ] Make sure target outputs exist
-  - [x] After task run
-  - [ ] On package invalidate – [if not invalidated restore outputs]
 - [ ] More commands
   - [x] `evo show-scope <package>` – show what packages are in scope
-  - [ ] `evo add dep@ver` to add a dependency
-  - [ ] `evo remove dep` to remove a dependency
   - [ ] `evo import`
     - [ ] makes sure that all dependencies are on expected versions
     - [ ] makes sure that all dependencies are lifted to the top level package.json
-- [ ] Put overrides to file system
 - [ ] Use .gitignore in addition to include/exclude in evo config
 - [ ] FileSystem
   - [ ] Cache file check-sums
@@ -70,7 +55,6 @@ For Release
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] Use semver comparison for dependencies (?)
-- [ ] https://github.com/adrg/xdg
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
 
@@ -78,6 +62,9 @@ For Release
 
 ## DONE
 
+- [x] Put overrides to file system
+- [x] Re-design CLI output
+- [x] Fix error reporting
 - [x] Cache diagnostics
   - [x] List of files that were used to create hash
   - [x] Diff to show what affected cache
