@@ -143,7 +143,7 @@ func (rr *Reporter) SuccessTask(task *task_graph.Task) {
 	if task.RestoredFromCache == task_graph.TaskCacheHitCopy {
 		fromCache = color.HiBlackString("cache hit [%s] outputs don't match, restoring…", task.WsHash[0:6])
 	} else if task.RestoredFromCache == task_graph.TaskCacheHitSkip || task.RestoredFromCache == task_graph.TaskCacheHit {
-		fromCache = color.HiBlackString("cache hit [%s] outputs match, skiping…", task.WsHash[0:6])
+		fromCache = color.HiBlackString("cache hit [%s]", task.WsHash[0:6])
 	}
 
 	rr.logger.Log(
@@ -181,7 +181,7 @@ func (rr *Reporter) FailTask(task *task_graph.Task) {
 	if task.RestoredFromCache == task_graph.TaskCacheHitCopy {
 		fromCache = color.HiBlackString("cache hit [%s] restoring outputs…", task.WsHash[0:6])
 	} else if task.RestoredFromCache == task_graph.TaskCacheHitSkip || task.RestoredFromCache == task_graph.TaskCacheHit {
-		fromCache = color.HiBlackString("cache hit [%s] outputs match, skiping…", task.WsHash[0:6])
+		fromCache = color.HiBlackString("cache hit [%s]", task.WsHash[0:6])
 	}
 	rr.logger.Log(
 		color.HiRedString(
