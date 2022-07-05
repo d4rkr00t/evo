@@ -1,10 +1,6 @@
 ## TODO
 
 For Release
-- [ ] Fix GOCCM with empty queue
-- [ ] Task Shell Like commands:
-    - [ ] https://github.com/denoland/deno_task_shell
-    - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
 - [ ] Evo status
     - [ ] Show some stats info about the repo
 - [ ] Move reporter locking into a separate go routine
@@ -62,6 +58,9 @@ For Release
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] Use semver comparison for dependencies (?)
+- [ ] Task Shell Like commands:
+    - [ ] https://github.com/denoland/deno_task_shell
+    - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
 
@@ -69,6 +68,7 @@ For Release
 
 ## DONE
 
+- [x] Fix GOCCM with empty queue
 - [x] Profile long workspaces discovery
 - [x] Put overrides to file system
 - [x] Re-design CLI output

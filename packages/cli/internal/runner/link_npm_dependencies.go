@@ -16,6 +16,8 @@ func LinkNpmDependencies(ctx *context.Context, proj *project.Project) error {
 	lg.Debug().Start("Linking npm dependencies...")
 
 	var ccm = goccm.New(ctx.Concurrency)
+	ccm.Wait()
+
 	for _, wsName := range proj.WorkspacesNames {
 		ccm.Wait()
 		go func(ws_name string) {
@@ -24,6 +26,8 @@ func LinkNpmDependencies(ctx *context.Context, proj *project.Project) error {
 			npm.LinkNpmDependencies(proj, ws_name)
 		}(wsName)
 	}
+
+	ccm.Done()
 	ccm.WaitAllDone()
 
 	lg.Debug().EndEmpty(ctx.Stats.Stop("link npm dependencies"))

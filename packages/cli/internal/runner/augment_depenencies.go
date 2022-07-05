@@ -16,6 +16,7 @@ func AugmentDependencies(ctx *context.Context, proj *project.Project) error {
 	lg.Debug().Start("Discovering dependencies...")
 
 	var ccm = goccm.New(ctx.Concurrency)
+	ccm.Wait()
 
 	for _, wsName := range proj.WorkspacesNames {
 		ccm.Wait()
@@ -29,6 +30,8 @@ func AugmentDependencies(ctx *context.Context, proj *project.Project) error {
 			}
 		}(wsName)
 	}
+
+	ccm.Done()
 	ccm.WaitAllDone()
 
 	lg.Debug().EndEmpty(ctx.Stats.Stop("augment dependencies"))
