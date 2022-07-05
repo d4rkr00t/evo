@@ -39,7 +39,7 @@ func New(logger logger.Logger) Reporter {
 }
 
 func (rr *Reporter) EnableSpinner() {
-	rr.spinnerEnabled = false
+	rr.spinnerEnabled = true
 }
 
 func (rr *Reporter) SetOutput(output int) {
