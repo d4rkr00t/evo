@@ -21,7 +21,7 @@ func GetAllTargetsForWorkspace(projectPath string, projectConfig *ProjectConfig,
 
 	for groupName := range projectConfig.Overrides {
 		var absGroupPath = path.Join(projectPath, groupName)
-		if strings.HasPrefix(wsPath, absGroupPath) {
+		if strings.HasSuffix(wsPath, absGroupPath) {
 			var group = projectConfig.Overrides[groupName]
 			targets = target.MergeTargets(&targets, &group.Targets)
 		}

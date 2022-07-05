@@ -3,6 +3,11 @@
 For Release
 - [ ] Evo status
     - [ ] Show some stats info about the repo
+- [ ] Reporter
+  - [ ] Spinner disappears
+  - [ ] Useless when a lot of tasks
+    - [ ] Show only top level and in spinner report progress with – succeeded (+from cache) / failed (+from cache)
+  - [ ] On error need to report status – succeeded (+from cache) / failed (+from cache)
 - [ ] Move reporter locking into a separate go routine
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
