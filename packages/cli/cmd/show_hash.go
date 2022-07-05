@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"evo/cmd/cmdutils"
 	"evo/internal/cache"
 	"evo/internal/context"
 	"evo/internal/logger"
@@ -31,6 +32,9 @@ var ShowHashCmd = &cobra.Command{
 		var cwd, cwdErr = cmd.Flags().GetString("cwd")
 		var verbose, _ = cmd.Flags().GetBool("verbose")
 		var debug, _ = cmd.Flags().GetBool("debug")
+
+		var cpuprof, _ = cmd.Flags().GetBool("cpuprof")
+		defer cmdutils.CollectProfile(cpuprof)()
 
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()

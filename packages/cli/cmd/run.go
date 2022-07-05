@@ -44,6 +44,9 @@ var RunCmd = &cobra.Command{
 		var tracer = tracer.New()
 		var rr = reporter.New(logger)
 
+		var cpuprof, _ = cmd.Flags().GetBool("cpuprof")
+		defer cmdutils.CollectProfile(cpuprof)()
+
 		if !isCI {
 			rr.EnableSpinner()
 		}

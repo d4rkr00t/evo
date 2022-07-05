@@ -1,6 +1,13 @@
 ## TODO
 
 For Release
+- [ ] Fix GOCCM with empty queue
+- [ ] Task Shell Like commands:
+    - [ ] https://github.com/denoland/deno_task_shell
+    - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
+- [ ] Evo status
+    - [ ] Show some stats info about the repo
+- [ ] Move reporter locking into a separate go routine
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -62,6 +69,7 @@ For Release
 
 ## DONE
 
+- [x] Profile long workspaces discovery
 - [x] Put overrides to file system
 - [x] Re-design CLI output
 - [x] Fix error reporting

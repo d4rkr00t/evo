@@ -41,6 +41,9 @@ github.com/mattn/go-shellwords
 # github.com/otiai10/copy v1.7.0
 ## explicit; go 1.14
 github.com/otiai10/copy
+# github.com/pkg/profile v1.6.0
+## explicit; go 1.13
+github.com/pkg/profile
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib

@@ -31,6 +31,7 @@ func Execute() {
 	rootCmd.PersistentFlags().BoolP("version", "", false, "Version")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "Debug output")
+	rootCmd.PersistentFlags().BoolP("cpuprof", "", false, "Enables CPU profiler. For development usage only.")
 
 	RunCmd.PersistentFlags().BoolP("ci", "", false, "Indicates that the command is running in CI")
 	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified packages")
