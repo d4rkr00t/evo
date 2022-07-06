@@ -11,8 +11,12 @@ func CacheWorkspacesStates(ctx *context.Context, proj *project.Project) {
 	defer ctx.Tracer.Event("caching workspaces states").Done()
 	ctx.Stats.Start("caching workspaces states", stats.MeasureKindStage)
 
+	if len(proj.WorkspacesNames) == 0 {
+		ctx.Stats.Stop("caching workspaces states")
+		return
+	}
+
 	var ccm = goccm.New(ctx.Concurrency)
-	ccm.Wait()
 
 	for _, wsName := range proj.WorkspacesNames {
 		ccm.Wait()
@@ -23,7 +27,6 @@ func CacheWorkspacesStates(ctx *context.Context, proj *project.Project) {
 		}(wsName)
 	}
 
-	ccm.Done()
 	ccm.WaitAllDone()
 
 	ctx.Stats.Stop("caching workspaces states")

@@ -11,9 +11,12 @@ import (
 
 func DiscoverWorkspaces(rootPath string, workspacesGlobsList []string) sync.Map {
 	var workspacesConfigsMap sync.Map
+	if len(workspacesGlobsList) == 0 {
+		return workspacesConfigsMap
+	}
+
 	// TODO: use concurency settings
 	var ccm = goccm.New(runtime.NumCPU())
-	ccm.Wait()
 
 	for _, wc := range workspacesGlobsList {
 		var wsGlob = path.Join(rootPath, wc, workspace.WorkspaceConfigFileName)
@@ -35,7 +38,6 @@ func DiscoverWorkspaces(rootPath string, workspacesGlobsList []string) sync.Map 
 		}
 	}
 
-	ccm.Done()
 	ccm.WaitAllDone()
 
 	return workspacesConfigsMap

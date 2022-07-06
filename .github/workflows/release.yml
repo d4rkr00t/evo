@@ -34,9 +34,17 @@ jobs:
           path: ./.evo_cache
           key: ${{ runner.os }}-build
 
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node_modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-nodemodules
+
       - run: pnpm install
       - run: pnpm run ci:setup
-      - run: ./node_modules/.bin/evo run ci --since $(git describe --tags --abbrev=0) --ci
+      - run: ./node_modules/.bin/evo run ci --since $(git describe --tags --abbrev=0) --ci --debug
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@master

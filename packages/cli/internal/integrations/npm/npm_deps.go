@@ -19,14 +19,14 @@ func AddNpmDependencies(proj *project.Project, wsName string) error {
 
 	var rootPkgJson, rootPkgJsonError = NewPackageJson(path.Join(proj.Path, "package.json"))
 	if rootPkgJsonError != nil {
-		return nil
+		return rootPkgJsonError
 	}
 
 	var ws, _ = proj.Load(wsName)
 	var pkgJson, pkgJsonErr = NewPackageJson(path.Join(ws.Path, "package.json"))
 
 	if pkgJsonErr != nil {
-		return nil
+		return pkgJsonErr
 	}
 
 	var rootDeps = rootPkgJson.GetAllDependencies()
