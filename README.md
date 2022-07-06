@@ -1,12 +1,14 @@
 ## TODO
 
 For Release
+- [ ] CI should use already published @evobuild/cli package
+- [ ] Explore optimisation by checking top level targets cache hit before proceeding to other tasks
 - [ ] Evo status
     - [ ] Show some stats info about the repo
 - [ ] Reporter
   - [ ] Spinner disappears
   - [ ] Useless when a lot of tasks
-    - [ ] Show only top level and in spinner report progress with – succeeded (+from cache) / failed (+from cache)
+    - [ ] Show only top level and failed. In spinner report progress with – succeeded (+from cache) / failed (+from cache)
   - [ ] On error need to report status – succeeded (+from cache) / failed (+from cache)
 - [ ] Move reporter locking into a separate go routine
 - [ ] Cache improvements

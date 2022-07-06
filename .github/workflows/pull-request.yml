@@ -24,6 +24,13 @@ jobs:
         with:
           path: ./.evo_cache
           key: ${{ runner.os }}-build
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node_modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-nodemodules
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: 7.3.0
