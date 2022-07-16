@@ -136,10 +136,6 @@ func (rr *Reporter) StreamError(task *task_graph.Task, lines ...string) {
 }
 
 func (rr *Reporter) SuccessTask(task *task_graph.Task) {
-	if rr.Output != ReporterOutputStreamAll && !(rr.Output == ReporterOutputStreamTopLevel && task.TopLevel) {
-		return
-	}
-
 	rr.lock.Lock()
 	rr.spinnerPause()
 	rr.spinnerErase()
