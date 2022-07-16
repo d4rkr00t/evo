@@ -1,5 +1,20 @@
 # @evobuild/cli
 
+## 0.6.0
+
+### Minor Changes
+
+- 28c9bb5: Add progress reporter with a spinner
+- 2b7c397: feat: improve reporter output with the number of failed/succeeded tasks
+- 1955d33: Simplify cache hit message when outputs match
+
+### Patch Changes
+
+- 8fd1e84: Overrides are applied based on suffixes match not prefixes
+- 186c8b7: reporter enable spinner acutally enables spinner
+- 3774dad: Fix installation with improved postinstall script
+- 3f35741: revert changes in reporter that produce 0 output in CombindOutput mode
+
 ## 0.5.1
 
 ### Patch Changes
