@@ -43,7 +43,7 @@ jobs:
           key: ${{ runner.os }}-nodemodules
 
       - run: pnpm install
-      - run: pnpm run ci:setup
+      - run: pnpm install @evobuild/cli@latest
       - run: ./node_modules/.bin/evo run ci --since $(git describe --tags --abbrev=0) --ci
 
       - name: Create Release Pull Request or Publish to npm

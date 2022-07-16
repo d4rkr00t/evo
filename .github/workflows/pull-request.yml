@@ -36,6 +36,6 @@ jobs:
           version: 7.3.0
       - run: git fetch origin main
       - run: pnpm install
-      - run: pnpm run ci:setup
+      - run: pnpm install @evobuild/cli@latest
       - run: ./node_modules/.bin/evo run ci --since origin/main --ci
 
