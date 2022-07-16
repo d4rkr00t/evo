@@ -136,6 +136,10 @@ func (rr *Reporter) StreamError(task *task_graph.Task, lines ...string) {
 }
 
 func (rr *Reporter) SuccessTask(task *task_graph.Task) {
+	if rr.Output != ReporterOutputStreamAll && !(rr.Output == ReporterOutputStreamTopLevel && task.TopLevel) {
+		return
+	}
+
 	rr.lock.Lock()
 	rr.spinnerPause()
 	rr.spinnerErase()
@@ -289,22 +293,34 @@ func (rr *Reporter) FailRun(dur time.Duration, taskGraph *task_graph.TaskGraph) 
 
 func (rr *Reporter) UpdateFromTaskGraph(taskGraph *task_graph.TaskGraph) {
 	rr.lock.Lock()
-	var newOutput = []string{""}
+	var newOutput = []string{}
 	var countPending = 0
 	var countRunning = 0
+	var countSuccess = 0
+	var countFailed = 0
 
 	for _, taskName := range taskGraph.TasksNamesList {
 		var task, _ = taskGraph.Load(taskName)
 		if task.Status == task_graph.TaskStatsuPending {
 			countPending += 1
-		}
-		if task.Status == task_graph.TaskStatsuRunning {
+		} else if task.Status == task_graph.TaskStatsuRunning {
 			countRunning += 1
+		} else if task.Status == task_graph.TaskStatsuFailure {
+			countFailed += 1
+		} else if task.Status == task_graph.TaskStatsuSuccess {
+			countSuccess += 1
 		}
 	}
 
 	newOutput = append(
 		newOutput,
+		fmt.Sprintf(
+			"%s %s %s %s",
+			color.YellowString("▸"),
+			color.HiBlackString("status:"),
+			color.GreenString("%d succeeded", countSuccess),
+			color.RedString("%d failed", countFailed),
+		),
 		fmt.Sprintf(
 			"%s %s %s %s",
 			color.YellowString("▸"),
