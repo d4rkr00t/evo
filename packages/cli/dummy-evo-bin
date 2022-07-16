@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+console.log("DUMMY BIN FILE.");
+console.log("IF IT'S STILL PRESENT SOMETHING WENT WRONG WITH INSTALLATION.");
+
+process.exit(1);

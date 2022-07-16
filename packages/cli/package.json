@@ -11,11 +11,12 @@
   },
   "files": [
     "postinstall.js",
-    "dist"
+    "dist",
+    "bin"
   ],
   "scripts": {
-    "postinstall": "node postinstall.js install",
-    "preuninstall": "node postinstall.js uninstall"
+    "postinstall": "node postinstall.js",
+    "prepack": "mkdir bin &2> /dev/null && cp dummy-evo-bin ./bin/evo"
   },
   "dependencies": {
     "mkdirp": "^1.0.4"
