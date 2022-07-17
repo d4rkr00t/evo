@@ -1,8 +1,6 @@
 ## TODO
 
 For Release
-- [ ] CI should use already published @evobuild/cli package
-- [ ] Explore optimisation by checking top level targets cache hit before proceeding to other tasks
 - [ ] Evo status
     - [ ] Show some stats info about the repo
 - [ ] Reporter
@@ -75,6 +73,7 @@ For Release
 
 ## DONE
 
+- [x] CI should use already published @evobuild/cli package
 - [x] Fix GOCCM with empty queue
 - [x] Profile long workspaces discovery
 - [x] Put overrides to file system
