@@ -15,6 +15,7 @@ import (
 	"evo/internal/reporter"
 	"evo/internal/runner"
 	"evo/internal/stats"
+	"evo/internal/target"
 	"evo/internal/tracer"
 
 	"github.com/spf13/cobra"
@@ -39,10 +40,11 @@ var RunCmd = &cobra.Command{
 		var debug, _ = cmd.Flags().GetBool("debug")
 		var tracingOutput, _ = cmd.Flags().GetString("tracing")
 		var isCI, _ = cmd.Flags().GetBool("ci")
-		var targets = args
+		var maybeTargets = args
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()
 		var rr = reporter.New(logger)
+		var targets = []string{}
 
 		var cpuprof, _ = cmd.Flags().GetBool("cpuprof")
 		defer cmdutils.CollectProfile(cpuprof)()
@@ -76,6 +78,16 @@ var RunCmd = &cobra.Command{
 		if tracingOutput != "" {
 			tracer.SetOut(tracingOutput)
 			tracer.Enable()
+		}
+
+		for _, tgt := range maybeTargets {
+			var s, t, ok = target.GetScopeAndTargetFromString(tgt)
+			if ok {
+				scope = append(scope, s)
+				targets = append(targets, t)
+			} else {
+				targets = append(targets, tgt)
+			}
 		}
 
 		if len(scope) == 0 {

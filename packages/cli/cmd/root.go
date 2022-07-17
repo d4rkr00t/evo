@@ -34,7 +34,6 @@ func Execute() {
 	rootCmd.PersistentFlags().BoolP("cpuprof", "", false, "Enables CPU profiler. For development usage only.")
 
 	RunCmd.PersistentFlags().BoolP("ci", "", false, "Indicates that the command is running in CI")
-	RunCmd.PersistentFlags().StringSlice("scope", []string{}, "Scope run to specified packages")
 	RunCmd.PersistentFlags().Int("concurrency", runtime.NumCPU()-1, "Number of concurrently running tasks, defaults to a number of CPUs")
 	RunCmd.PersistentFlags().String("cwd", "", "Override CWD")
 	RunCmd.PersistentFlags().String("since", "", "Use git diff to determine what workspaces have changed since a merge-base")

@@ -1,6 +1,20 @@
 ## TODO
 
-For Release
+- [ ] Support target deps: ["package#sometarget"]
+- [ ] Support file deps: ["file::somefilepath"]
+- [ ] Cache improvements
+  - [ ] Custom Hash Input for e.g. environment, etc...
+  - [ ] Remote cache (MVP)
+  - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
+  - [ ] `evo clear-cache <package>`
+  - [ ] `evo clear-output <package>` – clears all outputs from packages
+- [ ] FileSystem
+  - [ ] Cache file check-sums
+  - [ ] Update file check sums only when modified time is after previous update
+  - [ ] Watch file changes during task run
+    - [ ] Update FileSystem cache only when a file changes
+- [ ] Fix linking peer dependencies (?)
+- [ ] Watch mode
 - [ ] Evo status
     - [ ] Show some stats info about the repo
 - [ ] Reporter
@@ -8,17 +22,8 @@ For Release
   - [ ] Useless when a lot of tasks
     - [ ] Show only top level and failed. In spinner report progress with – succeeded (+from cache) / failed (+from cache)
   - [ ] On error need to report status – succeeded (+from cache) / failed (+from cache)
-- [ ] Move reporter locking into a separate go routine
-- [ ] Cache improvements
-  - [ ] Custom Hash Input for e.g. environment, etc...
-  - [ ] Remote cache (MVP)
-  - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
-  - [ ] `evo clear-cache <package>`
-  - [ ] `evo clear-output <package>` – clears all outputs from packages
-- [ ] Fix linking peer dependencies (?)
-- [ ] Watch mode
+  - [ ] Move reporter locking into a separate go routine
 - [ ] Tests
-  - [ ] TBD
 - [ ] Website
   - [ ] Documentation
 - [ ] Refactor
@@ -35,11 +40,7 @@ For Release
     - [x] Add debug level to the logger
 - [ ] Add .env support
 - [ ] Support custom package manager (?)
-- [ ] Support file deps: ["file:somefilepath"]
-- [ ] Support target deps: ["package:sometarget"]
 - [ ] Watchman integration and persistent graph
-- [ ] More sophisticated logic around package managers
-  - [ ] include lock files into cache hash
 - [ ] SANDBOXING !!!
 - [ ] Targets
   - [ ] check that command exist
@@ -55,11 +56,6 @@ For Release
     - [ ] makes sure that all dependencies are on expected versions
     - [ ] makes sure that all dependencies are lifted to the top level package.json
 - [ ] Use .gitignore in addition to include/exclude in evo config
-- [ ] FileSystem
-  - [ ] Cache file check-sums
-  - [ ] Update file check sums only when modified time is after previous update
-  - [ ] Watch file changes during task run
-    - [ ] Update FileSystem cache only when a file changes
 - [ ] Generators / Templates
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] Use semver comparison for dependencies (?)
@@ -73,6 +69,7 @@ For Release
 
 ## DONE
 
+- [x] evo run package#target
 - [x] CI should use already published @evobuild/cli package
 - [x] Fix GOCCM with empty queue
 - [x] Profile long workspaces discovery

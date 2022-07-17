@@ -18,7 +18,7 @@ import (
 )
 
 var ShowAffectedCmd = &cobra.Command{
-	Use:   "show-affected",
+	Use:   "show-affected <target name>",
 	Short: "Show what workspaces are affected by the change",
 	Long:  "Show what workspaces are affected by the change",
 	Args: func(cmd *cobra.Command, args []string) error {
