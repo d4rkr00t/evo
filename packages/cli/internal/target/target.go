@@ -12,10 +12,9 @@ import (
 type TargetsMap = map[string]Target
 
 type Target struct {
-	Cmd       string
-	Deps      []string
-	Outputs   []string
-	SkipCache bool
+	Cmd     string
+	Deps    []string
+	Outputs []string
 }
 
 func (t Target) String() string {

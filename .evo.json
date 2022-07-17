@@ -2,7 +2,6 @@
   "workspaces": [
     "packages/experiments",
     "packages/cli",
-    "packages/cli/cmd/version",
     "build/*"
   ],
   "excludes": [
@@ -49,17 +48,21 @@
         "build:mac:amd64": {
           "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o 'dist/evo_darwin_amd64/evo' main.go",
           "outputs": ["dist/evo_darwin_amd64"],
-          "deps": ["@build"]
+          "deps": ["@build", "build:version"]
         },
         "build:mac:arm64": {
           "cmd": "CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o 'dist/evo_darwin_arm64/evo' main.go",
           "outputs": ["dist/evo_darwin_arm64"],
-          "deps": ["@build"]
+          "deps": ["@build", "build:version"]
         },
         "build:linux:amd64": {
           "cmd": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o 'dist/evo_linux_amd64/evo' main.go",
           "outputs": ["dist/evo_linux_amd64"],
-          "deps": ["@build"]
+          "deps": ["@build", "build:version"]
+        },
+        "build:version": {
+          "cmd": "node ./version.js",
+          "outputs": ["./cmd/version/version.go"]
         },
         "build:dev": {
           "cmd": "echo 'BUILDING...'",
@@ -69,7 +72,7 @@
         "build:dev:dist": {
           "cmd": "CGO_ENABLED=1 go build -race -o 'dist/dev/evo' main.go",
           "outputs": ["dist/dev"],
-          "deps": ["@build"]
+          "deps": ["@build", "build:version"]
         },
         "build:dev:cpy": {
           "cmd": "cpy dist/dev/evo ./bin --flat",

@@ -1,7 +1,5 @@
 ## TODO
 
-- [ ] Support target deps: ["package#sometarget"]
-- [ ] Support file deps: ["file::somefilepath"]
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -64,6 +62,8 @@
     - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
+- [ ] Support target deps: ["package#sometarget"]
+- [ ] Support file deps: ["file::somefilepath"]
 
 ---
 

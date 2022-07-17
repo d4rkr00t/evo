@@ -20,8 +20,5 @@
   },
   "dependencies": {
     "mkdirp": "^1.0.4"
-  },
-  "devDependencies": {
-    "@evobuild/cli__version": "*"
   }
 }
