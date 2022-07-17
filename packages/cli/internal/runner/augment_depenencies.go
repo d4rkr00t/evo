@@ -1,8 +1,8 @@
 package runner
 
 import (
+	"evo/internal/ccm"
 	"evo/internal/context"
-	"evo/internal/goccm"
 	"evo/internal/integrations/npm"
 	"evo/internal/project"
 	"evo/internal/stats"
@@ -20,9 +20,9 @@ func AugmentDependencies(ctx *context.Context, proj *project.Project) error {
 		return nil
 	}
 
-	var ccm = goccm.New(ctx.Concurrency)
+	var ccm = ccm.New(ctx.Concurrency)
 	for _, wsName := range proj.WorkspacesNames {
-		ccm.Wait()
+		ccm.Add()
 		go func(wsName string) {
 			defer ctx.Tracer.Event(fmt.Sprintf("discover dependencies for %s", wsName)).Done()
 			defer ccm.Done()
@@ -34,7 +34,7 @@ func AugmentDependencies(ctx *context.Context, proj *project.Project) error {
 		}(wsName)
 	}
 
-	ccm.WaitAllDone()
+	ccm.Wait()
 	lg.Debug().EndEmpty(ctx.Stats.Stop("augment dependencies"))
 
 	return nil

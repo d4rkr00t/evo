@@ -1,8 +1,8 @@
 package runner
 
 import (
+	"evo/internal/ccm"
 	"evo/internal/context"
-	"evo/internal/goccm"
 	"evo/internal/project"
 	"evo/internal/stats"
 )
@@ -16,10 +16,10 @@ func CacheWorkspacesStates(ctx *context.Context, proj *project.Project) {
 		return
 	}
 
-	var ccm = goccm.New(ctx.Concurrency)
+	var ccm = ccm.New(ctx.Concurrency)
 
 	for _, wsName := range proj.WorkspacesNames {
-		ccm.Wait()
+		ccm.Add()
 		go func(wsName string) {
 			defer ccm.Done()
 			var ws, _ = proj.Load(wsName)
@@ -27,7 +27,7 @@ func CacheWorkspacesStates(ctx *context.Context, proj *project.Project) {
 		}(wsName)
 	}
 
-	ccm.WaitAllDone()
+	ccm.Wait()
 
 	ctx.Stats.Stop("caching workspaces states")
 }

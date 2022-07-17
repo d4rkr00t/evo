@@ -1,7 +1,7 @@
 package project
 
 import (
-	"evo/internal/goccm"
+	"evo/internal/ccm"
 	"evo/internal/workspace"
 	"path"
 	"path/filepath"
@@ -16,16 +16,15 @@ func DiscoverWorkspaces(rootPath string, workspacesGlobsList []string) sync.Map 
 	}
 
 	// TODO: use concurency settings
-	var ccm = goccm.New(runtime.NumCPU())
+	var ccm = ccm.New(runtime.NumCPU())
 
 	for _, wc := range workspacesGlobsList {
 		var wsGlob = path.Join(rootPath, wc, workspace.WorkspaceConfigFileName)
 		var matches, _ = filepath.Glob(wsGlob)
 
 		for _, wsConfigPath := range matches {
-			ccm.Wait()
+			ccm.Add()
 			go func(wsConfigPath string) {
-				defer ccm.Done()
 				var wsPath = path.Dir(wsConfigPath)
 
 				// TODO: error handling
@@ -34,11 +33,12 @@ func DiscoverWorkspaces(rootPath string, workspacesGlobsList []string) sync.Map 
 				if err == nil {
 					workspacesConfigsMap.Store(wsPath, wsCfg)
 				}
+				ccm.Done()
 			}(wsConfigPath)
 		}
 	}
 
-	ccm.WaitAllDone()
+	ccm.Wait()
 
 	return workspacesConfigsMap
 }
