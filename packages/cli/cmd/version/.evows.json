@@ -3,15 +3,18 @@
   "targets": {
     "build": {
       "cmd": "node ../../version.js",
-      "outputs": ["version.go"]
+      "outputs": ["version.go"],
+      "skipCache": true
     },
     "build:dev": {
       "cmd": "@noop",
-      "outputs": []
+      "outputs": [],
+      "skipCache": true
     },
     "test": {
       "cmd": "@noop",
-      "outputs": []
+      "outputs": [],
+      "skipCache": true
     }
   }
 }

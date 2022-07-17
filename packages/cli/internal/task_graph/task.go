@@ -98,7 +98,7 @@ func (t *Task) CleanName() string {
 }
 
 func (t *Task) HasOutputs() bool {
-	return len(t.Target.Outputs) > 0
+	return len(t.Target.Outputs) > 0 && !t.Target.SkipCache
 }
 
 func (t *Task) GetCacheKey() string {
@@ -110,6 +110,10 @@ func (t *Task) Invalidate(cc *cache.Cache) bool {
 }
 
 func (t *Task) Cache(cc *cache.Cache, stdout string, stderr string) {
+	if t.Target.SkipCache {
+		return
+	}
+
 	var exitCode = 0
 	if t.Status == TaskStatsuFailure {
 		exitCode = 1
@@ -125,6 +129,10 @@ func (t *Task) Cache(cc *cache.Cache, stdout string, stderr string) {
 }
 
 func (t *Task) GetStatusAndLogs(cc *cache.Cache) (string, string, string, error) {
+	if t.Target.SkipCache {
+		return "", "", "", nil
+	}
+
 	if !cc.Has(t.GetCacheKey()) {
 		return "", "", "", fmt.Errorf("no cache for a task")
 	}
@@ -166,6 +174,10 @@ func (t *Task) ValidateOutputs() error {
 }
 
 func (t *Task) CleanOutputs() {
+	if !t.HasOutputs() {
+		return
+	}
+
 	for _, output := range t.Target.Outputs {
 		os.RemoveAll(path.Join(t.WsPath, output))
 	}
@@ -189,6 +201,10 @@ func (t *Task) GetOutputsHash() string {
 }
 
 func (t *Task) ShouldRestoreOutputs(cc *cache.Cache) bool {
+	if !t.HasOutputs() {
+		return false
+	}
+
 	var cacheKey = t.GetCacheKey() + TaskOutputsHashPostfix
 	if !cc.Has(cacheKey) {
 		return true
