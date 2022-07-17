@@ -32,7 +32,7 @@ For Release
   - [ ] REFACTOR: Refactor logger
     - [ ] to generics/interfaces
     - [x] Cleaner API
-    - [ ] Add debug level to the logger
+    - [x] Add debug level to the logger
 - [ ] Add .env support
 - [ ] Support custom package manager (?)
 - [ ] Support file deps: ["file:somefilepath"]

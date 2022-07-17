@@ -11,29 +11,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-go@v2
         with:
           go-version: '1.18.3'
+
       - uses: actions/setup-node@v1
         with:
             node-version: '16.15.1'
+
       - name: Cache evo
         uses: actions/cache@v2
         env:
           cache-name: cache-evo
         with:
           path: ./.evo_cache
-          key: ${{ runner.os }}-build
+          key: ${{ runner.OS }}-evo-cache-${{ hashFiles('./.evo_cache/evo_cache_key') }}
+          restore-keys: |
+            ${{ runner.OS }}-evo-cache-
+
       - name: Cache node_modules
         uses: actions/cache@v2
         env:
           cache-name: cache-node_modules
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-nodemodules
+          key: ${{ runner.OS }}-nodemodules-cache-${{ hashFiles('./pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.OS }}-nodemodules-cache-
+
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: 7.3.0
+
       - run: git fetch origin main
       - run: pnpm install
       - run: pnpm install @evobuild/cli@latest

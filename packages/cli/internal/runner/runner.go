@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -93,5 +94,6 @@ func Run(ctx *context.Context) error {
 	}
 
 	ctx.Reporter.SuccessRun(&ctx.Stats, &taskGraph)
+	ctx.Cache.CacheData("evo_cache_key", time.Now().String())
 	return nil
 }
