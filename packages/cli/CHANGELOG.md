@@ -1,5 +1,15 @@
 # @evobuild/cli
 
+## 0.7.0
+
+### Minor Changes
+
+- 5769dfd: output evo_cache_key to use as an input for github actions cache key or similar
+
+### Patch Changes
+
+- f7bf598: Fix build hanging sometimes
+
 ## 0.6.0
 
 ### Minor Changes
