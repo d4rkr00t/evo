@@ -3,6 +3,7 @@ package show
 import (
 	"evo/internal/context"
 	"evo/internal/errors"
+	"evo/internal/label"
 	"evo/internal/project"
 	"evo/internal/stats"
 	"fmt"
@@ -33,7 +34,7 @@ func Targets(ctx *context.Context, wsName string) error {
 	for targetName, target := range ws.Targets {
 		var lg = ctx.Logger.CreateGroup()
 
-		lg.Start(targetName+" |", color.HiYellowString(fmt.Sprintf("evo run %s --scope %s", targetName, ws.Name)))
+		lg.Start(targetName+" |", color.HiYellowString(fmt.Sprintf("evo run %s%s%s", ws.Name, label.Sep, targetName)))
 
 		if len(target.Cmd) > 0 {
 			lg.Badge("command").Info(target.Cmd)

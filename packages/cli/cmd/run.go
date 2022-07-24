@@ -10,12 +10,12 @@ import (
 	"evo/internal/cache"
 	"evo/internal/context"
 	"evo/internal/integrations/git"
+	"evo/internal/label"
 	"evo/internal/logger"
 	"evo/internal/project"
 	"evo/internal/reporter"
 	"evo/internal/runner"
 	"evo/internal/stats"
-	"evo/internal/target"
 	"evo/internal/tracer"
 
 	"github.com/spf13/cobra"
@@ -23,8 +23,8 @@ import (
 
 var RunCmd = &cobra.Command{
 	Use:   "run <target>",
-	Short: "Run a project's target",
-	Long:  "Run a project's target",
+	Short: "Run a workspaces's target",
+	Long:  "Run a workspaces's target",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("target name is required")
@@ -34,7 +34,6 @@ var RunCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwdErr = cmd.Flags().GetString("cwd")
 		var since, _ = cmd.Flags().GetString("since")
-		var scope, _ = cmd.Flags().GetStringSlice("scope")
 		var concurrency, _ = cmd.Flags().GetInt("concurrency")
 		var verbose, _ = cmd.Flags().GetBool("verbose")
 		var debug, _ = cmd.Flags().GetBool("debug")
@@ -44,7 +43,6 @@ var RunCmd = &cobra.Command{
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()
 		var rr = reporter.New(logger)
-		var targets = []string{}
 
 		var cpuprof, _ = cmd.Flags().GetBool("cpuprof")
 		defer cmdutils.CollectProfile(cpuprof)()
@@ -71,7 +69,6 @@ var RunCmd = &cobra.Command{
 
 		if projectConfigErr != nil {
 			fmt.Println(projectConfigErr.Error())
-			logger.Log(fmt.Sprintf("%s", projectConfigErr))
 			os.Exit(1)
 		}
 
@@ -80,18 +77,11 @@ var RunCmd = &cobra.Command{
 			tracer.Enable()
 		}
 
-		for _, tgt := range maybeTargets {
-			var s, t, ok = target.GetScopeAndTargetFromString(tgt)
-			if ok {
-				scope = append(scope, s)
-				targets = append(targets, t)
-			} else {
-				targets = append(targets, tgt)
-			}
-		}
-
-		if len(scope) == 0 {
-			scope = cmdutils.DetectScopeFromCWD(rootPath, cwd)
+		var defaultScope = cmdutils.DetectScopeFromCWD(rootPath, cwd)
+		var labels, labelsErr = label.GetLablesFromList(maybeTargets, defaultScope)
+		if labelsErr != nil {
+			fmt.Println(labelsErr.Error())
+			os.Exit(1)
 		}
 
 		var cache = cache.New(rootPath, cache.DefaultCacheLocation)
@@ -106,7 +96,7 @@ var RunCmd = &cobra.Command{
 			Root:              rootPath,
 			Cwd:               cwd,
 			ProjectConfigPath: projectConfigPath,
-			Targets:           targets,
+			Labels:            labels,
 			Concurrency:       concurrency,
 			ChangedFiles:      changedFiles,
 			ChangedOnly:       len(since) > 0,
@@ -115,7 +105,6 @@ var RunCmd = &cobra.Command{
 			Stats:             stats.New(),
 			Tracer:            tracer,
 			Cache:             cache,
-			Scope:             scope,
 		}
 
 		var runErr = runner.Run(&ctx)

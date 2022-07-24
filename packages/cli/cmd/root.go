@@ -31,7 +31,7 @@ func Execute() {
 	rootCmd.PersistentFlags().BoolP("version", "", false, "Version")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "Debug output")
-	rootCmd.PersistentFlags().BoolP("cpuprof", "", false, "Enables CPU profiler. For development usage only.")
+	rootCmd.PersistentFlags().BoolP("cpuprof", "", false, "Enables CPU profiler. For development use only")
 
 	RunCmd.PersistentFlags().BoolP("ci", "", false, "Indicates that the command is running in CI")
 	RunCmd.PersistentFlags().Int("concurrency", runtime.NumCPU()-1, "Number of concurrently running tasks, defaults to a number of CPUs")

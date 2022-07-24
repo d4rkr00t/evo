@@ -62,13 +62,11 @@ var ShowHashCmd = &cobra.Command{
 			Root:              rootPath,
 			Cwd:               cwd,
 			ProjectConfigPath: projectConfigPath,
-			Targets:           []string{},
 			Concurrency:       runtime.NumCPU() - 1,
 			Logger:            logger,
 			Stats:             stats.New(),
 			Tracer:            tracer,
 			Cache:             cache,
-			Scope:             []string{},
 		}
 
 		var err = show.Hash(&ctx, pkgName)

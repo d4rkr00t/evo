@@ -4,6 +4,7 @@ import (
 	"evo/internal/cache"
 	"evo/internal/fsutils"
 	"evo/internal/hash_utils"
+	"evo/internal/label"
 	"evo/internal/target"
 	"evo/internal/workspace"
 	"fmt"
@@ -98,7 +99,7 @@ func (t *Task) CleanName() string {
 }
 
 func (t *Task) HasOutputs() bool {
-	return len(t.Target.Outputs) > 0 && !t.Target.SkipCache
+	return len(t.Target.Outputs) > 0
 }
 
 func (t *Task) GetCacheKey() string {
@@ -110,10 +111,6 @@ func (t *Task) Invalidate(cc *cache.Cache) bool {
 }
 
 func (t *Task) Cache(cc *cache.Cache, stdout string, stderr string) {
-	if t.Target.SkipCache {
-		return
-	}
-
 	var exitCode = 0
 	if t.Status == TaskStatsuFailure {
 		exitCode = 1
@@ -129,10 +126,6 @@ func (t *Task) Cache(cc *cache.Cache, stdout string, stderr string) {
 }
 
 func (t *Task) GetStatusAndLogs(cc *cache.Cache) (string, string, string, error) {
-	if t.Target.SkipCache {
-		return "", "", "", nil
-	}
-
 	if !cc.Has(t.GetCacheKey()) {
 		return "", "", "", fmt.Errorf("no cache for a task")
 	}
@@ -233,5 +226,5 @@ func (t *Task) cacheOutputs(cc *cache.Cache) {
 }
 
 func GetTaskName(wsName string, targetName string) string {
-	return fmt.Sprintf("%s:%s", wsName, targetName)
+	return fmt.Sprintf("%s%s%s", wsName, label.Sep, targetName)
 }

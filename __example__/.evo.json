@@ -94,7 +94,37 @@
         }
       }
     },
-    "packages/dummy": {
+    "packages/dummy/pkg-a": {
+      "targets": {
+        "build": {
+          "cmd": "echo $ROOT",
+          "deps": [
+            "@build"
+          ]
+        }
+      }
+    },
+    "packages/dummy/pkg-b": {
+      "targets": {
+        "build": {
+          "cmd": "echo $ROOT",
+          "deps": [
+            "@build"
+          ]
+        }
+      }
+    },
+    "packages/dummy/pkg-c": {
+      "targets": {
+        "build": {
+          "cmd": "echo $ROOT",
+          "deps": [
+            "@build"
+          ]
+        }
+      }
+    },
+    "packages/dummy/pkg-d": {
       "targets": {
         "build": {
           "cmd": "echo $ROOT",

@@ -25,9 +25,10 @@ func CreateTaskGraphFromProject(ctx *context.Context, proj *Project) task_graph.
 
 	proj.Walk(func(ws *workspace.Workspace) error {
 		defer ctx.Tracer.Event(fmt.Sprintf("creating task graph for %s", ws.Name)).Done()
-		for _, targetName := range ctx.Targets {
-			var isTopLevel = len(ctx.Scope) == 0 || contains(ctx.Scope, ws.Name)
-			createTask(targetName, proj, ws, &addFn, isTopLevel)
+		for _, label := range ctx.Labels {
+			if label.Scope == "*" || label.Scope == ws.Name {
+				createTask(label.Target, proj, ws, &addFn, true)
+			}
 		}
 		return nil
 	}, ctx.Concurrency)
