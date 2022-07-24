@@ -7,18 +7,15 @@ import (
 	"evo/internal/stats"
 	"evo/internal/task_graph"
 	"fmt"
-	"strings"
 	"sync"
 	"sync/atomic"
-
-	"github.com/fatih/color"
 )
 
 func RunTaskGraph(ctx *context.Context, proj *project.Project, taskGraph *task_graph.TaskGraph) error {
 	defer ctx.Tracer.Event("run tasks").Done()
 	ctx.Stats.Start("runtasks", stats.MeasureKindStage)
 	ctx.Logger.Log()
-	ctx.Logger.Log(fmt.Sprintf("Running targets: %s", color.CyanString(strings.Join(ctx.Targets, ", "))))
+	ctx.Logger.Log("Running:")
 	ctx.Logger.Log()
 
 	ctx.Reporter.Start()

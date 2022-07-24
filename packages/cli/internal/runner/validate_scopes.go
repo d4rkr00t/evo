@@ -22,5 +22,5 @@ func ValidateScopes(proj *project.Project, scopes *[]string) error {
 		return nil
 	}
 
-	return errors.New(errors.ErrorScopesNotFound, fmt.Sprintf("Trying to scope the run to non-existing workspaces: %s", color.YellowString(strings.Join(missing, ", "))))
+	return errors.New(errors.ErrorScopesNotFound, fmt.Sprintf("Trying to scope the run to workspaces \"%s\" that don't exist", color.YellowString(strings.Join(missing, ", "))))
 }

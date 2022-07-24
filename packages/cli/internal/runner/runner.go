@@ -3,6 +3,7 @@ package runner
 import (
 	"evo/internal/context"
 	"evo/internal/integrations/npm"
+	"evo/internal/label"
 	"evo/internal/reporter"
 	"evo/internal/scheduler/basic"
 	"evo/internal/stats"
@@ -22,10 +23,9 @@ func Run(ctx *context.Context) error {
 	os.Setenv("PATH", npm.GetNodeModulesBinPath(ctx.Root)+":"+os.ExpandEnv("$PATH"))
 	os.Setenv("ROOT", ctx.Root)
 
-	ctx.Logger.Badge("root").Log(ctx.Root)
-	if len(ctx.Scope) > 0 {
-		ctx.Logger.Badge("scope").Log(color.YellowString(strings.Join(ctx.Scope, ", ")))
-	}
+	ctx.Logger.Badge("root").Log(" ", ctx.Root)
+	ctx.Logger.Badge("labels").Log(color.YellowString(label.StringifyLabels(&ctx.Labels)))
+
 	if len(ctx.ChangedFiles) > 0 {
 		ctx.Logger.Badge("changed files:").Debug().Log(fmt.Sprintf("[%d]", len(ctx.ChangedFiles)), strings.Join(ctx.ChangedFiles, ", "))
 	}
@@ -45,8 +45,11 @@ func Run(ctx *context.Context) error {
 		return err
 	}
 
-	var scope = ctx.Scope
+	var scope = label.GetScopeFromLabels(&ctx.Labels)
 	if len(ctx.ChangedFiles) > 0 {
+		// Reset scope, so only workspaces with changed files are included
+		scope = []string{}
+
 		var workspacesWithChangedFiles = proj.GetWorkspacesMatchingFiles(ctx.ChangedFiles)
 		scope = append([]string{}, workspacesWithChangedFiles...)
 		if len(scope) == 0 {

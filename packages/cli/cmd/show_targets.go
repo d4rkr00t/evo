@@ -38,7 +38,7 @@ var ShowTargetsCmd = &cobra.Command{
 
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()
-		var pkgName = args[0]
+		var wsName = args[0]
 
 		var osCwd, _ = os.Getwd()
 		if cwdErr != nil {
@@ -62,16 +62,14 @@ var ShowTargetsCmd = &cobra.Command{
 			Root:              rootPath,
 			Cwd:               cwd,
 			ProjectConfigPath: projectConfigPath,
-			Targets:           []string{},
 			Concurrency:       runtime.NumCPU() - 1,
 			Logger:            logger,
 			Stats:             stats.New(),
 			Tracer:            tracer,
 			Cache:             cache,
-			Scope:             []string{},
 		}
 
-		var err = show.Targets(&ctx, pkgName)
+		var err = show.Targets(&ctx, wsName)
 
 		if err != nil {
 			logger.Log(err.Error())

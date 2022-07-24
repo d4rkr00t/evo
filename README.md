@@ -1,5 +1,7 @@
 ## TODO
 
+- [ ] Stop swallowing stderr or stdout in case of an error
+- [ ] Rewrite show-affected to use :: syntax for targets and workspaces
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -13,6 +15,7 @@
     - [ ] Update FileSystem cache only when a file changes
 - [ ] Fix linking peer dependencies (?)
 - [ ] Watch mode
+- [ ] evo run workspace#* –> to build everything for a workspace(?)
 - [ ] Evo status
     - [ ] Show some stats info about the repo
 - [ ] Reporter
@@ -68,8 +71,9 @@
 ---
 
 ## DONE
-
-- [x] evo run package#target
+- [x] Migrate to workspace#target convention
+  - [x] evo run #build
+  - [x] evo run workspace#build
 - [x] CI should use already published @evobuild/cli package
 - [x] Fix GOCCM with empty queue
 - [x] Profile long workspaces discovery

@@ -3,6 +3,7 @@ package runner_test
 import (
 	"evo/internal/cache"
 	"evo/internal/context"
+	"evo/internal/label"
 	"evo/internal/logger"
 	"evo/internal/project"
 	"evo/internal/reporter"
@@ -30,7 +31,7 @@ func Test_BuildSimple(t *testing.T) {
 		Root:              tmpDirAbs,
 		Cwd:               tmpDirAbs,
 		ProjectConfigPath: projectConfigPath,
-		Targets:           []string{"build"},
+		Labels:            []label.Label{{Target: "build", Scope: "*"}},
 		Concurrency:       2,
 		ChangedFiles:      []string{},
 		ChangedOnly:       false,
@@ -39,7 +40,6 @@ func Test_BuildSimple(t *testing.T) {
 		Tracer:            tracer.New(),
 		Reporter:          &rr,
 		Cache:             cache,
-		Scope:             []string{},
 	}
 
 	var runErr = runner.Run(&ctx)
@@ -63,7 +63,7 @@ func Test_BuildSimpleUnknownTarget(t *testing.T) {
 		Root:              tmpDirAbs,
 		Cwd:               tmpDirAbs,
 		ProjectConfigPath: projectConfigPath,
-		Targets:           []string{"test"},
+		Labels:            []label.Label{{Target: "test", Scope: "*"}},
 		Concurrency:       2,
 		ChangedFiles:      []string{},
 		ChangedOnly:       false,
@@ -72,7 +72,6 @@ func Test_BuildSimpleUnknownTarget(t *testing.T) {
 		Stats:             stats.New(),
 		Tracer:            tracer.New(),
 		Cache:             cache,
-		Scope:             []string{},
 	}
 
 	var runErr = runner.Run(&ctx)
@@ -94,7 +93,7 @@ func Test_BuildSimpleOverrides(t *testing.T) {
 		Root:              tmpDirAbs,
 		Cwd:               tmpDirAbs,
 		ProjectConfigPath: projectConfigPath,
-		Targets:           []string{"build"},
+		Labels:            []label.Label{{Target: "build", Scope: "*"}},
 		Concurrency:       2,
 		ChangedFiles:      []string{},
 		ChangedOnly:       false,
@@ -103,7 +102,6 @@ func Test_BuildSimpleOverrides(t *testing.T) {
 		Stats:             stats.New(),
 		Tracer:            tracer.New(),
 		Cache:             cache,
-		Scope:             []string{},
 	}
 
 	var runErr = runner.Run(&ctx)

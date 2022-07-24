@@ -37,7 +37,6 @@ var ShowAffectedCmd = &cobra.Command{
 
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()
-
 		var targetName = args[0]
 
 		var osCwd, _ = os.Getwd()
@@ -62,13 +61,11 @@ var ShowAffectedCmd = &cobra.Command{
 			Root:              rootPath,
 			Cwd:               cwd,
 			ProjectConfigPath: projectConfigPath,
-			Targets:           []string{},
 			Concurrency:       runtime.NumCPU() - 1,
 			Logger:            logger,
 			Stats:             stats.New(),
 			Tracer:            tracer,
 			Cache:             cache,
-			Scope:             []string{},
 		}
 
 		var err = show.Affected(&ctx, targetName)

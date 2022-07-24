@@ -5,14 +5,14 @@ import (
 	"path"
 )
 
-func DetectScopeFromCWD(rootPath string, cwd string) []string {
+func DetectScopeFromCWD(rootPath string, cwd string) string {
 	if rootPath != cwd {
 		var wsConfig, err = workspace.LoadConfig(path.Join(cwd, workspace.WorkspaceConfigFileName))
 
 		if err == nil {
-			return []string{wsConfig.Name}
+			return wsConfig.Name
 		}
 	}
 
-	return []string{}
+	return "*"
 }
