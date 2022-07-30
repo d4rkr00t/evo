@@ -8,3 +8,4 @@ packages/cli/main
 packages/cli/bin
 evo-tracing-output.trace
 .userdir.list
+graph.svg

@@ -26,7 +26,6 @@ var ShowTargetsCmd = &cobra.Command{
 			return errors.New("workspace name is required")
 		}
 		return nil
-
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var cwd, cwdErr = cmd.Flags().GetString("cwd")
