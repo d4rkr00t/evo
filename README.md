@@ -12,6 +12,9 @@
   - [ ] Update file check sums only when modified time is after previous update
   - [ ] Watch file changes during task run
     - [ ] Update FileSystem cache only when a file changes
+- [ ] Support sub workspaces (?)
+  - [ ] Pros / Cons
+  - [ ] Automatic ignores from top level
 - [ ] Fix linking peer dependencies (?)
 - [ ] Watch mode
 - [ ] evo run workspace#* –> to build everything for a workspace(?)

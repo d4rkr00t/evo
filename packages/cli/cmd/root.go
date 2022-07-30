@@ -40,13 +40,12 @@ func Execute() {
 	RunCmd.PersistentFlags().String("tracing", "", "Output tracing data")
 	RunCmd.PersistentFlags().Lookup("tracing").NoOptDefVal = "evo-tracing-output.trace"
 
-	ShowHashCmd.PersistentFlags().String("cwd", "", "Override CWD")
-
 	rootCmd.AddCommand(RunCmd)
 	rootCmd.AddCommand(ShowHashCmd)
 	rootCmd.AddCommand(ShowTargetsCmd)
 	rootCmd.AddCommand(ShowScopesCmd)
 	rootCmd.AddCommand(ShowAffectedCmd)
+	rootCmd.AddCommand(GraphCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
