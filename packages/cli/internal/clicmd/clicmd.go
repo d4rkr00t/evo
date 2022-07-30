@@ -1,6 +1,7 @@
 package clicmd
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -39,6 +40,7 @@ func (c *Cmd) Run() (string, error) {
 	cmd.Dir = c.dir
 	cmd.Env = procs.ParseEnv(os.Environ())
 	cmd.Env["CWD"] = c.dir
+
 	for _, envString := range envs {
 		var splitEnvString = strings.Split(envString, "=")
 		if len(splitEnvString) == 2 {
@@ -62,6 +64,12 @@ func (c *Cmd) Run() (string, error) {
 	}
 
 	var err = cmd.Run()
+
+	if err != nil {
+		var stderr, _ = cmd.ErrOutput()
+		err = fmt.Errorf("%s", stderr)
+	}
+
 	os.Setenv("PATH", oldPath)
 	return strings.Join(out, "\n"), err
 }

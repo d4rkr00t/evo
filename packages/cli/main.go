@@ -1,8 +1,6 @@
 package main
 
-import (
-	"evo/cmd"
-)
+import "evo/cmd"
 
 func main() {
 	cmd.Execute()

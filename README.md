@@ -1,6 +1,5 @@
 ## TODO
 
-- [ ] Stop swallowing stderr or stdout in case of an error
 - [ ] Rewrite show-affected to use :: syntax for targets and workspaces
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
@@ -65,15 +64,16 @@
     - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
-- [ ] Support target deps: ["package#sometarget"]
+- [ ] Support target deps: ["package::sometarget"]
 - [ ] Support file deps: ["file::somefilepath"]
 
 ---
 
 ## DONE
-- [x] Migrate to workspace#target convention
-  - [x] evo run #build
-  - [x] evo run workspace#build
+- [x] Stop swallowing stderr or stdout in case of an error
+- [x] Migrate to workspace::target convention
+  - [x] evo run ::build
+  - [x] evo run workspace::build
 - [x] CI should use already published @evobuild/cli package
 - [x] Fix GOCCM with empty queue
 - [x] Profile long workspaces discovery
