@@ -1,5 +1,18 @@
 # @evobuild/cli
 
+## 0.8.0
+
+### Minor Changes
+
+- f796f8b: Add SkipCache flag to targets
+- 3fc0f1e: add evo graph command to output dotviz graph of a dependency tree
+- 21c3070: support :: syntax to run targets, instead of --scope flag
+- aaec75e: Support running scope target with 'evo run workspace#target' syntax
+
+### Patch Changes
+
+- cff0f9d: propagate errors from cli commands properly
+
 ## 0.7.0
 
 ### Minor Changes
