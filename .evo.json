@@ -37,7 +37,8 @@
         "*.html",
         "cmd/version",
         "bin",
-        "**/__testfs__/"
+        "**/__testfs__/",
+        "dummy-evo-bin"
       ],
       "targets": {
         "build": {

@@ -1,5 +1,5 @@
 export default function a() {
-  console.log(34);
+  console.log(36);
   b(16);
 }
 

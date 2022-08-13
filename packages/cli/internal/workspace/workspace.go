@@ -35,10 +35,10 @@ type Workspace struct {
 	Hash          string
 }
 
-func New(name string, wsAbsPath string, targets target.TargetsMap, excludes []string) Workspace {
+func New(name string, wsAbsPath string, targets target.TargetsMap, excludes []string) *Workspace {
 	var targetsOutputs = target.GetAllTargetsOutputs(&targets)
 
-	return Workspace{
+	return &Workspace{
 		Name:        name,
 		Path:        wsAbsPath,
 		Deps:        WorkspaceDependencyMap{},
@@ -63,8 +63,6 @@ func (ws *Workspace) Rehash(wm *sync.Map) {
 
 	ws.Hash = hash_utils.HashStringList([]string{
 		ws.FilesHash,
-		ws.TargetsHash,
-		ws.LocalDepsHash,
 		ws.ExtDepsHash,
 	})
 }
@@ -99,9 +97,7 @@ func (ws *Workspace) getLocalDepsHash(wm *sync.Map) string {
 
 	for _, dep := range ws.Deps {
 		if dep.Type == "local" {
-			var _depWs, _ = wm.Load(dep.Name)
-			var depWs = _depWs.(Workspace)
-			depsList = append(depsList, dep.Name+":"+depWs.Hash)
+			depsList = append(depsList, dep.Name+":"+dep.Provider)
 		}
 	}
 

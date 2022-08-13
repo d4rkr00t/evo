@@ -34,6 +34,10 @@ func (tg *TaskGraph) Add(task *Task) {
 		tg.TasksNamesList = append(tg.TasksNamesList, task.Name())
 		tg.Store(task)
 	}
+
+	for _, depName := range task.Deps {
+		tg.Connect(task.Name(), depName)
+	}
 }
 
 func (tg *TaskGraph) Connect(from string, to string) {
