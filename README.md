@@ -7,6 +7,7 @@
   - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
+- [ ] Validate missing target dependencies
 - [ ] FileSystem
   - [ ] Cache file check-sums
   - [ ] Update file check sums only when modified time is after previous update
@@ -73,6 +74,7 @@
 ---
 
 ## DONE
+- [x] Only care about tasks, workspaces are just meta information and a part of inputs
 - [x] Stop swallowing stderr or stdout in case of an error
 - [x] Migrate to workspace::target convention
   - [x] evo run ::build

@@ -37,14 +37,8 @@ func Hash(ctx *context.Context, wsName string) error {
 	}
 
 	proj.ReduceToScope([]string{wsName})
-	runner.BuildDependencyGraph(ctx, &proj)
-
-	err = runner.ValidateDependencyGraph(ctx, &proj)
-	if err != nil {
-		return err
-	}
-
 	runner.InvalidateProjects(ctx, &proj)
+
 	ws, _ = proj.Load(wsName)
 	var oldWsState, wsCacheErr = ws.RetriveStateFromCache(&ctx.Cache)
 	var wsDiff workspace.WorkspacesDiff

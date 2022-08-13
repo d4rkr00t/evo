@@ -1,10 +1,9 @@
 package project
 
 import (
-	gocontext "context"
+	"evo/internal/ccm"
 	"evo/internal/context"
 	"evo/internal/errors"
-	"evo/internal/task_graph"
 	"evo/internal/workspace"
 	"fmt"
 	"path"
@@ -12,8 +11,6 @@ import (
 	"sync"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/pyr-sh/dag"
-	"golang.org/x/sync/semaphore"
 )
 
 type ProjectWorkspacesMap = sync.Map
@@ -22,8 +19,6 @@ type Project struct {
 	Path            string
 	Config          ProjectConfig
 	WorkspacesNames []string
-
-	dependencyGraph dag.AcyclicGraph
 	workspacesMap   ProjectWorkspacesMap
 }
 
@@ -52,7 +47,8 @@ func NewProject(configPath string) (Project, error) {
 		if ok {
 			duplicates = append(duplicates, wsConfig.Name)
 		} else {
-			projectWorkspacesMap.Store(wsConfig.Name, workspace.New(wsConfig.Name, wsPath, targets, excludes))
+			var ws = workspace.New(wsConfig.Name, wsPath, targets, excludes)
+			projectWorkspacesMap.Store(wsConfig.Name, ws)
 			workspacesNames = append(workspacesNames, wsConfig.Name)
 		}
 
@@ -80,73 +76,40 @@ func (p *Project) Size() int {
 
 func (p *Project) Load(wsName string) (*workspace.Workspace, bool) {
 	var value, ok = p.workspacesMap.Load(wsName)
-	var ws workspace.Workspace
+	var ws *workspace.Workspace
 
 	if ok {
-		ws = value.(workspace.Workspace)
+		ws = value.(*workspace.Workspace)
 	}
 
-	return &ws, ok
+	return ws, ok
 }
 
 func (p *Project) Store(ws *workspace.Workspace) {
-	p.workspacesMap.Store(ws.Name, *ws)
-}
-
-func (p *Project) BuildDependencyGraph() {
-	p.workspacesMap.Range(func(key, value any) bool {
-		p.dependencyGraph.Add(key.(string))
-		return true
-	})
-
-	p.workspacesMap.Range(func(key, value any) bool {
-		var ws = value.(workspace.Workspace)
-		for _, dep := range ws.Deps {
-			if dep.Type == "local" {
-				p.dependencyGraph.Connect(dag.BasicEdge(ws.Name, dep.Name))
-			}
-		}
-		return true
-	})
-}
-
-func (p *Project) Walk(fn func(ws *workspace.Workspace) error, concurency int) {
-	var cc = gocontext.TODO()
-	var sem = semaphore.NewWeighted(int64(concurency))
-
-	p.dependencyGraph.Walk(func(v dag.Vertex) error {
-		var wsName = fmt.Sprint(v)
-		if err := sem.Acquire(cc, 1); err != nil {
-			panic(fmt.Sprintf("Failed to acquire semaphore: %v", err))
-		}
-		defer sem.Release(1)
-		var ws, _ = p.Load(wsName)
-		return fn(ws)
-	})
-}
-
-func (p *Project) Validate() error {
-	var cycles = p.dependencyGraph.Cycles()
-
-	if len(cycles) == 0 {
-		return nil
-	}
-
-	var msg = []string{"cycles in the dependency graph:"}
-	for _, cycle := range cycles {
-		msg = append(msg, fmt.Sprintf("– %s", cycle))
-	}
-
-	return errors.New(errors.ErrorProjectDepGraphCycle, strings.Join(msg, "\n"))
+	p.workspacesMap.Store(ws.Name, ws)
 }
 
 func (p *Project) RehashAllWorkspaces(ctx *context.Context) {
-	p.Walk(func(ws *workspace.Workspace) error {
-		defer ctx.Tracer.Event(fmt.Sprintf("invalidating workspace %s", ws.Name)).Done()
-		ws.Rehash(&p.workspacesMap)
-		p.Store(ws)
-		return nil
-	}, ctx.Concurrency)
+	var cm = ccm.New(ctx.Concurrency)
+
+	p.Range(func(ws *workspace.Workspace) bool {
+		cm.Add()
+		go func(ws *workspace.Workspace) {
+			defer ctx.Tracer.Event(fmt.Sprintf("invalidating workspace %s", ws.Name)).Done()
+			ws.Rehash(&p.workspacesMap)
+			cm.Done()
+		}(ws)
+		return true
+	})
+
+	cm.Wait()
+}
+
+func (p *Project) Range(fn func(ws *workspace.Workspace) bool) {
+	p.workspacesMap.Range(func(_, value any) bool {
+		var ws = value.(*workspace.Workspace)
+		return fn(ws)
+	})
 }
 
 func (p *Project) ReduceToScope(scope []string) {
@@ -165,7 +128,7 @@ func (p *Project) ReduceToScope(scope []string) {
 		}
 
 		visited.Add(ws.Name)
-		workspacesInScope.Store(ws.Name, *ws)
+		workspacesInScope.Store(ws.Name, ws)
 		workspacesNames = append(workspacesNames, ws.Name)
 
 		for _, wsDep := range ws.Deps {
@@ -177,26 +140,6 @@ func (p *Project) ReduceToScope(scope []string) {
 
 	p.workspacesMap = workspacesInScope
 	p.WorkspacesNames = workspacesNames
-}
-
-func (p *Project) GetAffectedWorkspaces(ctx *context.Context, targetsNames []string) []string {
-	var affectedWorkspaces = []string{}
-	var mx sync.Mutex
-	p.Walk(func(ws *workspace.Workspace) error {
-		for _, targetName := range targetsNames {
-			if target, ok := ws.Targets[targetName]; ok {
-				var task = task_graph.NewTask(ws, targetName, &target, false)
-				if task.Invalidate(&ctx.Cache) {
-					mx.Lock()
-					affectedWorkspaces = append(affectedWorkspaces, ws.Name)
-					mx.Unlock()
-					break
-				}
-			}
-		}
-		return nil
-	}, ctx.Concurrency)
-	return affectedWorkspaces
 }
 
 func (p *Project) GetWorkspacesMatchingFiles(filesList []string) []string {

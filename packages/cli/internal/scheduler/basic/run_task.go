@@ -27,7 +27,7 @@ func RunTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_g
 		return "", depsErr
 	}
 
-	if !task.Invalidate(&ctx.Cache) {
+	if !task.Invalidate(&ctx.Cache, taskGraph) {
 		task.RestoredFromCache = task_graph.TaskCacheHit
 
 		if task.HasOutputs() {

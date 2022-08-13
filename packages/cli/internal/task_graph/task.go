@@ -24,6 +24,7 @@ type Task struct {
 	WsName            string
 	WsHash            string
 	WsPath            string
+	Hash              string
 	TargetName        string
 	Target            *target.Target
 	Status            int
@@ -103,11 +104,32 @@ func (t *Task) HasOutputs() bool {
 }
 
 func (t *Task) GetCacheKey() string {
-	return fmt.Sprintf("%s__%s", t.CleanName(), t.WsHash)
+	if t.Hash == "" {
+		panic(fmt.Sprintf("Hash for a task '%s' is empty", t.Name()))
+	}
+
+	return fmt.Sprintf("%s__%s", t.CleanName(), t.Hash)
 }
 
-func (t *Task) Invalidate(cc *cache.Cache) bool {
+func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
+	t.Hash = hash_utils.HashStringList([]string{
+		t.WsHash,
+		t.Target.String(),
+		t.getDepsHash(tg),
+	})
 	return !cc.Has(t.GetCacheKey())
+}
+
+func (t *Task) getDepsHash(tg *TaskGraph) string {
+	var depsList = []string{}
+
+	for _, depName := range t.Deps {
+		var dep, _ = tg.Load(depName)
+		depsList = append(depsList, dep.Name()+":"+dep.Hash)
+	}
+
+	sort.Strings(depsList)
+	return hash_utils.HashStringList(depsList)
 }
 
 func (t *Task) Cache(cc *cache.Cache, stdout string, stderr string) {

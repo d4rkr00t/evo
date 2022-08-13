@@ -5,7 +5,6 @@ import (
 	"evo/internal/label"
 	"evo/internal/project"
 	"evo/internal/runner"
-	"evo/internal/task_graph"
 	"fmt"
 	"strings"
 )
@@ -26,15 +25,8 @@ func Graph(ctx *context.Context) error {
 		proj.ReduceToScope(scope)
 	}
 
-	runner.BuildDependencyGraph(ctx, &proj)
-
-	err = runner.ValidateDependencyGraph(ctx, &proj)
-	if err != nil {
-		return err
-	}
-
 	var taskGraph = runner.CreateTaskGraph(ctx, &proj)
-	err = runner.ValidateTaskGraph(ctx, &taskGraph)
+	err = runner.ValidateTaskGraph(ctx, taskGraph)
 	if err != nil {
 		return err
 	}
@@ -51,17 +43,13 @@ func Graph(ctx *context.Context) error {
 
 		var ws, _ = proj.Load(wsName)
 
-		for taskName := range ws.Targets {
-			nodes = append(nodes, fmt.Sprintf("%s -> \"%s\"", from, task_graph.GetTaskName(ws.Name, taskName)))
-		}
-
 		for _, dep := range ws.Deps {
 			var to = fmt.Sprintf("\"%s\"", dep.Name)
-			nodes = append(nodes, fmt.Sprintf("%s -> %s", from, to))
 
 			if _, ok := visited[dep.Name]; !ok {
 				visited[dep.Name] = true
 				if dep.Type == "external" {
+					nodes = append(nodes, fmt.Sprintf("%s -> %s", from, to))
 					shapes = append(shapes, fmt.Sprintf("%s [fillcolor=lightgoldenrodyellow, style=\"filled\"]", to))
 				} else {
 					shapes = append(shapes, fmt.Sprintf("%s [shape=doubleoctagon]", to))
@@ -71,13 +59,14 @@ func Graph(ctx *context.Context) error {
 	}
 
 	for _, taskName := range taskGraph.TasksNamesList {
+		var task, _ = taskGraph.Load(taskName)
+		var fromWs = fmt.Sprintf("\"%s\"", task.WsName)
 		var from = fmt.Sprintf("\"%s\"", taskName)
 		if _, ok := visited[taskName]; !ok {
 			visited[taskName] = true
 			shapes = append(shapes, fmt.Sprintf("%s [shape=box, fillcolor=gray96, style=\"filled\"]", from))
+			nodes = append(nodes, fmt.Sprintf("%s -> %s", fromWs, from))
 		}
-
-		var task, _ = taskGraph.Load(taskName)
 
 		for _, dep := range task.Deps {
 			var to = fmt.Sprintf("\"%s\"", dep)

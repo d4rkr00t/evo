@@ -70,33 +70,25 @@ func Run(ctx *context.Context) error {
 		}
 	}
 
-	BuildDependencyGraph(ctx, &proj)
-
-	err = ValidateDependencyGraph(ctx, &proj)
-	if err != nil {
-		return err
-	}
-
 	InvalidateProjects(ctx, &proj)
-	CacheWorkspacesStates(ctx, &proj)
 
 	var taskGraph = CreateTaskGraph(ctx, &proj)
-	err = ValidateTaskGraph(ctx, &taskGraph)
+	err = ValidateTaskGraph(ctx, taskGraph)
 	if err != nil {
 		return err
 	}
 
 	LinkNpmDependencies(ctx, &proj)
 
-	err = basic.RunTaskGraph(ctx, &proj, &taskGraph)
+	err = basic.RunTaskGraph(ctx, &proj, taskGraph)
 	ctx.Stats.Stop("total")
 
 	if err != nil {
-		ctx.Reporter.FailRun(ctx.Stats.Get("total").Duration, &taskGraph)
+		ctx.Reporter.FailRun(ctx.Stats.Get("total").Duration, taskGraph)
 		return err
 	}
 
-	ctx.Reporter.SuccessRun(&ctx.Stats, &taskGraph)
+	ctx.Reporter.SuccessRun(&ctx.Stats, taskGraph)
 	ctx.Cache.CacheData("evo_cache_key", time.Now().String())
 	return nil
 }

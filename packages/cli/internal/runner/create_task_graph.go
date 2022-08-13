@@ -7,7 +7,7 @@ import (
 	"evo/internal/task_graph"
 )
 
-func CreateTaskGraph(ctx *context.Context, proj *project.Project) task_graph.TaskGraph {
+func CreateTaskGraph(ctx *context.Context, proj *project.Project) *task_graph.TaskGraph {
 	ctx.Stats.Start("task graph", stats.MeasureKindStage)
 	var taskGraphLg = ctx.Logger.CreateGroup()
 	taskGraphLg.Debug().Start("Building a task graph...")

@@ -44,7 +44,6 @@ func Execute() {
 	rootCmd.AddCommand(ShowHashCmd)
 	rootCmd.AddCommand(ShowTargetsCmd)
 	rootCmd.AddCommand(ShowScopesCmd)
-	rootCmd.AddCommand(ShowAffectedCmd)
 	rootCmd.AddCommand(GraphCmd)
 
 	if err := rootCmd.Execute(); err != nil {

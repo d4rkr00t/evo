@@ -65,8 +65,6 @@ func AddNpmDependencies(proj *project.Project, wsName string) error {
 		}
 	}
 
-	proj.Store(ws)
-
 	if len(npmDepsErrors) > 1 {
 		return errors.New(
 			errors.ErrorNPMIntegrationInvalidDeps,

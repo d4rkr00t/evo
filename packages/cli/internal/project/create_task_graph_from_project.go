@@ -6,37 +6,32 @@ import (
 	"evo/internal/workspace"
 	"fmt"
 	"strings"
-	"sync"
 )
 
-func CreateTaskGraphFromProject(ctx *context.Context, proj *Project) task_graph.TaskGraph {
+func CreateTaskGraphFromProject(ctx *context.Context, proj *Project) *task_graph.TaskGraph {
 	defer ctx.Tracer.Event("creating task graph").Done()
 	var taskGraph = task_graph.New()
-	var mutex sync.Mutex
 
-	var addFn = func(task task_graph.Task) {
-		mutex.Lock()
-		taskGraph.Add(&task)
-		for _, depName := range task.Deps {
-			taskGraph.Connect(task.Name(), depName)
-		}
-		mutex.Unlock()
-	}
-
-	proj.Walk(func(ws *workspace.Workspace) error {
+	proj.Range(func(ws *workspace.Workspace) bool {
 		defer ctx.Tracer.Event(fmt.Sprintf("creating task graph for %s", ws.Name)).Done()
 		for _, label := range ctx.Labels {
 			if label.Scope == "*" || label.Scope == ws.Name {
-				createTask(label.Target, proj, ws, &addFn, true)
+				if label.Target == "*" {
+					for targetName := range ws.Targets {
+						createTask(proj, &taskGraph, targetName, ws, true)
+					}
+				} else {
+					createTask(proj, &taskGraph, label.Target, ws, true)
+				}
 			}
 		}
-		return nil
-	}, ctx.Concurrency)
+		return true
+	})
 
-	return taskGraph
+	return &taskGraph
 }
 
-func createTask(targetName string, proj *Project, ws *workspace.Workspace, addFn *func(task task_graph.Task), topLevel bool) {
+func createTask(proj *Project, taskGraph *task_graph.TaskGraph, targetName string, ws *workspace.Workspace, topLevel bool) {
 	var tgt, ok = ws.Targets[targetName]
 	if !ok {
 		return
@@ -46,7 +41,7 @@ func createTask(targetName string, proj *Project, ws *workspace.Workspace, addFn
 
 	for _, targetDep := range tgt.Deps {
 		if isSelfReference(targetDep) {
-			createTask(targetDep, proj, ws, addFn, false)
+			createTask(proj, taskGraph, targetDep, ws, false)
 			task.AddDependency(task_graph.GetTaskName(ws.Name, targetDep))
 		} else {
 			targetDep = targetDep[1:]
@@ -62,23 +57,15 @@ func createTask(targetName string, proj *Project, ws *workspace.Workspace, addFn
 					continue
 				}
 
+				createTask(proj, taskGraph, targetDep, dep, false)
 				task.AddDependency(task_graph.GetTaskName(dep.Name, targetDep))
 			}
 		}
 	}
 
-	(*addFn)(task)
+	taskGraph.Add(&task)
 }
 
 func isSelfReference(name string) bool {
 	return !strings.HasPrefix(name, "@")
-}
-
-func contains(s []string, wsName string) bool {
-	for _, a := range s {
-		if a == wsName {
-			return true
-		}
-	}
-	return false
 }
