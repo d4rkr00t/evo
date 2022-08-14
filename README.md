@@ -1,5 +1,12 @@
 ## TODO
 
+- [ ] Cache debugging <- 🦄
+  - [ ] Centered around tasks
+  - [ ] Shows what task deps have changed
+  - [ ] Shows what external workspace deps have changed
+  - [ ] Shows if workspace files have changed
+  - [ ] Shows everything that is included in building a cache
+  - [ ] Shows if command changed
 - [ ] Rewrite show-affected to use :: syntax for targets and workspaces
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
@@ -74,6 +81,7 @@
 ---
 
 ## DONE
+- [x] Task references workspace directly instead of WsName, WsPath, etc...
 - [x] Only care about tasks, workspaces are just meta information and a part of inputs
 - [x] Stop swallowing stderr or stdout in case of an error
 - [x] Migrate to workspace::target convention

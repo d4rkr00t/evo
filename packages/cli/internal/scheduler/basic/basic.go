@@ -28,7 +28,7 @@ func RunTaskGraph(ctx *context.Context, proj *project.Project, taskGraph *task_g
 		var taskId = task.Name()
 		defer ctx.Tracer.Event(fmt.Sprintf("run task %s", taskId)).Done()
 
-		var ws, _ = proj.Load(task.WsName)
+		var ws, _ = proj.Load(task.Ws.Name)
 		var _, err = RunTask(ctx, taskGraph, task, ws, &taskOutputMutex)
 
 		if err != nil {

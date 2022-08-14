@@ -21,9 +21,7 @@ import (
 
 type Task struct {
 	TopLevel          bool
-	WsName            string
-	WsHash            string
-	WsPath            string
+	Ws                *workspace.Workspace
 	Hash              string
 	TargetName        string
 	Target            *target.Target
@@ -68,9 +66,7 @@ const (
 func NewTask(ws *workspace.Workspace, targetName string, target *target.Target, topLevel bool) Task {
 	return Task{
 		TopLevel:          topLevel,
-		WsName:            ws.Name,
-		WsHash:            ws.Hash,
-		WsPath:            ws.Path,
+		Ws:                ws,
 		TargetName:        targetName,
 		Target:            target,
 		Status:            TaskStatsuPending,
@@ -88,7 +84,7 @@ func (t *Task) UpdateStatus(status int) {
 }
 
 func (t *Task) Name() string {
-	return GetTaskName(t.WsName, t.TargetName)
+	return GetTaskName(t.Ws.Name, t.TargetName)
 }
 
 func (t *Task) String() string {
@@ -113,7 +109,7 @@ func (t *Task) GetCacheKey() string {
 
 func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
 	t.Hash = hash_utils.HashStringList([]string{
-		t.WsHash,
+		t.Ws.Hash,
 		t.Target.String(),
 		t.getDepsHash(tg),
 	})
@@ -164,7 +160,7 @@ func (t *Task) RestoreOutputs(cc *cache.Cache) {
 	}
 	var cacheKey = t.GetCacheKey() + TaskOutputsPostfix
 	for _, output := range t.Target.Outputs {
-		copy.Copy(path.Join(cc.GetCachePath(cacheKey), output), path.Join(t.WsPath, output))
+		copy.Copy(path.Join(cc.GetCachePath(cacheKey), output), path.Join(t.Ws.Path, output))
 	}
 }
 
@@ -176,7 +172,7 @@ func (t *Task) ValidateOutputs() error {
 	var missing = []string{}
 
 	for _, output := range t.Target.Outputs {
-		if !fsutils.Exist(path.Join(t.WsPath, output)) {
+		if !fsutils.Exist(path.Join(t.Ws.Path, output)) {
 			missing = append(missing, output)
 		}
 	}
@@ -194,7 +190,7 @@ func (t *Task) CleanOutputs() {
 	}
 
 	for _, output := range t.Target.Outputs {
-		os.RemoveAll(path.Join(t.WsPath, output))
+		os.RemoveAll(path.Join(t.Ws.Path, output))
 	}
 }
 
@@ -209,7 +205,7 @@ func (t *Task) GetOutputsHash() string {
 		globs = append(globs, out)
 	}
 
-	var files []string = fsutils.GlobFiles(t.WsPath, &globs, &[]string{"node_modules/**"})
+	var files []string = fsutils.GlobFiles(t.Ws.Path, &globs, &[]string{"node_modules/**"})
 	sort.Strings(files)
 
 	return fsutils.GetFileListHash(files)
@@ -237,9 +233,9 @@ func (t *Task) cacheOutputs(cc *cache.Cache) {
 	}
 
 	for _, output := range t.Target.Outputs {
-		copy.Copy(path.Join(t.WsPath, output), path.Join(cc.GetCachePath(cacheKeyOutputsDir), output), copy.Options{
+		copy.Copy(path.Join(t.Ws.Path, output), path.Join(cc.GetCachePath(cacheKeyOutputsDir), output), copy.Options{
 			Skip: func(src string) (bool, error) {
-				var relSrc, _ = filepath.Rel(t.WsPath, src)
+				var relSrc, _ = filepath.Rel(t.Ws.Path, src)
 				return ignores[relSrc], nil
 			},
 		})

@@ -60,7 +60,7 @@ func Graph(ctx *context.Context) error {
 
 	for _, taskName := range taskGraph.TasksNamesList {
 		var task, _ = taskGraph.Load(taskName)
-		var fromWs = fmt.Sprintf("\"%s\"", task.WsName)
+		var fromWs = fmt.Sprintf("\"%s\"", task.Ws.Name)
 		var from = fmt.Sprintf("\"%s\"", taskName)
 		if _, ok := visited[taskName]; !ok {
 			visited[taskName] = true
