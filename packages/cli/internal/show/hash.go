@@ -20,6 +20,10 @@ func Hash(ctx *context.Context, labels label.Label) error {
 	ctx.Logger.Badge("root").Log(" " + ctx.Root)
 	ctx.Logger.Badge("query").Log("show hash for the label →", labels.String())
 
+	if len(labels.Scope) == 0 {
+		return errors.New(errors.ErrorEmptyWsName, fmt.Sprintf("Empty workspace. Use `evo show-hash workspace::%s`", labels.Target))
+	}
+
 	var proj, err = project.NewProject(ctx.ProjectConfigPath)
 	if err != nil {
 		return err
@@ -27,8 +31,7 @@ func Hash(ctx *context.Context, labels label.Label) error {
 
 	var _, ok = proj.Load(labels.Scope)
 	if !ok {
-		ctx.Logger.Log("  Workspace", labels.Scope, "not found!")
-		return errors.New(errors.ErrorWsNotFound, fmt.Sprint("  Workspace", labels.Scope, "not found!"))
+		return errors.New(errors.ErrorWsNotFound, fmt.Sprint("Workspace", labels.Scope, "not found!"))
 	}
 
 	err = runner.AugmentDependencies(ctx, &proj)

@@ -25,8 +25,7 @@ func Targets(ctx *context.Context, wsName string) error {
 
 	var ws, ok = proj.Load(wsName)
 	if !ok {
-		ctx.Logger.Log("  Workspace", wsName, "not found!")
-		return errors.New(errors.ErrorWsNotFound, fmt.Sprint("  Workspace", wsName, "not found!"))
+		return errors.New(errors.ErrorWsNotFound, fmt.Sprint("Workspace", wsName, "not found!"))
 	}
 
 	ctx.Logger.Log()

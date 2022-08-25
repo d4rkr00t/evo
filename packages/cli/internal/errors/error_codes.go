@@ -9,3 +9,4 @@ const ErrorTaskGraphCycle = 6
 const ErrorWsNotFound = 7
 const ErrorScopesNotFound = 8
 const ErrorExtractingScopeAndTargetsFromInput = 9
+const ErrorEmptyWsName = 10
