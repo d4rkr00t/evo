@@ -1,12 +1,12 @@
 ## TODO
 
 - [ ] Cache debugging <- 🦄
-  - [ ] Centered around tasks
+  - [x] Centered around tasks
   - [ ] Shows what task deps have changed
   - [ ] Shows what external workspace deps have changed
-  - [ ] Shows if workspace files have changed
-  - [ ] Shows everything that is included in building a cache
-  - [ ] Shows if command changed
+  - [x] Shows if workspace files have changed
+  - [x] Shows everything that is included in building a cache
+  - [x] Shows if command changed
 - [ ] Rewrite show-affected to use :: syntax for targets and workspaces
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
@@ -34,14 +34,12 @@
     - [ ] Show only top level and failed. In spinner report progress with – succeeded (+from cache) / failed (+from cache)
   - [ ] On error need to report status – succeeded (+from cache) / failed (+from cache)
   - [ ] Move reporter locking into a separate go routine
-- [ ] Tests
 - [ ] Website
   - [ ] Documentation
 - [ ] Refactor
   - [x] Upgrade Go
   - [x] Split code in packages
-  - [ ] Try DoD
-  - [ ] Generics -> Go 1.8
+  - [x] Generics -> Go 1.8
   - [x] REFACTOR: create tasks from workspaces
   - [x] REFACTOR: Generic create task from a rule
   - [ ] REFACTOR: Refactor cache to interfaces
@@ -58,9 +56,9 @@
   - [ ] check all required fields
     - [ ] provide schema (?)
 - [ ] Different info
-  - [x] Show what's included in hash for a workspace – `evo show-hash pkg-a`
+  - [x] Show what's included in hash for a target – `evo show-hash pkg-a::target`
   - [x] Show all rules for a WS with overrides – `evo show-rules pkg-a`
-  - [ ] Why a package is affected – `evo why pkg-a`
+  - [ ] Why a target is affected – `evo why pkg-a::build`
 - [ ] More commands
   - [x] `evo show-scope <package>` – show what packages are in scope
   - [ ] `evo import`

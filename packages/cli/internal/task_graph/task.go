@@ -1,6 +1,7 @@
 package task_graph
 
 import (
+	"encoding/json"
 	"evo/internal/cache"
 	"evo/internal/fsutils"
 	"evo/internal/hash_utils"
@@ -22,6 +23,7 @@ import (
 type Task struct {
 	TopLevel          bool
 	Ws                *workspace.Workspace
+	DepsHash          string
 	Hash              string
 	TargetName        string
 	Target            *target.Target
@@ -32,6 +34,17 @@ type Task struct {
 	Duration          time.Duration
 	Output            string
 	Error             error
+}
+
+type TaskCacheDiagnostics struct {
+	TaskHash        string
+	TaskDepsHash    string
+	TaskTarget      string
+	WsHash          string
+	WsFilesHash     string
+	WsExtDepsHash   string
+	WsLocalDepsHash string
+	WsFiles         []string
 }
 
 const (
@@ -50,10 +63,11 @@ var taskBadgeColors = []string{
 }
 
 const (
-	TaskStdoutPostfix      = "__stdout"
-	TaskStderrPostfix      = "__stderr"
-	TaskOutputsPostfix     = "__outputs"
-	TaskOutputsHashPostfix = "__outputs__hash"
+	TaskStdoutPostfix           = "__stdout"
+	TaskStderrPostfix           = "__stderr"
+	TaskOutputsPostfix          = "__outputs"
+	TaskOutputsHashPostfix      = "__outputs__hash"
+	TaskCacheDiagnosticsPostfix = "__hash__state"
 )
 
 const (
@@ -108,11 +122,13 @@ func (t *Task) GetCacheKey() string {
 }
 
 func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
+	t.DepsHash = t.getDepsHash(tg)
 	t.Hash = hash_utils.HashStringList([]string{
 		t.Ws.Hash,
 		t.Target.String(),
-		t.getDepsHash(tg),
+		t.DepsHash,
 	})
+	tg.Store(t)
 	return !cc.Has(t.GetCacheKey())
 }
 
@@ -137,10 +153,40 @@ func (t *Task) Cache(cc *cache.Cache, stdout string, stderr string) {
 	cc.CacheData(t.GetCacheKey(), fmt.Sprintf("%d", exitCode))
 	cc.CacheData(t.GetCacheKey()+TaskStdoutPostfix, stdout)
 	cc.CacheData(t.GetCacheKey()+TaskStderrPostfix, stderr)
+	t.storeCacheDiagnostics(cc)
 
 	if t.HasOutputs() && len(stderr) == 0 {
 		t.cacheOutputs(cc)
 	}
+}
+
+func (t *Task) storeCacheDiagnostics(cc *cache.Cache) {
+	var cacheDiagnostics = TaskCacheDiagnostics{
+		TaskHash:        t.Hash,
+		TaskTarget:      t.Target.String(),
+		TaskDepsHash:    t.DepsHash,
+		WsHash:          t.Ws.Hash,
+		WsFilesHash:     t.Ws.FilesHash,
+		WsExtDepsHash:   t.Ws.ExtDepsHash,
+		WsLocalDepsHash: t.Ws.LocalDepsHash,
+		WsFiles:         t.Ws.Files,
+	}
+
+	var cacheDiagnosticsSerialized, err = json.Marshal(cacheDiagnostics)
+	if err == nil {
+		cc.CacheData(t.CleanName()+"__"+TaskCacheDiagnosticsPostfix, string(cacheDiagnosticsSerialized))
+	}
+}
+
+func (t *Task) RetriveCacheDiagnostics(cc *cache.Cache) (TaskCacheDiagnostics, error) {
+	var cacheKey = t.CleanName() + "__" + TaskCacheDiagnosticsPostfix
+	if !cc.Has(cacheKey) {
+		return TaskCacheDiagnostics{}, fmt.Errorf("no hash state found")
+	}
+	var state = cc.ReadData(cacheKey)
+	var cachDiagnostics TaskCacheDiagnostics
+	var err = json.Unmarshal([]byte(state), &cachDiagnostics)
+	return cachDiagnostics, err
 }
 
 func (t *Task) GetStatusAndLogs(cc *cache.Cache) (string, string, string, error) {

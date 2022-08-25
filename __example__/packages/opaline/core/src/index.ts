@@ -19,7 +19,7 @@ export default async function opaline(
   let isCommand = !!commandName && !commandName.startsWith("-");
   let hasCommand = (name: string) => !!config.commands[name];
 
-  // 0. If no commands -> blow up! 123
+  // 0. If no commands -> blow up! 1234
   // 1. If --version and command is not passed -> print version
   // 2. If --help
   //   2.1. If command is not passed -> help

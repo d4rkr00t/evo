@@ -1,10 +1,7 @@
 package target
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"io"
 	"sort"
 	"strings"
 )
@@ -50,12 +47,4 @@ func GetAllTargetsOutputs(tm *TargetsMap) []string {
 	}
 
 	return outputs
-}
-
-func GetTargetsHash(tm *TargetsMap) string {
-	var h = sha1.New()
-	for _, targetName := range GetSortedTargetsNames(tm) {
-		io.WriteString(h, (*tm)[targetName].String())
-	}
-	return hex.EncodeToString(h.Sum(nil))
 }

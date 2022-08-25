@@ -5,11 +5,13 @@ import (
 	"evo/cmd/cmdutils"
 	"evo/internal/cache"
 	"evo/internal/context"
+	"evo/internal/label"
 	"evo/internal/logger"
 	"evo/internal/project"
 	"evo/internal/show"
 	"evo/internal/stats"
 	"evo/internal/tracer"
+	"fmt"
 	"os"
 	"path"
 	"runtime"
@@ -18,12 +20,12 @@ import (
 )
 
 var ShowHashCmd = &cobra.Command{
-	Use:   "show-hash <workspace name>",
+	Use:   "show-hash <workspace name>::<target>",
 	Short: "Show what's included in a hash for a workspace",
 	Long:  "Show what's included in a hash for a workspace",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("workspace name is required")
+			return errors.New("workspace name and target is required")
 		}
 		return nil
 
@@ -38,7 +40,6 @@ var ShowHashCmd = &cobra.Command{
 
 		var logger = logger.NewLogger(verbose, debug)
 		var tracer = tracer.New()
-		var pkgName = args[0]
 
 		var osCwd, _ = os.Getwd()
 		if cwdErr != nil {
@@ -58,6 +59,12 @@ var ShowHashCmd = &cobra.Command{
 		var cache = cache.New(rootPath, cache.DefaultCacheLocation)
 		cache.Setup()
 
+		var labels, labelsErr = label.GetLablesFromList(args, "")
+		if labelsErr != nil {
+			fmt.Println(labelsErr.Error())
+			os.Exit(1)
+		}
+
 		var ctx = context.Context{
 			Root:              rootPath,
 			Cwd:               cwd,
@@ -65,11 +72,12 @@ var ShowHashCmd = &cobra.Command{
 			Concurrency:       runtime.NumCPU() - 1,
 			Logger:            logger,
 			Stats:             stats.New(),
+			Labels:            []label.Label{labels[0]},
 			Tracer:            tracer,
 			Cache:             cache,
 		}
 
-		var err = show.Hash(&ctx, pkgName)
+		var err = show.Hash(&ctx, labels[0])
 
 		if err != nil {
 			logger.Log(err.Error())
