@@ -1,5 +1,21 @@
 # @evobuild/cli
 
+## 0.8.0
+
+### Minor Changes
+
+- f796f8b: Add SkipCache flag to targets
+- 4683433: show-hash is now centered around tasks not workspaces
+- ff0a9c8: improved node modules linker, supports linking bins for external deps
+- 3fc0f1e: add evo graph command to output dotviz graph of a dependency tree
+- 21c3070: support :: syntax to run targets, instead of --scope flag
+- aaec75e: Support running scope target with 'evo run workspace#target' syntax
+- 1a0ef38: Making tasks and task graph the only source of truth for dependency graph and for tasks graph execution, workspaces just an input information to the task graph
+
+### Patch Changes
+
+- cff0f9d: propagate errors from cli commands properly
+
 ## 0.7.0
 
 ### Minor Changes
