@@ -60,8 +60,7 @@ func linkBin(wsPath string, depWsPath string) {
 	}
 
 	var binDir = GetNodeModulesBinPath(wsPath)
-	var err = os.MkdirAll(binDir, 0700)
-	fmt.Println(err)
+	os.MkdirAll(binDir, 0700)
 	for binName, binTgt := range depWsPkgJson.GetBin() {
 		var binLinkSrc = path.Join(wsPath, "node_modules", folderNameFromPackageName(depWsPkgJson.Name), binTgt)
 		if strings.HasPrefix(binName, "@") {

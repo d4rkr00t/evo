@@ -66,8 +66,11 @@ func (c *Cmd) Run() (string, error) {
 	var err = cmd.Run()
 
 	if err != nil {
-		var stderr, _ = cmd.ErrOutput()
-		err = fmt.Errorf("%s", stderr)
+		var stderrByte, _ = cmd.ErrOutput()
+		var stderr = string(stderrByte)
+		if len(stderr) > 0 {
+			err = fmt.Errorf("%s", stderr)
+		}
 	}
 
 	os.Setenv("PATH", oldPath)
