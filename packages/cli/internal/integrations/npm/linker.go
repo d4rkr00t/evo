@@ -35,10 +35,10 @@ func linkExternal(rootPath string, ws *workspace.Workspace, dep *workspace.Works
 	os.MkdirAll(dirName, 0700)
 	var err = os.Symlink(src, tgt)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
-	// TODO: Link BIN (?)
+	linkBin(ws.Path, src)
 }
 
 func linkLocal(rootPath string, ws *workspace.Workspace, depWs *workspace.Workspace) {
@@ -47,23 +47,31 @@ func linkLocal(rootPath string, ws *workspace.Workspace, depWs *workspace.Worksp
 	os.MkdirAll(dirName, 0700)
 	var err = os.Symlink(depWs.Path, tgt)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
-	var depWsPkgJson, depWsPkgJsonErr = NewPackageJson(path.Join(depWs.Path, "package.json"))
+	linkBin(ws.Path, depWs.Path)
+}
+
+func linkBin(wsPath string, depWsPath string) {
+	var depWsPkgJson, depWsPkgJsonErr = NewPackageJson(path.Join(depWsPath, "package.json"))
 	if depWsPkgJsonErr != nil {
 		return
 	}
 
-	var binDir = GetNodeModulesBinPath(ws.Path)
-	os.MkdirAll(binDir, 0700)
-	for binName, binTgt := range depWsPkgJson.Bin {
-		var binLinkSrc = path.Join(ws.Path, "node_modules", folderNameFromPackageName(depWs.Name), binTgt)
+	var binDir = GetNodeModulesBinPath(wsPath)
+	var err = os.MkdirAll(binDir, 0700)
+	fmt.Println(err)
+	for binName, binTgt := range depWsPkgJson.GetBin() {
+		var binLinkSrc = path.Join(wsPath, "node_modules", folderNameFromPackageName(depWsPkgJson.Name), binTgt)
+		if strings.HasPrefix(binName, "@") {
+			binName = strings.Split(binName, "/")[1]
+		}
 		var binLinkTgt = path.Join(binDir, binName)
-		var data = fmt.Sprintf("#!/usr/bin/env node\nrequire(\"%s\")", binLinkSrc)
+		var data = fmt.Sprintf("#!/bin/bash \nnode \"%s\" \"$@\"", binLinkSrc)
 		var err = os.WriteFile(binLinkTgt, []byte(data), 0744)
 		if err != nil {
-			fmt.Println(err)
+			panic(err)
 		}
 	}
 }

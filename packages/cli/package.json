@@ -19,6 +19,7 @@
     "prepack": "mkdir bin &2> /dev/null && cp dummy-evo-bin ./bin/evo"
   },
   "dependencies": {
-    "mkdirp": "^1.0.4"
+    "mkdirp": "^1.0.4",
+    "cpy-cli": "^4.1.0"
   }
 }

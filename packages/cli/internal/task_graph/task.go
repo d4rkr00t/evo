@@ -121,7 +121,7 @@ func (t *Task) GetCacheKey() string {
 	return fmt.Sprintf("%s__%s", t.CleanName(), t.Hash)
 }
 
-func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
+func (t *Task) Rehash(tg *TaskGraph) string {
 	t.DepsHash = t.getDepsHash(tg)
 	t.Hash = hash_utils.HashStringList([]string{
 		t.Ws.Hash,
@@ -129,6 +129,10 @@ func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
 		t.DepsHash,
 	})
 	tg.Store(t)
+	return t.Hash
+}
+
+func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
 	return !cc.Has(t.GetCacheKey())
 }
 

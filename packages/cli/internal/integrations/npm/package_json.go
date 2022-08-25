@@ -2,6 +2,7 @@ package npm
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 )
 
@@ -12,7 +13,7 @@ type PackageJson struct {
 	Dependencies     map[string]string
 	DevDependencies  map[string]string
 	PeerDependencies map[string]string
-	Bin              map[string]string
+	Bin              interface{}
 }
 
 func NewPackageJson(packageJsonPath string) (PackageJson, error) {
@@ -43,4 +44,29 @@ func (pjs *PackageJson) GetAllDependencies() map[string]string {
 	}
 
 	return allDeps
+}
+
+func (pjs *PackageJson) GetBin() map[string]string {
+	switch x := pjs.Bin.(type) {
+	case string:
+		var bins = map[string]string{}
+		bins[pjs.Name] = x
+		return bins
+	case interface{}:
+		return toStringString(x.(map[string]interface{}))
+	default:
+		return map[string]string{}
+	}
+}
+
+func toStringString(mapInterface map[string]interface{}) map[string]string {
+	var mapString = map[string]string{}
+
+	for key, value := range mapInterface {
+		strKey := fmt.Sprintf("%v", key)
+		strValue := fmt.Sprintf("%v", value)
+		mapString[strKey] = strValue
+	}
+
+	return mapString
 }
