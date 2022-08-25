@@ -3,32 +3,32 @@ package show
 import (
 	"evo/internal/context"
 	"evo/internal/errors"
+	"evo/internal/label"
 	"evo/internal/project"
 	"evo/internal/runner"
 	"evo/internal/stats"
-	"evo/internal/target"
-	"evo/internal/workspace"
+	"evo/internal/task_graph"
 	"fmt"
 	"path/filepath"
 
 	"github.com/fatih/color"
 )
 
-func Hash(ctx *context.Context, wsName string) error {
+func Hash(ctx *context.Context, labels label.Label) error {
 	ctx.Stats.Start("show-hash", stats.MeasureKindStage)
 	ctx.Logger.Log()
 	ctx.Logger.Badge("root").Log(" " + ctx.Root)
-	ctx.Logger.Badge("query").Log("show hash of", wsName)
+	ctx.Logger.Badge("query").Log("show hash for the label →", labels.String())
 
 	var proj, err = project.NewProject(ctx.ProjectConfigPath)
 	if err != nil {
 		return err
 	}
 
-	var ws, ok = proj.Load(wsName)
+	var _, ok = proj.Load(labels.Scope)
 	if !ok {
-		ctx.Logger.Log("  Workspace", wsName, "not found!")
-		return errors.New(errors.ErrorWsNotFound, fmt.Sprint("  Workspace", wsName, "not found!"))
+		ctx.Logger.Log("  Workspace", labels.Scope, "not found!")
+		return errors.New(errors.ErrorWsNotFound, fmt.Sprint("  Workspace", labels.Scope, "not found!"))
 	}
 
 	err = runner.AugmentDependencies(ctx, &proj)
@@ -36,65 +36,83 @@ func Hash(ctx *context.Context, wsName string) error {
 		return err
 	}
 
-	proj.ReduceToScope([]string{wsName})
+	proj.ReduceToScope([]string{labels.Scope})
 	runner.InvalidateProjects(ctx, &proj)
 
-	ws, _ = proj.Load(wsName)
-	var oldWsState, wsCacheErr = ws.RetriveStateFromCache(&ctx.Cache)
-	var wsDiff workspace.WorkspacesDiff
-	if wsCacheErr == nil {
-		wsDiff = workspace.DiffWorkspaces(&oldWsState, ws)
+	var taskGraph = runner.CreateTaskGraph(ctx, &proj)
+
+	taskGraph.Walk(func(task *task_graph.Task) error {
+		task.Invalidate(&ctx.Cache, taskGraph)
+		return nil
+	}, ctx.Concurrency)
+
+	var task, taskOk = taskGraph.Load(labels.String())
+	if !taskOk {
+		return fmt.Errorf("no task named: %s", labels.String())
 	}
 
-	if wsDiff.Changed {
-		var lgChanged = ctx.Logger.CreateGroup()
-		lgChanged.Start(color.HiMagentaString("Workspace has changes since last run"))
-		if wsDiff.FilesChanged {
-			lgChanged.Log("Files:                ", color.YellowString(fmt.Sprintf("%s → %s", oldWsState.FilesHash, ws.FilesHash)))
+	var cacheDiag, diagErr = task.RetriveCacheDiagnostics(&ctx.Cache)
+	if diagErr == nil {
+		if cacheDiag.TaskHash != task.Hash {
+			var lgChanged = ctx.Logger.CreateGroup()
+			lgChanged.Start(color.HiMagentaString("Task has changed since the last run: %s", formatPairOfHashes(cacheDiag.TaskHash, task.Hash)))
+
+			if cacheDiag.TaskDepsHash != task.DepsHash {
+				lgChanged.Log("Task deps:     ", color.YellowString(formatPairOfHashes(cacheDiag.TaskDepsHash, task.DepsHash)))
+			}
+
+			if cacheDiag.TaskTarget != task.Target.String() {
+				lgChanged.Log("Target:        ", color.YellowString(formatPairOfHashes(cacheDiag.TaskTarget, task.Target.String())))
+			}
+
+			if cacheDiag.WsFilesHash != task.Ws.FilesHash {
+				lgChanged.Log("Files:         ", color.YellowString(formatPairOfHashes(cacheDiag.WsFilesHash, task.Ws.FilesHash)))
+			}
+
+			if cacheDiag.WsExtDepsHash != task.Ws.ExtDepsHash {
+				lgChanged.Log("External Deps: ", color.YellowString(formatPairOfHashes(cacheDiag.WsExtDepsHash, task.Ws.ExtDepsHash)))
+			}
+
+			if cacheDiag.WsLocalDepsHash != task.Ws.LocalDepsHash {
+				lgChanged.Log("Local Deps:    ", color.YellowString(formatPairOfHashes(cacheDiag.WsLocalDepsHash, task.Ws.LocalDepsHash)))
+			}
+
+			lgChanged.EndPlain()
 		}
-		if wsDiff.LocalDepsChanged {
-			lgChanged.Log("Local dependencies:   ", color.YellowString(fmt.Sprintf("%s → %s", oldWsState.LocalDepsHash, ws.LocalDepsHash)))
-		}
-		if wsDiff.ExternalDepsChanged {
-			lgChanged.Log("External dependencies:", color.YellowString(fmt.Sprintf("%s → %s", oldWsState.ExtDepsHash, ws.ExtDepsHash)))
-		}
-		if wsDiff.TargetsChanged {
-			lgChanged.Log("Targets:              ", color.YellowString(fmt.Sprintf("%s → %s", oldWsState.TargetsHash, ws.TargetsHash)))
-		}
-		if wsDiff.Changed {
-			lgChanged.Log("Workspace:            ", color.YellowString(fmt.Sprintf("%s → %s", oldWsState.Hash, ws.Hash)))
-		}
-		lgChanged.EndPlain()
 	}
 
 	var lg = ctx.Logger.CreateGroup()
-	lg.Start("Workspace hash consists of:")
-	lg.Log("Files:", color.HiBlackString(ws.FilesHash))
-	var files = ws.GetFilesList()
+	lg.Start(fmt.Sprintf("Hash [%s] consists of:", task.Hash))
+
+	lg.Log("Target:", color.HiBlackString(task.Target.String()))
+
+	lg.Log()
+	lg.Log("Files:", color.HiBlackString(task.Ws.FilesHash))
+	var files = task.Ws.GetFilesList()
 	for _, fileName := range files {
-		var filePath, _ = filepath.Rel(ws.Path, fileName)
+		var filePath, _ = filepath.Rel(task.Ws.Path, fileName)
 		lg.Log("–", filePath)
 	}
 
 	lg.Log()
-	lg.Log("Dependencies:", color.HiBlackString(fmt.Sprintf("[local:%s] [external:%s]", ws.LocalDepsHash, ws.ExtDepsHash)))
-	var deps = ws.Deps
-	for _, dep := range deps {
+	lg.Log("Task Dependencies:", color.HiBlackString(task.DepsHash))
+	var taskDeps = task.Deps
+	for _, dep := range taskDeps {
+		lg.Log(fmt.Sprintf("– %s", dep))
+	}
+
+	lg.Log()
+	lg.Log("Workspace Dependencies:", color.HiBlackString(fmt.Sprintf("[local:%s] [external:%s]", task.Ws.LocalDepsHash, task.Ws.ExtDepsHash)))
+	var wsDeps = task.Ws.Deps
+	for _, dep := range wsDeps {
 		lg.Log(fmt.Sprintf("– %s:%s [%s] [%s]", dep.Name, dep.Version, dep.Type, dep.Provider))
 	}
-
-	lg.Log()
-	lg.Log("Targets:", color.HiBlackString(ws.TargetsHash))
-	var targets = target.GetSortedTargetsNames(&ws.Targets)
-	for _, tgt := range targets {
-		lg.Log("–", tgt)
-	}
-
-	lg.Log()
-	lg.Log("Hash:")
-	lg.Log("–", ws.Hash)
 
 	lg.End(ctx.Stats.Stop("show-hash"))
 
 	return nil
+}
+
+func formatPairOfHashes(h1 string, h2 string) string {
+	return fmt.Sprintf("%s → %s", h1[:9], h2[:9])
 }

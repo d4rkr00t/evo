@@ -27,7 +27,6 @@ type Workspace struct {
 	Excludes      []string
 	Outputs       []string
 	Targets       target.TargetsMap
-	TargetsHash   string
 	Files         []string
 	FilesHash     string
 	ExtDepsHash   string
@@ -39,13 +38,12 @@ func New(name string, wsAbsPath string, targets target.TargetsMap, excludes []st
 	var targetsOutputs = target.GetAllTargetsOutputs(&targets)
 
 	return &Workspace{
-		Name:        name,
-		Path:        wsAbsPath,
-		Deps:        WorkspaceDependencyMap{},
-		Targets:     targets,
-		TargetsHash: target.GetTargetsHash(&targets),
-		Outputs:     targetsOutputs,
-		Excludes:    append(excludes, targetsOutputs...),
+		Name:     name,
+		Path:     wsAbsPath,
+		Deps:     WorkspaceDependencyMap{},
+		Targets:  targets,
+		Outputs:  targetsOutputs,
+		Excludes: append(excludes, targetsOutputs...),
 	}
 }
 
