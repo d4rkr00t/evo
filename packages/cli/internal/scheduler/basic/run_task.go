@@ -19,6 +19,7 @@ func RunTask(ctx *context.Context, taskGraph *task_graph.TaskGraph, task *task_g
 	var depsErr = checkStatusesOfTaskDependencies(taskGraph, task)
 
 	task.UpdateStatus(task_graph.TaskStatsuRunning)
+	task.Rehash(taskGraph)
 	taskGraph.Store(task)
 	ctx.Reporter.UpdateFromTaskGraph(taskGraph)
 

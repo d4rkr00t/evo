@@ -42,7 +42,7 @@ func Hash(ctx *context.Context, labels label.Label) error {
 	var taskGraph = runner.CreateTaskGraph(ctx, &proj)
 
 	taskGraph.Walk(func(task *task_graph.Task) error {
-		task.Invalidate(&ctx.Cache, taskGraph)
+		task.Rehash(taskGraph)
 		return nil
 	}, ctx.Concurrency)
 

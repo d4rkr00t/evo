@@ -1,3 +1,6 @@
 {
-  "name": "pkg-c"
+  "name": "pkg-c",
+  "bin": {
+    "pkgc": "./index.js"
+  }
 }

@@ -75,6 +75,7 @@
 - [ ] https://github.com/sabhiram/go-gitignore (?)
 - [ ] Support target deps: ["package::sometarget"]
 - [ ] Support file deps: ["file::somefilepath"]
+- [ ] Linker: error when duplicate/overriding bins
 
 ---
 

@@ -1,4 +1,7 @@
 {
   "name": "@pkg/a-ts",
-  "description": "hello-19"
+  "description": "hello-19",
+  "dependencies": {
+    "typescript": "^4.3.5"
+  }
 }

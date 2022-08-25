@@ -2,7 +2,6 @@ package runner
 
 import (
 	"evo/internal/context"
-	"evo/internal/integrations/npm"
 	"evo/internal/label"
 	"evo/internal/reporter"
 	"evo/internal/scheduler/basic"
@@ -19,8 +18,6 @@ func Run(ctx *context.Context) error {
 	ctx.Stats.Start("total", stats.MeasureKindStage)
 	defer ctx.Tracer.Write(&ctx.Logger, ctx.Root)
 
-	// TODO: Get rid of this
-	os.Setenv("PATH", npm.GetNodeModulesBinPath(ctx.Root)+":"+os.ExpandEnv("$PATH"))
 	os.Setenv("ROOT", ctx.Root)
 
 	ctx.Logger.Badge("root").Log(" ", ctx.Root)
