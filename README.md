@@ -1,12 +1,10 @@
 ## TODO
 
-- [ ] Cache debugging <- 🦄
-  - [x] Centered around tasks
-  - [ ] Shows what task deps have changed
-  - [ ] Shows what external workspace deps have changed
-  - [x] Shows if workspace files have changed
-  - [x] Shows everything that is included in building a cache
-  - [x] Shows if command changed
+- [ ] FileSystem <- 🦄
+  - [ ] Cache file check-sums
+  - [ ] Update file check sums only when modified time is after previous update
+  - [ ] Watch file changes during task run
+    - [ ] Update FileSystem cache only when a file changes
 - [ ] Rewrite show-affected to use :: syntax for targets and workspaces
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
@@ -15,17 +13,14 @@
   - [ ] `evo clear-cache <package>`
   - [ ] `evo clear-output <package>` – clears all outputs from packages
 - [ ] Validate missing target dependencies
-- [ ] FileSystem
-  - [ ] Cache file check-sums
-  - [ ] Update file check sums only when modified time is after previous update
-  - [ ] Watch file changes during task run
-    - [ ] Update FileSystem cache only when a file changes
+- [ ] Workspace tags
+  - [ ] Add rules to define what tags can depend on what tags, e.g. library and app, app can depend on a library but not the other way around
+- [ ] Private targets – Only can be run as a dependency of another target in the same workspace
 - [ ] Support sub workspaces (?)
   - [ ] Pros / Cons
   - [ ] Automatic ignores from top level
 - [ ] Fix linking peer dependencies (?)
 - [ ] Watch mode
-- [ ] evo run workspace#* –> to build everything for a workspace(?)
 - [ ] Evo status
     - [ ] Show some stats info about the repo
 - [ ] Reporter
@@ -36,6 +31,13 @@
   - [ ] Move reporter locking into a separate go routine
 - [ ] Website
   - [ ] Documentation
+- [ ] Cache debugging
+  - [x] Centered around tasks
+  - [ ] Shows what task deps have changed
+  - [ ] Shows what external workspace deps have changed
+  - [x] Shows if workspace files have changed
+  - [x] Shows everything that is included in building a cache
+  - [x] Shows if command changed
 - [ ] Refactor
   - [x] Upgrade Go
   - [x] Split code in packages
