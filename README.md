@@ -16,6 +16,8 @@
 - [ ] Workspace tags
   - [ ] Add rules to define what tags can depend on what tags, e.g. library and app, app can depend on a library but not the other way around
 - [ ] Private targets – Only can be run as a dependency of another target in the same workspace
+- [ ] Filter target inputs, apply globs to workspace files, depends on ((FileSystem))
+- [ ] Should manage toolchain (?)
 - [ ] Support sub workspaces (?)
   - [ ] Pros / Cons
   - [ ] Automatic ignores from top level
