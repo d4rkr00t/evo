@@ -67,7 +67,6 @@
     - [x] Cleaner API
     - [x] Add debug level to the logger
 - [ ] Add .env support
-- [ ] Support custom package manager (?)
 - [ ] Watchman integration and persistent graph
 - [ ] SANDBOXING !!!
 - [ ] Targets
@@ -95,6 +94,7 @@
 - [ ] Support target deps: ["package::sometarget"]
 - [ ] Support file deps: ["file::somefilepath"]
 - [ ] Linker: error when duplicate/overriding bins
+- [ ] Support project tasks, e.g. run pnpm install for the whole project ((Support file deps))
 
 ---
 
