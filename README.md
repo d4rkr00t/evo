@@ -1,3 +1,19 @@
+```
+/*
+ * ┌────────────┐   ┌────────────┐       ┌─────────────────────────┐
+ * │            │   │            │       │                         │
+ * │ evo config ├──►│ workspaces ├──────►│                         │
+ * │            │   │            │       │         labels          │
+ * └─────────┬──┘   └────────────┘       │                         │
+ *           │                           │    workspace::target    │
+ *           │      ┌────────────┐       │        ::target         │
+ *           │      │            │       │                         │
+ *           └─────►│ targets    ├──────►│                         │
+ *                  │            │       │                         │
+ *                  └────────────┘       └─────────────────────────┘
+ */
+```
+
 ## TODO
 
 - [ ] FileSystem <- 🦄
@@ -9,8 +25,8 @@
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
   - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
-  - [ ] `evo clear-cache <package>`
-  - [ ] `evo clear-output <package>` – clears all outputs from packages
+  - [ ] `evo clear-cache <label>`
+  - [ ] `evo clear-output <label>` – clears all outputs from packages
 - [ ] Validate missing target dependencies
 - [ ] Workspace tags
   - [ ] Add rules to define what tags can depend on what tags, e.g. library and app, app can depend on a library but not the other way around
