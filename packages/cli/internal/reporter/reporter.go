@@ -244,7 +244,7 @@ func (rr *Reporter) SuccessRun(st *stats.Stats, taskGraph *task_graph.TaskGraph)
 			"%s %s | %s %s |",
 			"total",
 			taskSeqTime.Truncate(time.Millisecond).String(),
-			"concurent",
+			"concurrent",
 			taskParallelTime.Truncate(time.Millisecond).String(),
 		),
 		color.GreenString("saved %s", diff.Truncate(time.Millisecond).String()),
