@@ -18,7 +18,7 @@ func Hash(ctx *context.Context, labels label.Label) error {
 	ctx.Stats.Start("show-hash", stats.MeasureKindStage)
 	ctx.Logger.Log()
 	ctx.Logger.Badge("root").Log(" " + ctx.Root)
-	ctx.Logger.Badge("query").Log("show hash for the label →", labels.String())
+	ctx.Logger.Badge("query").Log("show hash for the label →", color.YellowString(labels.String()))
 
 	if len(labels.Scope) == 0 {
 		return errors.New(errors.ErrorEmptyWsName, fmt.Sprintf("Empty workspace. Use `evo show-hash workspace::%s`", labels.Target))

@@ -5,7 +5,6 @@
   - [ ] Update file check sums only when modified time is after previous update
   - [ ] Watch file changes during task run
     - [ ] Update FileSystem cache only when a file changes
-- [ ] Rewrite show-affected to use :: syntax for targets and workspaces
 - [ ] Cache improvements
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
@@ -84,6 +83,8 @@
 ---
 
 ## DONE
+
+- [x] Rewrite show-affected to use :: syntax for targets and workspaces
 - [x] Task references workspace directly instead of WsName, WsPath, etc...
 - [x] Only care about tasks, workspaces are just meta information and a part of inputs
 - [x] Stop swallowing stderr or stdout in case of an error

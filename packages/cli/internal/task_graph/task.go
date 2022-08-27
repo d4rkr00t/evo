@@ -132,7 +132,7 @@ func (t *Task) Rehash(tg *TaskGraph) string {
 	return t.Hash
 }
 
-func (t *Task) Invalidate(cc *cache.Cache, tg *TaskGraph) bool {
+func (t *Task) Invalidate(cc *cache.Cache) bool {
 	return !cc.Has(t.GetCacheKey())
 }
 

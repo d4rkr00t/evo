@@ -42,6 +42,7 @@ func Execute() {
 
 	rootCmd.AddCommand(RunCmd)
 	rootCmd.AddCommand(ShowHashCmd)
+	rootCmd.AddCommand(ShowAffectedCmd)
 	rootCmd.AddCommand(ShowTargetsCmd)
 	rootCmd.AddCommand(ShowScopesCmd)
 	rootCmd.AddCommand(GraphCmd)
