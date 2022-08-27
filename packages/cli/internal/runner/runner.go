@@ -22,6 +22,7 @@ func Run(ctx *context.Context) error {
 
 	ctx.Logger.Badge("root").Log(" ", ctx.Root)
 	ctx.Logger.Badge("labels").Log(color.YellowString(label.StringifyLabels(&ctx.Labels)))
+	ctx.Logger.Badge("concurrency").Debug().Log(color.YellowString("%d", ctx.Concurrency))
 
 	if len(ctx.ChangedFiles) > 0 {
 		ctx.Logger.Badge("changed files:").Debug().Log(fmt.Sprintf("[%d]", len(ctx.ChangedFiles)), strings.Join(ctx.ChangedFiles, ", "))
