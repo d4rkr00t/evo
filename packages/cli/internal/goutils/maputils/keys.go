@@ -13,13 +13,7 @@ func GetKeys[V any](mp map[string]V) []string {
 }
 
 func GetSortedKeys[V any](mp map[string]V) []string {
-	var keys = []string{}
-
-	for key := range mp {
-		keys = append(keys, key)
-	}
-
+	var keys = GetKeys(mp)
 	sort.Strings(keys)
-
 	return keys
 }
