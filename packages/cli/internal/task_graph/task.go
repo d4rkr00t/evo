@@ -9,6 +9,7 @@ import (
 	"evo/internal/target"
 	"evo/internal/workspace"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -284,7 +285,7 @@ func (t *Task) cacheOutputs(cc *cache.Cache) {
 
 	for _, output := range t.Target.Outputs {
 		copy.Copy(path.Join(t.Ws.Path, output), path.Join(cc.GetCachePath(cacheKeyOutputsDir), output), copy.Options{
-			Skip: func(src string) (bool, error) {
+			Skip: func(srcinfo fs.FileInfo, src string, dest string) (bool, error) {
 				var relSrc, _ = filepath.Rel(t.Ws.Path, src)
 				return ignores[relSrc], nil
 			},

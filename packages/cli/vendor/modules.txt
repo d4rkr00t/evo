@@ -1,4 +1,4 @@
-# github.com/bmatcuk/doublestar/v4 v4.0.2
+# github.com/bmatcuk/doublestar/v4 v4.6.0
 ## explicit; go 1.16
 github.com/bmatcuk/doublestar/v4
 # github.com/davecgh/go-spew v1.1.1
@@ -7,65 +7,74 @@ github.com/davecgh/go-spew/spew
 # github.com/deckarep/golang-set v1.8.0
 ## explicit; go 1.17
 github.com/deckarep/golang-set
-# github.com/fatih/color v1.13.0
-## explicit; go 1.13
+# github.com/fatih/color v1.15.0
+## explicit; go 1.17
 github.com/fatih/color
+# github.com/felixge/fgprof v0.9.3
+## explicit; go 1.14
+github.com/felixge/fgprof
 # github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 ## explicit
 github.com/flynn/go-shlex
-# github.com/google/chrometracing v0.0.0-20210820115312-9b2483a9dc7d
+# github.com/google/chrometracing v0.0.0-20220629084019-32f135b956e4
 ## explicit; go 1.15
 github.com/google/chrometracing
 github.com/google/chrometracing/traceinternal
-# github.com/hashicorp/errwrap v1.0.0
+# github.com/google/pprof v0.0.0-20230728192033-2ba5b33183c6
+## explicit; go 1.19
+github.com/google/pprof/profile
+# github.com/hashicorp/errwrap v1.1.0
 ## explicit
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-multierror v1.1.1
 ## explicit; go 1.13
 github.com/hashicorp/go-multierror
-# github.com/inconshreveable/mousetrap v1.0.0
-## explicit
+# github.com/inconshreveable/mousetrap v1.1.0
+## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/ionrock/procs v0.0.0-20180102005558-f53ef5630f1a
+# github.com/ionrock/procs v0.0.0-20230108235056-4ba188ce3ead
 ## explicit
 github.com/ionrock/procs
-# github.com/mattn/go-colorable v0.1.9
-## explicit; go 1.13
+# github.com/mattn/go-colorable v0.1.13
+## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.14
-## explicit; go 1.12
+# github.com/mattn/go-isatty v0.0.17
+## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/mattn/go-shellwords v1.0.12
 ## explicit; go 1.13
 github.com/mattn/go-shellwords
-# github.com/otiai10/copy v1.7.0
-## explicit; go 1.14
+# github.com/otiai10/copy v1.12.0
+## explicit; go 1.18
 github.com/otiai10/copy
-# github.com/pkg/profile v1.6.0
+# github.com/pkg/profile v1.7.0
 ## explicit; go 1.13
 github.com/pkg/profile
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
+# github.com/poy/onpar v0.3.2
+## explicit; go 1.18
 # github.com/pyr-sh/dag v1.0.0
 ## explicit; go 1.16
 github.com/pyr-sh/dag
-# github.com/spf13/cobra v1.4.0
+# github.com/spf13/cobra v1.7.0
 ## explicit; go 1.15
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/stretchr/testify v1.7.1
+# github.com/stretchr/testify v1.8.0
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
-# golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
+# golang.org/x/sync v0.2.0
 ## explicit
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
+# golang.org/x/sys v0.7.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+golang.org/x/sys/windows
+# gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3

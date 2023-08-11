@@ -148,18 +148,18 @@ func (pe *PendingEvent) Done() {
 
 // Event logs a unit of work. To instrument a Go function, use e.g.:
 //
-//   func calcPi() {
-//     defer chrometracing.Event("calculate pi").Done()
-//     // …
-//   }
+//	func calcPi() {
+//	  defer chrometracing.Event("calculate pi").Done()
+//	  // …
+//	}
 //
 // For more finely-granular traces, use e.g.:
 //
-//   for _, cmd := range commands {
-//     ev := chrometracing.Event("initialize " + cmd.Name)
-//     cmd.Init()
-//     ev.Done()
-//   }
+//	for _, cmd := range commands {
+//	  ev := chrometracing.Event("initialize " + cmd.Name)
+//	  cmd.Init()
+//	  ev.Done()
+//	}
 func Event(name string) *PendingEvent {
 	if trace.file == nil {
 		return &PendingEvent{}
@@ -224,4 +224,16 @@ func releaseTid(t uint64) {
 	if tids.next > int(t) {
 		tids.next = int(t)
 	}
+}
+
+// Flush should be called before your program terminates, and/or periodically
+// for long-running programs, to flush any pending chrome://tracing events out
+// to disk.
+func Flush() error {
+	trace.fileMu.Lock()
+	defer trace.fileMu.Unlock()
+	if err := trace.file.Sync(); err != nil {
+		return fmt.Errorf("flushing trace file: %v", err)
+	}
+	return nil
 }

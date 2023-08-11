@@ -22,6 +22,7 @@
   - [ ] Watch file changes during task run
     - [ ] Update FileSystem cache only when a file changes
 - [ ] Cache improvements
+  - [ ] Put single target's cache in 1 folder instead of spreading it across multiple locations
   - [ ] Custom Hash Input for e.g. environment, etc...
   - [ ] Remote cache (MVP)
   - [ ] Cache rotation – e.g. `evo clear-cache` clears stale cache
@@ -39,7 +40,7 @@
 - [ ] Fix linking peer dependencies (?)
 - [ ] Watch mode
 - [ ] Evo status
-    - [ ] Show some stats info about the repo
+  - [ ] Show some stats info about the repo
 - [ ] Reporter
   - [ ] Spinner disappears
   - [ ] Useless when a lot of tasks
@@ -87,8 +88,8 @@
   - [ ] Generate a project from pnpm/yarn workspace and npm scripts
 - [ ] Use semver comparison for dependencies (?)
 - [ ] Task Shell Like commands:
-    - [ ] https://github.com/denoland/deno_task_shell
-    - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
+  - [ ] https://github.com/denoland/deno_task_shell
+  - [ ] https://deno.land/manual/tools/task_runner#built-in-commands
 - [ ] https://github.com/karrick/godirwalk
 - [ ] https://github.com/sabhiram/go-gitignore (?)
 - [ ] Support target deps: ["package::sometarget"]
