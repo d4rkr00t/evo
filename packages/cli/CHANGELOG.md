@@ -1,5 +1,15 @@
 # @evobuild/cli
 
+## 0.9.0
+
+### Minor Changes
+
+- 3cd914f: revive show-affected command and change it to use target labels syntax
+
+### Patch Changes
+
+- cef5e17: handle empty workspace name in show-hash command
+
 ## 0.8.0
 
 ### Minor Changes
