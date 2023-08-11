@@ -16,6 +16,7 @@
     "dev": "nodemon --exec './node_modules/.bin/evo run build:dev --verbose' --watch packages/cli -e go,json,mod --ignore lib/version.go",
     "dev:test": "nodemon --exec 'evo run test' --watch packages/cli -e go,json,mod --ignore lib/version.go --ignore **/__testfs__/*",
     "setup": "cd packages/cli && go build main.go && cpy ./main ./bin --flat --rename=evo && npm link --ignore-scripts",
-    "ci:release": "changeset publish"
+    "ci:release": "changeset publish",
+    "graph": "evo graph | dot -Tpng -o graph.png"
   }
 }
